@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+option csharp_namespace = "PRC.GRPC";
+
+import "Protos/primitives.proto";
+import "Protos/robotdata.proto";
+import "Protos/flow.proto";
+import "Protos/feedback.proto";
+import "Protos/actions.proto";
+
+//SubscribeRobotFeedbackRequest subscribes to feedback of the robot with the provided ID.
+message SubscribeRobotFeedbackRequest{
+	//The unique ID of the robot.
+	string id = 1;
+}
+
+
+//The RobotFeedback returns feedback from the robot.
+message RobotFeedback{
+	//Connection feedback.
+	string status = 1;
+	//Feedback data.
+	oneof data_package {
+		//The heartbeat message is sent by the robot to indicate that it is still alive.
+        Heartbeat heartbeat_data = 2;
+		//The robot state message contains the current state of the robot.
+        RobotState robot_state_data = 3;
+		//The current settings of the robot.
+		Settings settings_data = 4;
+		//The ping message pings the controller.
+		Ping ping_data = 5;
+    }
+}
+
+//GetSimulatedRobotStateRequest is used to manually request the robot's state. Feedback can be provided either by the response or written to the feedback stream.
+message GetSimulatedRobotStateRequest{
+	//The unique ID of the robot.
+	string id = 1;
+	//The simulation state as defined by a float between 0.0 and 1.0.
+	float normalized_state = 2;
+	//If TRUE, the response will be written to the feedback stream.
+	bool async_stream_update = 3;
+}
+
+//AddRobotTaskRequest adds a new task to the robot. Depending on the driver, the task may replace the previous task or be queued.
+message AddRobotTaskRequest{
+	//The unique ID of the robot.
+	string id = 1; 
+	//The task to be added.
+	Task robot_task = 2;
+	//The settings for the robot.
+	Settings robot_settings = 3;
+}
+
+//AddRobotTaskReply returns the simulation of the provided task.
+message AddRobotTaskReply{
+	//Task processing feedback.
+	string status = 1;
+	//The simulation result of the task.
+	SimulationResult simulation_result_data = 2;
+}
+
+//UpdateVariableRequest sets a variable on the robot.
+message UpdateVariableRequest{
+	//The unique ID of the robot.
+	string id = 1; 
+	//The variable to be set. May be omitted.
+	Variable var = 2;
+}
+
+//UpdateVariableReply returns the variables of all connected robots.
+message UpdateVariableReply{
+	//An array of the IDs of the connected robots, with the order matching the order of the VariableArray.
+	repeated string id = 1;
+	//An array of variables, with the order relating to the array of IDs.
+	repeated VariableArray variables = 2; 
+}
+
+//SetupRobotRequest sets up a new simulation environment.
+message SetupRobotRequest{
+	//ClientId sets the unique identifier of the robot, to be used in all following requests..
+	string client_id = 1;
+	//SoftwareVersion optionally provides the version of the client library.
+	string software_version = 2;
+	//Robot defines the robot and its environment.
+	Robot robot_setup = 3;
+}
+
+//SetupRobotReply confirms that the robot environment has been set up.
+message SetupRobotReply{
+	//Robot setup feedback.
+	string status = 1;
+	//The unique ID of the robot.
+	string id = 2;
+	//The current settings of the robot environment, to be used/modified in AddRobotTaskRequest.
+	Settings robot_settings = 3;
+}

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option csharp_namespace = "PRC.GRPC";
+
+import "Protos/requestreply.proto";
+import "Protos/actions.proto";
+import "Protos/feedback.proto";
+import "google/protobuf/empty.proto";
+
+//ParametricRobotControlService provides an interface for simulating/controlling supported robots through GRPC.
+service ParametricRobotControlService {
+ //Step 1: Setup the simulation/control environemt.
+  rpc SetupRobot (SetupRobotRequest) returns (SetupRobotReply);
+  //Step 2: Define a task to be processed or simulated.
+  rpc AddRobotTask (AddRobotTaskRequest) returns (AddRobotTaskReply);
+  //Step 3: Subscribe to the feedback coming from the simulation/control environment..
+  rpc SubscribeRobotFeedback (SubscribeRobotFeedbackRequest) returns (stream RobotFeedback);
+  //Step 4: Request a simulation update, to be either provided directly or written to the feedback stream.
+  rpc GetSimulatedRobotState (GetSimulatedRobotStateRequest) returns (RobotState);
+  //Optional: Can update a variable. Always returns a list of all variables of all connected devices.
+  rpc UpdateVariable (UpdateVariableRequest) returns (UpdateVariableReply);
+  //Optional: Ping the controller.
+  rpc SendPing (Ping) returns (Ping);
+}
