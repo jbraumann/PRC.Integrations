@@ -13,7 +13,7 @@ def run():
     print("Getting certificate from same folder as the python code...")
     __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
-    with open(os.path.join(__location__, 'prc_localhost.pem'), 'rb') as f:
+    with open(os.path.join(__location__, 'PRCServerCertificate.pem'), 'rb') as f:
         credentials = grpc.ssl_channel_credentials(f.read())
 
     print("Connecting to https://localhost:5001...")
@@ -101,7 +101,7 @@ def run():
         ptp_motion_1 = prc_pb2.MotionCommand(
             axis_motion=prc_pb2.AxisMotion(
                 target=prc_pb2.JointTarget(
-                    axis_values=[-45, -90, 90, 0, 0, 0],
+                    axis_values=[0, 20, -90, 90, 70, -115],
                     speed=[0.1]
                 )
             )
@@ -110,7 +110,7 @@ def run():
         ptp_motion_2 = prc_pb2.MotionCommand(
             axis_motion=prc_pb2.AxisMotion(
                 target=prc_pb2.JointTarget(
-                    axis_values=[45, -90, 90, 0, 0, 0],
+                    axis_values=[0, -40, 75, -80, -90, -125],
                     speed=[0.15]
                 )
             )
@@ -141,7 +141,7 @@ def run():
         print("Resulting KRL code: " + \
               task_reply.simulation_result_data.code
               )
-
+        time.sleep(4)
         print("Now simulating the robot's movement, similar to the simulation slider. If async_stream_update is true, the feedback stream will be utilized.")
         i=0
         while i < 100:
