@@ -24,7 +24,7 @@ public class PRC_Unity : MonoBehaviour
         await client.AddCommands();
         hasInitialized = true;
     }
-
+    
     // Update is called once per frame
     void Update()
     {
@@ -38,22 +38,49 @@ public class PRC_Unity : MonoBehaviour
                 + "A06: " + client.state.ActualAxisPosition.AxisValues[5] + Environment.NewLine;
 
             List<UnityEngine.Matrix4x4> unityMatrices = new List<UnityEngine.Matrix4x4>();
+            List<UnityEngine.Vector3> translations = new List<UnityEngine.Vector3>();
+            List<UnityEngine.Quaternion> rotations = new List<UnityEngine.Quaternion>();
 
-            foreach (var matrix in client.state.RobotTransformations[0].Transformation)
+            for (global::System.Int32 i = 0; i < client.state.RobotTransformations[0].Transformation.Count; i++)
             {
+                var matrix = client.state.RobotTransformations[0].Transformation[i];
                 UnityEngine.Matrix4x4 unityMatrix = new UnityEngine.Matrix4x4();
-                unityMatrix.SetRow(0, new UnityEngine.Vector4(matrix.M11, matrix.M12, matrix.M13, matrix.M14));
-                unityMatrix.SetRow(1, new UnityEngine.Vector4(matrix.M21, matrix.M22, matrix.M23, matrix.M24));
-                unityMatrix.SetRow(2, new UnityEngine.Vector4(matrix.M31, matrix.M32, matrix.M33, matrix.M34));
-                unityMatrix.SetRow(3, new UnityEngine.Vector4(matrix.M41, matrix.M42, matrix.M43, matrix.M44));
-                unityMatrices.Add(unityMatrix);
+
+                unityMatrix.m00 = matrix.M11;
+                unityMatrix.m01 = matrix.M12;
+                unityMatrix.m02 = matrix.M13;
+                unityMatrix.m03 = matrix.M14; 
+                unityMatrix.m10 = matrix.M21;
+                unityMatrix.m11 = matrix.M22;
+                unityMatrix.m12 = matrix.M23;
+                unityMatrix.m13 = matrix.M24 ;
+                unityMatrix.m20 = matrix.M31;
+                unityMatrix.m21 = matrix.M32;
+                unityMatrix.m22 = matrix.M33;
+                unityMatrix.m23 = matrix.M34 ;
+                unityMatrix.m30 = matrix.M41 / 1000f;
+                unityMatrix.m31 = matrix.M42 / 1000f;
+                unityMatrix.m32 = matrix.M43 / 1000f;
+                unityMatrix.m33 = matrix.M44;
+
+                UnityEngine.Matrix4x4 other = new UnityEngine.Matrix4x4();
+                other.SetColumn(0, new Vector4(1, 0, 0, 0));
+                other.SetColumn(1, new Vector4(0, 0, 1, 0));
+                other.SetColumn(2, new Vector4(0, 1, 0, 0));
+                other.SetColumn(3, new Vector4(0, 0, 0, 1));
+
+                unityMatrix = unityMatrix.transpose;
+
+                unityMatrix = other * unityMatrix;
+
+                var gameobj = GameObject.Find("Robot").transform.GetChild(i).gameObject;
+
+                gameobj.transform.rotation = Quaternion.LookRotation(unityMatrix.GetColumn(2), unityMatrix.GetColumn(1));
+
+                gameobj.transform.position = unityMatrix.GetColumn(3);
+
             }
 
-            for (int i = 0; i < unityMatrices.Count; i++)
-            {
-                GameObject.Find("Robot").transform.GetChild(i).transform.position = unityMatrices[i].GetColumn(3);
-                GameObject.Find("Robot").transform.GetChild(i).transform.rotation = unityMatrices[i].rotation;
-            }
         }
 
         if (simBuffer != simulationSlider.value && hasInitialized)
@@ -62,4 +89,6 @@ public class PRC_Unity : MonoBehaviour
             client.UpdateSimulation(simulationSlider.value);
         }
     }
+
+    
 }
