@@ -83,7 +83,7 @@ output.innerHTML = 'Robot has been set up...';
 
 var stream = client.subscribeRobotFeedback(new prc.SubscribeRobotFeedbackRequest().setId(robotID), {});
 stream.on('data', async function(response) {
-	await updateRobot(response.getStatus());
+	await updateRobot(response.GetDataPackage, response.getStatus());
 	console.log(response.getStatus());
 });
 stream.on('status', function(status) {
@@ -101,14 +101,14 @@ output.innerHTML = 'Stream has been established...';
 var ptpMotion1 = new prc.MotionCommand()
 	.setAxisMotion(new prc.AxisMotion()
 		.setTarget(new prc.JointTarget()
-			.setAxisValuesList([-45, -90, 90, 0, 0, 0])
+			.setAxisValuesList([0, 20, -90, 90, 70, -115])
 			.setSpeedList([0.1])
 		));
 
 var ptpMotion2 = new prc.MotionCommand()
 	.setAxisMotion(new prc.AxisMotion()
 		.setTarget(new prc.JointTarget()
-			.setAxisValuesList([45, -90, 90, 0, 0, 0])
+			.setAxisValuesList([0, -40, 75, -80, -90, -125])
 			.setSpeedList([0.1])
 		));
 

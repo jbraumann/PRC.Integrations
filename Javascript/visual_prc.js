@@ -24,20 +24,8 @@ const createScene = async function() {
 		mesh.edgesColor = new BABYLON.Color4(0, 0, 0, 1);
 	}
 
-	var material = scene.getMaterialByName("Color #333333ff");
-	material.roughness = 0.05;
-
-	material = scene.getMaterialByName("Color #666666ff");
-	material.roughness = 0.05;
-
-	material = scene.getMaterialByName("Color #ccccccff");
-	material.roughness = 0.05;
-
-	material = scene.getMaterialByName("Color #ff7f00ff");
-	material.roughness = 0.05;
-
-	let root = new BABYLON.TransformNode("root");
-	root.rotation.x = Math.PI / 2;
+	let cameraRoot = new BABYLON.TransformNode("cameraRoot");
+	cameraRoot.rotation.x = Math.PI / 2;
 
 	scene.createDefaultCameraOrLight(true, true, true);
 
@@ -48,7 +36,7 @@ const createScene = async function() {
 	scene.activeCamera.beta = 1.2;
 	scene.activeCamera.radius = 4;
 
-	scene.activeCamera.parent = root;
+	scene.activeCamera.parent = cameraRoot;
 
 	var env512 = BABYLON.CubeTexture.CreateFromPrefilteredData("/assets/studio_512.env", scene);
 	env512.name = "env512";
@@ -116,7 +104,7 @@ export async function updateRobot(xForms, feedback) {
 				matrix1.setRowFromFloats(0, xForms[axisIndex].getM11(), xForms[axisIndex].getM12(), xForms[axisIndex].getM13(), xForms[axisIndex].getM14());
 				matrix1.setRowFromFloats(1, xForms[axisIndex].getM21(), xForms[axisIndex].getM22(), xForms[axisIndex].getM23(), xForms[axisIndex].getM24());
 				matrix1.setRowFromFloats(2, xForms[axisIndex].getM31(), xForms[axisIndex].getM32(), xForms[axisIndex].getM33(), xForms[axisIndex].getM34());
-				matrix1.setRowFromFloats(3, xForms[axisIndex].getM41(), xForms[axisIndex].getM42(), xForms[axisIndex].getM43(), xForms[axisIndex].getM44());
+				matrix1.setRowFromFloats(3, xForms[axisIndex].getM41() / 1000, xForms[axisIndex].getM42() / 1000, xForms[axisIndex].getM43() / 1000, xForms[axisIndex].getM44());
 				let matrix = mesh.getWorldMatrix();
 				matrix.copyFrom(matrix1);
 			}
