@@ -6,7 +6,7 @@ The communication is based on *.proto files, which can be translated into variou
 
 # Caution!
 
-#### Our expertise lies in robot simulation and control, not necessarily in writing beautiful code. Please consider the code snippets to be proof-of-concept rather than best-practise!
+#### Our expertise lies in robot simulation, not necessarily in writing beautiful code. Please consider the code snippets to be proof-of-concept rather than best-practise - especially Python and Javascript code can be quite "hacky"!
 We welcome suggestions on how to improve the code, as well as entirely new integrations.
 
 You can contact the developer at *johannes@robotsinarchitecture.org*
