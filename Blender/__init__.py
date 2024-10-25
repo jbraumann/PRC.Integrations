@@ -7,7 +7,7 @@ bl_info = {
 import sys
 from pathlib import Path
 
-# Add the current directory to the path so that the GRPC module can be imported
+# Add the current directory to the path so that the GRPC module can be imported. Either unpack the ZIP file from the folder to the grpc directory or get the latest version via pip install grpcio
 sys.path.append(str((Path(__file__)).parent))
 
 import bpy
