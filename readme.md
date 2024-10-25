@@ -1,8 +1,15 @@
 # Parametric Robot Control
 
-Parametric Robot Control uses [GRPC](https://grpc.io/) to establish a communication between the client software (e.g. Grasshopper) and the server, where the robot is simulated, real-time control is established etc.
+Parametric Robot Control uses [gRPC](https://grpc.io/) to establish a communication between the client software (e.g. Grasshopper) and the server, where the robot is simulated, real-time control is established etc.
 The communication is based on *.proto files, which can be translated into various programming languages. Please refer to our (beta) [documentation](https://parametricrobotcontrol.notion.site/) for more details.
 
+Currently, you can find code samples to integrate Parametric Robot Control into the following platforms/programming languages
+- Unity (Game engine, using C#)
+- Blender (3D modeling, using Python)
+- Javascript (does not require node.js)
+- C# (both direct implementation and using our wrapper library)
+- Python (also used in Blender)
+These integrations provide a starting point for developers but do not constitute a full plugin, accessible to end-users, as we provide in Grasshopper.
 
 # Caution!
 
