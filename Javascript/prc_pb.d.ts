@@ -1351,8 +1351,8 @@ export class GetSimulatedRobotStateRequest extends jspb.Message {
   getNormalizedState(): number;
   setNormalizedState(value: number): GetSimulatedRobotStateRequest;
 
-  getAsyncStreamUpdate(): boolean;
-  setAsyncStreamUpdate(value: boolean): GetSimulatedRobotStateRequest;
+  getStreamUpdate(): boolean;
+  setStreamUpdate(value: boolean): GetSimulatedRobotStateRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetSimulatedRobotStateRequest.AsObject;
@@ -1366,7 +1366,7 @@ export namespace GetSimulatedRobotStateRequest {
   export type AsObject = {
     id: string,
     normalizedState: number,
-    asyncStreamUpdate: boolean,
+    streamUpdate: boolean,
   }
 }
 
@@ -1509,6 +1509,9 @@ export class SetupRobotReply extends jspb.Message {
   getId(): string;
   setId(value: string): SetupRobotReply;
 
+  getLicenseState(): string;
+  setLicenseState(value: string): SetupRobotReply;
+
   getRobotSettings(): Settings | undefined;
   setRobotSettings(value?: Settings): SetupRobotReply;
   hasRobotSettings(): boolean;
@@ -1526,6 +1529,7 @@ export namespace SetupRobotReply {
   export type AsObject = {
     status: string,
     id: string,
+    licenseState: string,
     robotSettings?: Settings.AsObject,
   }
 }

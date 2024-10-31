@@ -11384,7 +11384,7 @@ proto.GetSimulatedRobotStateRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     id: jspb.Message.getFieldWithDefault(msg, 1, ""),
     normalizedState: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
-    asyncStreamUpdate: jspb.Message.getBooleanFieldWithDefault(msg, 3, false)
+    streamUpdate: jspb.Message.getBooleanFieldWithDefault(msg, 3, false)
   };
 
   if (includeInstance) {
@@ -11431,7 +11431,7 @@ proto.GetSimulatedRobotStateRequest.deserializeBinaryFromReader = function(msg, 
       break;
     case 3:
       var value = /** @type {boolean} */ (reader.readBool());
-      msg.setAsyncStreamUpdate(value);
+      msg.setStreamUpdate(value);
       break;
     default:
       reader.skipField();
@@ -11476,7 +11476,7 @@ proto.GetSimulatedRobotStateRequest.serializeBinaryToWriter = function(message, 
       f
     );
   }
-  f = message.getAsyncStreamUpdate();
+  f = message.getStreamUpdate();
   if (f) {
     writer.writeBool(
       3,
@@ -11523,10 +11523,10 @@ proto.GetSimulatedRobotStateRequest.prototype.setNormalizedState = function(valu
 
 
 /**
- * optional bool async_stream_update = 3;
+ * optional bool stream_update = 3;
  * @return {boolean}
  */
-proto.GetSimulatedRobotStateRequest.prototype.getAsyncStreamUpdate = function() {
+proto.GetSimulatedRobotStateRequest.prototype.getStreamUpdate = function() {
   return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 3, false));
 };
 
@@ -11535,7 +11535,7 @@ proto.GetSimulatedRobotStateRequest.prototype.getAsyncStreamUpdate = function() 
  * @param {boolean} value
  * @return {!proto.GetSimulatedRobotStateRequest} returns this
  */
-proto.GetSimulatedRobotStateRequest.prototype.setAsyncStreamUpdate = function(value) {
+proto.GetSimulatedRobotStateRequest.prototype.setStreamUpdate = function(value) {
   return jspb.Message.setProto3BooleanField(this, 3, value);
 };
 
@@ -12588,6 +12588,7 @@ proto.SetupRobotReply.toObject = function(includeInstance, msg) {
   var f, obj = {
     status: jspb.Message.getFieldWithDefault(msg, 1, ""),
     id: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    licenseState: jspb.Message.getFieldWithDefault(msg, 3, ""),
     robotSettings: (f = msg.getRobotSettings()) && proto.Settings.toObject(includeInstance, f)
   };
 
@@ -12634,6 +12635,10 @@ proto.SetupRobotReply.deserializeBinaryFromReader = function(msg, reader) {
       msg.setId(value);
       break;
     case 3:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setLicenseState(value);
+      break;
+    case 4:
       var value = new proto.Settings;
       reader.readMessage(value,proto.Settings.deserializeBinaryFromReader);
       msg.setRobotSettings(value);
@@ -12681,10 +12686,17 @@ proto.SetupRobotReply.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getLicenseState();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
   f = message.getRobotSettings();
   if (f != null) {
     writer.writeMessage(
-      3,
+      4,
       f,
       proto.Settings.serializeBinaryToWriter
     );
@@ -12729,12 +12741,30 @@ proto.SetupRobotReply.prototype.setId = function(value) {
 
 
 /**
- * optional Settings robot_settings = 3;
+ * optional string license_state = 3;
+ * @return {string}
+ */
+proto.SetupRobotReply.prototype.getLicenseState = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SetupRobotReply} returns this
+ */
+proto.SetupRobotReply.prototype.setLicenseState = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * optional Settings robot_settings = 4;
  * @return {?proto.Settings}
  */
 proto.SetupRobotReply.prototype.getRobotSettings = function() {
   return /** @type{?proto.Settings} */ (
-    jspb.Message.getWrapperField(this, proto.Settings, 3));
+    jspb.Message.getWrapperField(this, proto.Settings, 4));
 };
 
 
@@ -12743,7 +12773,7 @@ proto.SetupRobotReply.prototype.getRobotSettings = function() {
  * @return {!proto.SetupRobotReply} returns this
 */
 proto.SetupRobotReply.prototype.setRobotSettings = function(value) {
-  return jspb.Message.setWrapperField(this, 3, value);
+  return jspb.Message.setWrapperField(this, 4, value);
 };
 
 
@@ -12761,7 +12791,7 @@ proto.SetupRobotReply.prototype.clearRobotSettings = function() {
  * @return {boolean}
  */
 proto.SetupRobotReply.prototype.hasRobotSettings = function() {
-  return jspb.Message.getField(this, 3) != null;
+  return jspb.Message.getField(this, 4) != null;
 };
 
 

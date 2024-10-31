@@ -6,7 +6,7 @@ import {
 var output = document.getElementById('feedback-text');
 output.innerHTML = 'Starting client...';
 
-const server = 'https://localhost:5001';
+const server = 'https://127.0.0.1:5001';
 
 const client = new prc.ParametricRobotControlServicePromiseClient(server, null, null);
 
@@ -150,7 +150,7 @@ output.innerHTML = 'Task has been added...';
 
 export async function updateRobotSimulation(simSlider) {
 	var robotState = new prc.GetSimulatedRobotStateRequest()
-		.setAsyncStreamUpdate(false)
+		.setStreamUpdate(false)
 		.setId(robotID)
 		.setNormalizedState(simSlider);
 
