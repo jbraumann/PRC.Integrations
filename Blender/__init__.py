@@ -218,7 +218,7 @@ class PRC_OT_core(bpy.types.Operator):
         #update_sim is called by the simulation slider.
         robot_state = stub.GetSimulatedRobotState(
             prc_pb2.GetSimulatedRobotStateRequest(
-                async_stream_update=True,
+                stream_update=True,
                 id=robot_id,
                 normalized_state=context.scene.custom_props.simulation_slider
             )
