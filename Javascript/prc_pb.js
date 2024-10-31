@@ -56,6 +56,7 @@ goog.exportSymbol('proto.Robot.RobotDataCase', null, global);
 goog.exportSymbol('proto.RobotFeedback', null, global);
 goog.exportSymbol('proto.RobotFeedback.DataPackageCase', null, global);
 goog.exportSymbol('proto.RobotState', null, global);
+goog.exportSymbol('proto.RobotStatus', null, global);
 goog.exportSymbol('proto.SetVariable', null, global);
 goog.exportSymbol('proto.Settings', null, global);
 goog.exportSymbol('proto.SetupRobotReply', null, global);
@@ -3162,7 +3163,7 @@ proto.RobotState.prototype.toObject = function(opt_includeInstance) {
  */
 proto.RobotState.toObject = function(includeInstance, msg) {
   var f, obj = {
-    actualAxisPosition: (f = msg.getActualAxisPosition()) && proto.JointTarget.toObject(includeInstance, f),
+    axisPosition: (f = msg.getAxisPosition()) && proto.JointTarget.toObject(includeInstance, f),
     robotTransformationsList: jspb.Message.toObjectList(msg.getRobotTransformationsList(),
     proto.TransformationArray.toObject, includeInstance),
     toolpathIndex: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
@@ -3174,7 +3175,11 @@ proto.RobotState.toObject = function(includeInstance, msg) {
     externalAxisAlarmList: (f = jspb.Message.getRepeatedBooleanField(msg, 9)) == null ? undefined : f,
     variablesMap: (f = msg.getVariablesMap()) ? f.toObject(includeInstance, proto.VariableArray.toObject) : [],
     dataMap: (f = msg.getDataMap()) ? f.toObject(includeInstance, undefined) : [],
-    connectionFeedback: jspb.Message.getFieldWithDefault(msg, 12, "")
+    connectionFeedback: jspb.Message.getFieldWithDefault(msg, 12, ""),
+    taskId: jspb.Message.getFieldWithDefault(msg, 13, ""),
+    commandId: jspb.Message.getFieldWithDefault(msg, 14, ""),
+    robotId: jspb.Message.getFieldWithDefault(msg, 15, ""),
+    status: jspb.Message.getFieldWithDefault(msg, 16, 0)
   };
 
   if (includeInstance) {
@@ -3214,7 +3219,7 @@ proto.RobotState.deserializeBinaryFromReader = function(msg, reader) {
     case 1:
       var value = new proto.JointTarget;
       reader.readMessage(value,proto.JointTarget.deserializeBinaryFromReader);
-      msg.setActualAxisPosition(value);
+      msg.setAxisPosition(value);
       break;
     case 2:
       var value = new proto.TransformationArray;
@@ -3268,6 +3273,22 @@ proto.RobotState.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setConnectionFeedback(value);
       break;
+    case 13:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setTaskId(value);
+      break;
+    case 14:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setCommandId(value);
+      break;
+    case 15:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setRobotId(value);
+      break;
+    case 16:
+      var value = /** @type {!proto.RobotStatus} */ (reader.readEnum());
+      msg.setStatus(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -3297,7 +3318,7 @@ proto.RobotState.prototype.serializeBinary = function() {
  */
 proto.RobotState.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getActualAxisPosition();
+  f = message.getAxisPosition();
   if (f != null) {
     writer.writeMessage(
       1,
@@ -3380,14 +3401,42 @@ proto.RobotState.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getTaskId();
+  if (f.length > 0) {
+    writer.writeString(
+      13,
+      f
+    );
+  }
+  f = message.getCommandId();
+  if (f.length > 0) {
+    writer.writeString(
+      14,
+      f
+    );
+  }
+  f = message.getRobotId();
+  if (f.length > 0) {
+    writer.writeString(
+      15,
+      f
+    );
+  }
+  f = message.getStatus();
+  if (f !== 0.0) {
+    writer.writeEnum(
+      16,
+      f
+    );
+  }
 };
 
 
 /**
- * optional JointTarget actual_axis_position = 1;
+ * optional JointTarget axis_position = 1;
  * @return {?proto.JointTarget}
  */
-proto.RobotState.prototype.getActualAxisPosition = function() {
+proto.RobotState.prototype.getAxisPosition = function() {
   return /** @type{?proto.JointTarget} */ (
     jspb.Message.getWrapperField(this, proto.JointTarget, 1));
 };
@@ -3397,7 +3446,7 @@ proto.RobotState.prototype.getActualAxisPosition = function() {
  * @param {?proto.JointTarget|undefined} value
  * @return {!proto.RobotState} returns this
 */
-proto.RobotState.prototype.setActualAxisPosition = function(value) {
+proto.RobotState.prototype.setAxisPosition = function(value) {
   return jspb.Message.setWrapperField(this, 1, value);
 };
 
@@ -3406,8 +3455,8 @@ proto.RobotState.prototype.setActualAxisPosition = function(value) {
  * Clears the message field making it undefined.
  * @return {!proto.RobotState} returns this
  */
-proto.RobotState.prototype.clearActualAxisPosition = function() {
-  return this.setActualAxisPosition(undefined);
+proto.RobotState.prototype.clearAxisPosition = function() {
+  return this.setAxisPosition(undefined);
 };
 
 
@@ -3415,7 +3464,7 @@ proto.RobotState.prototype.clearActualAxisPosition = function() {
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.RobotState.prototype.hasActualAxisPosition = function() {
+proto.RobotState.prototype.hasAxisPosition = function() {
   return jspb.Message.getField(this, 1) != null;
 };
 
@@ -3738,6 +3787,78 @@ proto.RobotState.prototype.getConnectionFeedback = function() {
  */
 proto.RobotState.prototype.setConnectionFeedback = function(value) {
   return jspb.Message.setProto3StringField(this, 12, value);
+};
+
+
+/**
+ * optional string task_id = 13;
+ * @return {string}
+ */
+proto.RobotState.prototype.getTaskId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 13, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.RobotState} returns this
+ */
+proto.RobotState.prototype.setTaskId = function(value) {
+  return jspb.Message.setProto3StringField(this, 13, value);
+};
+
+
+/**
+ * optional string command_id = 14;
+ * @return {string}
+ */
+proto.RobotState.prototype.getCommandId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 14, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.RobotState} returns this
+ */
+proto.RobotState.prototype.setCommandId = function(value) {
+  return jspb.Message.setProto3StringField(this, 14, value);
+};
+
+
+/**
+ * optional string robot_id = 15;
+ * @return {string}
+ */
+proto.RobotState.prototype.getRobotId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 15, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.RobotState} returns this
+ */
+proto.RobotState.prototype.setRobotId = function(value) {
+  return jspb.Message.setProto3StringField(this, 15, value);
+};
+
+
+/**
+ * optional RobotStatus status = 16;
+ * @return {!proto.RobotStatus}
+ */
+proto.RobotState.prototype.getStatus = function() {
+  return /** @type {!proto.RobotStatus} */ (jspb.Message.getFieldWithDefault(this, 16, 0));
+};
+
+
+/**
+ * @param {!proto.RobotStatus} value
+ * @return {!proto.RobotState} returns this
+ */
+proto.RobotState.prototype.setStatus = function(value) {
+  return jspb.Message.setProto3EnumField(this, 16, value);
 };
 
 
@@ -15013,6 +15134,15 @@ proto.TaskType = {
   EXECUTE_ON_SIMULATION_SUCCESS_TASK: 2,
   SIMULATE_AND_EXECUTE_TASK: 3,
   CONTAINER: 4
+};
+
+/**
+ * @enum {number}
+ */
+proto.RobotStatus = {
+  IDLE: 0,
+  ACTIVE: 1,
+  ERROR: 2
 };
 
 /**

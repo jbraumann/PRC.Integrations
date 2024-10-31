@@ -264,10 +264,10 @@ export namespace SimulationResultUnit {
 }
 
 export class RobotState extends jspb.Message {
-  getActualAxisPosition(): JointTarget | undefined;
-  setActualAxisPosition(value?: JointTarget): RobotState;
-  hasActualAxisPosition(): boolean;
-  clearActualAxisPosition(): RobotState;
+  getAxisPosition(): JointTarget | undefined;
+  setAxisPosition(value?: JointTarget): RobotState;
+  hasAxisPosition(): boolean;
+  clearAxisPosition(): RobotState;
 
   getRobotTransformationsList(): Array<TransformationArray>;
   setRobotTransformationsList(value: Array<TransformationArray>): RobotState;
@@ -314,6 +314,18 @@ export class RobotState extends jspb.Message {
   getConnectionFeedback(): string;
   setConnectionFeedback(value: string): RobotState;
 
+  getTaskId(): string;
+  setTaskId(value: string): RobotState;
+
+  getCommandId(): string;
+  setCommandId(value: string): RobotState;
+
+  getRobotId(): string;
+  setRobotId(value: string): RobotState;
+
+  getStatus(): RobotStatus;
+  setStatus(value: RobotStatus): RobotState;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): RobotState.AsObject;
   static toObject(includeInstance: boolean, msg: RobotState): RobotState.AsObject;
@@ -324,7 +336,7 @@ export class RobotState extends jspb.Message {
 
 export namespace RobotState {
   export type AsObject = {
-    actualAxisPosition?: JointTarget.AsObject,
+    axisPosition?: JointTarget.AsObject,
     robotTransformationsList: Array<TransformationArray.AsObject>,
     toolpathIndex: number,
     toolId: string,
@@ -336,6 +348,10 @@ export namespace RobotState {
     variablesMap: Array<[string, VariableArray.AsObject]>,
     dataMap: Array<[string, string]>,
     connectionFeedback: string,
+    taskId: string,
+    commandId: string,
+    robotId: string,
+    status: RobotStatus,
   }
 }
 
@@ -1842,6 +1858,11 @@ export enum TaskType {
   EXECUTE_ON_SIMULATION_SUCCESS_TASK = 2,
   SIMULATE_AND_EXECUTE_TASK = 3,
   CONTAINER = 4,
+}
+export enum RobotStatus { 
+  IDLE = 0,
+  ACTIVE = 1,
+  ERROR = 2,
 }
 export enum MotionGroupType { 
   CP = 0,
