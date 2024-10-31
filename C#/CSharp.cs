@@ -17,7 +17,7 @@ namespace PRC.Integration
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
 
-            string ip = "https://localhost:5001";
+            string ip = "https://127.0.0.1:5001";
             string robotID = "PRC_Test";
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             AsyncServerStreamingCall<RobotFeedback> dataStreamingCall;
