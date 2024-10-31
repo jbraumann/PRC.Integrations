@@ -80,9 +80,9 @@ class PRC_OT_core(bpy.types.Operator):
             with open(os.path.join(__location__, 'PRCServerCertificate.pem'), 'rb') as f:
                 credentials = grpc.ssl_channel_credentials(f.read())
 
-            viewport_area.header_text_set("Connecting to https://localhost:5001...")
+            viewport_area.header_text_set("Connecting to https://127.0.0.1:5001...")
 
-            with grpc.secure_channel("localhost:5001", credentials) as channel:
+            with grpc.secure_channel("127.0.0.1:5001", credentials) as channel:
                 stub = prc_pb2_grpc.ParametricRobotControlServiceStub(channel)
                 response = stub.SendPing(prc_pb2.Ping(payload="", time_ms=10))
                 viewport_area.header_text_set('Successfully sent ping')
@@ -316,7 +316,7 @@ class PRC_OT_add_task_button(bpy.types.Operator):
 
         robot_state = stub.GetSimulatedRobotState(
                 prc_pb2.GetSimulatedRobotStateRequest(
-                    async_stream_update=True,
+                    stream_update=True,
                     id=robot_id,
                     normalized_state=0.0
                 )
