@@ -1,6 +1,5 @@
 using Grpc.Core;
 using Grpc.Net.Client.Configuration;
-using Grpc.Net.Client.Web;
 using Grpc.Net.Client;
 using Grpc.Net.Compression;
 using PRC.GRPC;
@@ -243,7 +242,7 @@ yu8bjTT/AtFEbHMv7oIOQg==
 
     public async System.Threading.Tasks.Task<RobotState> UpdateSimulation(float simslider)
     {
-        return await client.GetSimulatedRobotStateAsync(new GetSimulatedRobotStateRequest { Id = robotID, NormalizedState = simslider, AsyncStreamUpdate = true });
+        return await client.GetSimulatedRobotStateAsync(new GetSimulatedRobotStateRequest { Id = robotID, NormalizedState = simslider, StreamUpdate = true });
     }
 }
 
