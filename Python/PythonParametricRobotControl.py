@@ -153,7 +153,7 @@ def run():
                     normalized_state=i/100.0
                 )
             )
-            axis_values = robot_state.actual_axis_position.axis_values
+            axis_values = robot_state.axis_position.axis_values
             print("At factor " + str(i/100.0) + " the robot is at A1: " + str(axis_values[0]) + " A2:" + str(axis_values[1]) + " A3:" + str(axis_values[2]) + " A4:" + str(axis_values[3]) + " A5:" + str(axis_values[4]) + " A6:" + str(axis_values[5]) )
             time.sleep(0.4)
 

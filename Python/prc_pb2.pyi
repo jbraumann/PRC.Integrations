@@ -48,6 +48,12 @@ class TaskType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     SIMULATE_AND_EXECUTE_TASK: _ClassVar[TaskType]
     CONTAINER: _ClassVar[TaskType]
 
+class RobotStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    IDLE: _ClassVar[RobotStatus]
+    ACTIVE: _ClassVar[RobotStatus]
+    ERROR: _ClassVar[RobotStatus]
+
 class MotionGroupType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     CP: _ClassVar[MotionGroupType]
@@ -80,6 +86,9 @@ EXECUTE_TASK: TaskType
 EXECUTE_ON_SIMULATION_SUCCESS_TASK: TaskType
 SIMULATE_AND_EXECUTE_TASK: TaskType
 CONTAINER: TaskType
+IDLE: RobotStatus
+ACTIVE: RobotStatus
+ERROR: RobotStatus
 CP: MotionGroupType
 PTP: MotionGroupType
 SPLINE: MotionGroupType
@@ -169,7 +178,7 @@ class SimulationResultUnit(_message.Message):
     def __init__(self, axis_values: _Optional[_Iterable[float]] = ..., position: _Optional[_Union[Matrix4x4, _Mapping]] = ..., time: _Optional[float] = ..., collision: _Optional[_Iterable[bool]] = ..., singularity: _Optional[_Iterable[bool]] = ..., outofreach: _Optional[_Iterable[bool]] = ..., external_axis_values: _Optional[_Iterable[float]] = ..., external_axis_outofreach: _Optional[_Iterable[bool]] = ..., interpolation_factor: _Optional[float] = ..., id: _Optional[str] = ...) -> None: ...
 
 class RobotState(_message.Message):
-    __slots__ = ("actual_axis_position", "robot_transformations", "toolpath_index", "tool_id", "tool_frame", "root_frame", "flange_frame", "axis_alarm", "external_axis_alarm", "variables", "data", "connection_feedback")
+    __slots__ = ("axis_position", "robot_transformations", "toolpath_index", "tool_id", "tool_frame", "root_frame", "flange_frame", "axis_alarm", "external_axis_alarm", "variables", "data", "connection_feedback", "task_id", "command_id", "robot_id", "status")
     class VariablesEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
@@ -184,7 +193,7 @@ class RobotState(_message.Message):
         key: str
         value: str
         def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
-    ACTUAL_AXIS_POSITION_FIELD_NUMBER: _ClassVar[int]
+    AXIS_POSITION_FIELD_NUMBER: _ClassVar[int]
     ROBOT_TRANSFORMATIONS_FIELD_NUMBER: _ClassVar[int]
     TOOLPATH_INDEX_FIELD_NUMBER: _ClassVar[int]
     TOOL_ID_FIELD_NUMBER: _ClassVar[int]
@@ -196,7 +205,11 @@ class RobotState(_message.Message):
     VARIABLES_FIELD_NUMBER: _ClassVar[int]
     DATA_FIELD_NUMBER: _ClassVar[int]
     CONNECTION_FEEDBACK_FIELD_NUMBER: _ClassVar[int]
-    actual_axis_position: JointTarget
+    TASK_ID_FIELD_NUMBER: _ClassVar[int]
+    COMMAND_ID_FIELD_NUMBER: _ClassVar[int]
+    ROBOT_ID_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    axis_position: JointTarget
     robot_transformations: _containers.RepeatedCompositeFieldContainer[TransformationArray]
     toolpath_index: float
     tool_id: str
@@ -208,7 +221,11 @@ class RobotState(_message.Message):
     variables: _containers.MessageMap[str, VariableArray]
     data: _containers.ScalarMap[str, str]
     connection_feedback: str
-    def __init__(self, actual_axis_position: _Optional[_Union[JointTarget, _Mapping]] = ..., robot_transformations: _Optional[_Iterable[_Union[TransformationArray, _Mapping]]] = ..., toolpath_index: _Optional[float] = ..., tool_id: _Optional[str] = ..., tool_frame: _Optional[_Union[Matrix4x4, _Mapping]] = ..., root_frame: _Optional[_Union[Matrix4x4, _Mapping]] = ..., flange_frame: _Optional[_Union[Matrix4x4, _Mapping]] = ..., axis_alarm: _Optional[_Iterable[bool]] = ..., external_axis_alarm: _Optional[_Iterable[bool]] = ..., variables: _Optional[_Mapping[str, VariableArray]] = ..., data: _Optional[_Mapping[str, str]] = ..., connection_feedback: _Optional[str] = ...) -> None: ...
+    task_id: str
+    command_id: str
+    robot_id: str
+    status: RobotStatus
+    def __init__(self, axis_position: _Optional[_Union[JointTarget, _Mapping]] = ..., robot_transformations: _Optional[_Iterable[_Union[TransformationArray, _Mapping]]] = ..., toolpath_index: _Optional[float] = ..., tool_id: _Optional[str] = ..., tool_frame: _Optional[_Union[Matrix4x4, _Mapping]] = ..., root_frame: _Optional[_Union[Matrix4x4, _Mapping]] = ..., flange_frame: _Optional[_Union[Matrix4x4, _Mapping]] = ..., axis_alarm: _Optional[_Iterable[bool]] = ..., external_axis_alarm: _Optional[_Iterable[bool]] = ..., variables: _Optional[_Mapping[str, VariableArray]] = ..., data: _Optional[_Mapping[str, str]] = ..., connection_feedback: _Optional[str] = ..., task_id: _Optional[str] = ..., command_id: _Optional[str] = ..., robot_id: _Optional[str] = ..., status: _Optional[_Union[RobotStatus, str]] = ...) -> None: ...
 
 class Task(_message.Message):
     __slots__ = ("payload", "type", "name", "data")
