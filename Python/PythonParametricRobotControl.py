@@ -16,9 +16,9 @@ def run():
     with open(os.path.join(__location__, 'PRCServerCertificate.pem'), 'rb') as f:
         credentials = grpc.ssl_channel_credentials(f.read())
 
-    print("Connecting to https://localhost:5001...")
+    print("Connecting to https://127.0.0.1:5001...")
 
-    with grpc.secure_channel("localhost:5001", credentials) as channel:
+    with grpc.secure_channel("127.0.0.1:5001", credentials) as channel:
         stub = prc_pb2_grpc.ParametricRobotControlServiceStub(channel)
         response = stub.SendPing(prc_pb2.Ping(payload="", time_ms=10))
         print("Successfully sent ping")
@@ -148,7 +148,7 @@ def run():
             i+=4
             robot_state = stub.GetSimulatedRobotState(
                 prc_pb2.GetSimulatedRobotStateRequest(
-                    async_stream_update=False,
+                    stream_update=False,
                     id=robot_id,
                     normalized_state=i/100.0
                 )

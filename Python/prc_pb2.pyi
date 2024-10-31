@@ -553,14 +553,14 @@ class RobotFeedback(_message.Message):
     def __init__(self, status: _Optional[str] = ..., heartbeat_data: _Optional[_Union[Heartbeat, _Mapping]] = ..., robot_state_data: _Optional[_Union[RobotState, _Mapping]] = ..., settings_data: _Optional[_Union[Settings, _Mapping]] = ..., ping_data: _Optional[_Union[Ping, _Mapping]] = ...) -> None: ...
 
 class GetSimulatedRobotStateRequest(_message.Message):
-    __slots__ = ("id", "normalized_state", "async_stream_update")
+    __slots__ = ("id", "normalized_state", "stream_update")
     ID_FIELD_NUMBER: _ClassVar[int]
     NORMALIZED_STATE_FIELD_NUMBER: _ClassVar[int]
-    ASYNC_STREAM_UPDATE_FIELD_NUMBER: _ClassVar[int]
+    STREAM_UPDATE_FIELD_NUMBER: _ClassVar[int]
     id: str
     normalized_state: float
-    async_stream_update: bool
-    def __init__(self, id: _Optional[str] = ..., normalized_state: _Optional[float] = ..., async_stream_update: bool = ...) -> None: ...
+    stream_update: bool
+    def __init__(self, id: _Optional[str] = ..., normalized_state: _Optional[float] = ..., stream_update: bool = ...) -> None: ...
 
 class AddRobotTaskRequest(_message.Message):
     __slots__ = ("id", "robot_task", "robot_settings")
@@ -607,14 +607,16 @@ class SetupRobotRequest(_message.Message):
     def __init__(self, client_id: _Optional[str] = ..., software_version: _Optional[str] = ..., robot_setup: _Optional[_Union[Robot, _Mapping]] = ...) -> None: ...
 
 class SetupRobotReply(_message.Message):
-    __slots__ = ("status", "id", "robot_settings")
+    __slots__ = ("status", "id", "license_state", "robot_settings")
     STATUS_FIELD_NUMBER: _ClassVar[int]
     ID_FIELD_NUMBER: _ClassVar[int]
+    LICENSE_STATE_FIELD_NUMBER: _ClassVar[int]
     ROBOT_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     status: str
     id: str
+    license_state: str
     robot_settings: Settings
-    def __init__(self, status: _Optional[str] = ..., id: _Optional[str] = ..., robot_settings: _Optional[_Union[Settings, _Mapping]] = ...) -> None: ...
+    def __init__(self, status: _Optional[str] = ..., id: _Optional[str] = ..., license_state: _Optional[str] = ..., robot_settings: _Optional[_Union[Settings, _Mapping]] = ...) -> None: ...
 
 class Robot(_message.Message):
     __slots__ = ("preset_robot_class", "custom_robot", "robot_driver_class", "friendly_id", "tool_dictionary", "initial_base", "collision_geometry", "external_axes", "data")
