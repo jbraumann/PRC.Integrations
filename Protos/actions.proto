@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+option csharp_namespace = "PRC.GRPC";
+
+import "Protos/primitives.proto";
+
+//Each Action describes a non-movement related command. Use only one entry in the "oneof" action_node
+message Action{
+	oneof action_node {
+        //SetVariable sets a variable. A variable can contain a bool, float, or integer value, along with a name as string.
+        SetVariable set_variable_action = 1;
+        //WaitForVariable instructs the robot to wait for a variable to reach a certain state. A variable can contain a bool, float, or integer value, along with a name as string.
+        WaitForVariable wait_for_variable_action = 2;
+        //Hold has the robot wait for a given time in milliseconds.
+        Hold hold_action = 3;
+        //Ping pings the PRC server, used e.g. to verify communication.
+        Ping ping_action = 4;
+        //InsertCode inserts arbitrary code into the generated robot control data file. It is not parsed or simulated.
+        InsertCode insert_code_action = 5;
+    }
+}
+
+//SetVariable sets a variable. A variable can contain a bool, float, or integer value, along with a name as string.
+message SetVariable{
+	Variable new_state = 1;
+}
+
+//WaitForVariable instructs the robot to wait for a variable to reach a certain state. A variable can contain a bool, float, or integer value, along with a name as string.
+message WaitForVariable{
+	Variable await_state = 1;
+}
+
+//Hold has the robot wait for a given time in milliseconds.
+message Hold{
+	float hold_ms = 1;
+}
+
+//Ping pings the PRC server, used e.g. to verify communication.
+message Ping{
+    string payload = 1;
+    int64 time_ms = 2;
+}
+
+//InsertCode inserts arbitrary code into the generated robot control data file. It is not parsed or simulated.
+message InsertCode{
+	repeated string code = 1;
+}

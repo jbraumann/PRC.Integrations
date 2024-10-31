@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+option csharp_namespace = "PRC.GRPC";
+
+import "Protos/primitives.proto";
+
+//Robot defines the robot itself, along with its drivers and other data.
+message Robot{
+	//The RobotData field is a oneof field, meaning that only one of its fields can be set at a time.
+	//This is used to define the robot as either a preset robot or a custom robot.
+	oneof robot_data {
+		//The PresetRobotClass refers to the PRC.Library.Robots namespace.
+        string preset_robot_class = 1;
+		//The CustomRobot defines a custom robot model.
+        CustomRobot custom_robot = 2;
+    }
+	//The RobotDriverClass refers to the PRC.Library.Drivers namespace, e.g. PRC.Library.Drivers.KUKA.KSS_KRL.
+	string robot_driver_class = 3;
+	//A unique ID of the robot setup.
+	string friendly_id = 4;
+	//The tool dictionary must contain the data for each tool that is referred to in a motion group.
+	map<string, Tool> tool_dictionary = 5;
+	//The initial base to be used with the robot.
+	Base initial_base = 6;
+	//Optional collision geometry, evaluated if collision checking is enabled.
+	repeated PolyMesh collision_geometry = 7;
+	//The external axes of the robot.
+	repeated ExternalAxis external_axes = 8;
+	//Additional data.
+	MetaData data = 9;
+}
+
+//Tool describes a robotic tool.
+message Tool {
+	//The ToolType sets whether the tool is fixed or external.
+	FrameType tool_type = 1;
+	//The TCP is the tool center point, i.e. the tip of the current tool.
+	CartesianPosition tcp = 2;
+	//ToolId sets the id of the tool.
+	string tool_id = 3;
+	//ToolState can be used to switch between different tool states.
+	int32 tool_state = 4;
+	//ToolGeometry is the geometry of the mesh, represented through several convex mesh hulls.
+	PolyMesh tool_geometry = 5;
+}
+
+//Base describes the robot's local coordinate system.
+message Base {
+	//The BaseType sets whether the base is fixed or external.
+	FrameType base_type = 1;
+	//The base frame is the local coordinate system of the base.
+	CartesianPosition base_frame = 2;
+	//BaseIndex sets the name of the base.
+	string base_id = 3;
+}
+
+//CustomRobot defines a custom robot model.
+message CustomRobot {
+	//The center of each axis of the robot.
+	repeated Vector3 axis_center = 1;
+	//The rotary axis of each axis of the robot.
+	repeated Vector3 axis_direction = 2;
+	//The speed of each axis of the robot.
+	repeated float axis_speed = 3;
+	//The minimum range of each axis of the robot.
+	repeated float axis_range_min = 4;
+	//The maximum range of each axis of the robot.
+	repeated float axis_range_max = 5;
+	//The name of the robot.
+	string name = 6;
+	//The short name of the robot.
+	string short_name = 7;
+	//The geometry of the robot, with each PolyMesh representing one joint.
+	repeated PolyMesh geometry = 8;
+	//The root coordinate system of the robot.
+	Matrix4x4 root_cs = 9;
+	//The flange coordinate system of the robot.
+	Matrix4x4 flange_cs = 10;
+}
+
+//ExternalAxis describes an external axis of the robot.
+message ExternalAxis{
+	//Type of external axis.
+	ExternalAxisType external_axis_type = 1;
+	//Name of the external axis.
+	string name = 2;
+	//The short name of the external axis.
+	string short_name = 3;
+	//The minimum range of the external axis.
+	repeated float range_min = 4;
+	//The maximum range of the external axis.
+	repeated float range_max = 5;
+	//The speed of the external axis.
+	repeated float speed = 6;
+	//The position(s) and orientation(s) of each external axis. Z+ is used as the rotary axis/linear rail direction.
+	repeated Matrix4x4 orientation = 7;
+	//The position of the axis in relation to the robot, in particular for rotary axes.
+	CartesianPosition position = 8;
+	//The geometry of the external axis.
+	repeated PolyMesh geometry = 9;
+	//Additional data.
+	MetaData data = 10;
+}

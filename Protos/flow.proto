@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+option csharp_namespace = "PRC.GRPC";
+
+import "Protos/primitives.proto";
+import "Protos/motion.proto";
+import "Protos/actions.proto";
+
+//A Task contains a list of TaskPayload objects containing grouped robot commands. The TaskType enum describes how the Task is to be processed.
+message Task{
+    //A list of TaskPayload objects containt the robot commands.
+    repeated TaskPayload payload = 1;
+    //The type of the task.
+    TaskType type = 2;
+    //An arbitrary name.
+    string name = 3;
+    //Additional data, if needed.
+    MetaData data = 4;
+}
+
+//The TaskPayload may contain either a Flow object - describing the dataflow of the program - , a MotionGroup with motion commands, or an Action object.
+message TaskPayload
+{
+    oneof payload {
+        //A FlowTask describes the data flow of the program.
+        Flow flow_task = 1;
+        //A MotionGroup contains a list of motion commands.
+        MotionGroup motion_group_task = 2;
+        //An Action object contains a single non-motion command.
+        Action action_task = 3;
+    }
+}
+
+//A Flow describes the data flow of a program. The FlowNode supports three types of flows: IfElse, While, and End.
+message Flow{
+	oneof flow_node {
+        //The IfElse object contains a condition, with one of two tasks to be executed based on the condition.
+        IfElse if_else_flow = 2;
+        //The While object contains a condition and a task to be executed while the condition is true.
+        While while_flow = 3;
+        //The End flow ends the program.
+        End end_flow = 4;
+    }
+}
+
+//The IfElse flow contains a condition, with one of two tasks to be executed based on the condition.
+message IfElse{
+    //The condition to be evaluated.
+    Variable condition = 1;
+    //The task to be executed if the condition is true.
+    Task if_true = 2;
+    //The task to be executed if the condition is false.
+    Task if_false = 3;
+}
+
+//The While flow contains a condition and a task to be executed while the condition is true.
+message While{
+    //The condition to be evaluated.
+    Variable condition = 1;
+    //The task to be executed while the condition is true.
+    Task body = 2;
+}
+
+//The End flow ends the program.
+message End{
+}

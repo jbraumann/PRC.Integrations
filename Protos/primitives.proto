@@ -1,0 +1,252 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "PRC.GRPC";
+
+//Matrix4x4 is to be used similar to System.Numerics.Matrix4x4
+message Matrix4x4 {
+  	float m11 = 1;
+	float m12 = 2;
+	float m13 = 3;
+	float m14 = 4;
+	float m21 = 5;
+	float m22 = 6;
+	float m23 = 7;
+	float m24 = 8;
+	float m31 = 9;
+	float m32 = 10;
+	float m33 = 11;
+	float m34 = 12;
+	float m41 = 13;
+	float m42 = 14;
+	float m43 = 15;
+	float m44 = 16;
+}
+
+//CartesianPosition uses one of three definitions to define a Cartesian position, either as a matrix, through Euler values, or a coordinate system.
+message CartesianPosition{
+    //The frame, defined either as matrix, Euler values, or coordinate system.
+    oneof frame {
+        Matrix4x4 matrix = 1;
+        Euler euler = 2;
+        CoordinateSystem cs = 3;
+    }
+    //The CartesianReference enum describes if the current frame is absolute, relative, or linked to a parent.
+    CartesianReference reference = 4;
+    //A parent matrix can be provided.
+    Matrix4x4 parent = 5;
+}
+
+//CartesianTarget contains the position defined as a CartesianPosition and addds information relating to the posture, speed, acceleration of the robot, as well as of its external axes.
+message CartesianTarget{
+    //The CartesianPosition of the target.
+    CartesianPosition position = 1;
+    //The posture of the robot.
+    string posture = 2;
+    //The speed of the robot, either one value per axis or a single value for all.
+    repeated float speed = 3;
+    //The acceleration of the robot, either one value per axis or a single value for all.
+    repeated float acceleration = 4;
+    //The position of any external axes of the robot.
+    repeated float external_axis_values = 5;
+}
+
+//JointTarget contains the target position of the robot in joint space, as well as the speed and acceleration of the robot.
+message JointTarget{
+    //The target position of the robot in joint space.
+    repeated float axis_values = 1;
+    //The speed of the robot, either one value per axis or a single value for all.
+    repeated float speed = 2;
+    //The acceleration of the robot, either one value per axis or a single value for all.
+    repeated float acceleration = 3;
+    //The position of any external axes of the robot.
+    repeated float external_axis_values = 4;
+}
+
+//A vector, similar to System.Numerics.Vector3
+message Vector3 {
+    //The X component of the vector.
+  	float x = 1;
+    //The Y component of the vector.
+	float y = 2;
+	//The Z component of the vector.
+    float z = 3;
+}
+
+//Int4 describes four integers, such as the indices of the corners of a mesh face.
+message Int4 {
+    //The first integer.
+	int32 x = 1;
+	//The second integer.
+	int32 y = 2;
+	//The third integer.
+	int32 z = 3;
+	//The fourth integer.
+	int32 w = 4;
+}
+
+//The Euler angles, describing a Cartesian position.
+message Euler {
+    //The X component of the Euler angles.
+	float x = 1;
+    //The Y component of the Euler angles.
+	float y = 2;
+    //The Z component of the Euler angles.
+	float z = 3;
+    //The A rotation component of the Euler angles.
+	float a = 4;
+    //The B rotation component of the Euler angles.
+	float b = 5;
+    //The C rotation component of the Euler angles.
+	float c = 6;
+}
+
+//The CoordinateSystem is defined through three vectors, the origin, the X axis, and the Y axis.
+message CoordinateSystem {
+    //The origin of the coordinate system.
+	Vector3 origin = 1;
+    //The X axis of the coordinate system.
+	Vector3 x_axis = 2;
+    //The Y axis of the coordinate system.
+    Vector3 y_axis = 3;
+}
+
+//The Variable can contain a bool, float, or integer value, along with a name as string.
+message Variable{
+    //The value of the variable, either a bool, float, or integer.
+	oneof variable_value {
+        bool boolean = 1;
+        float single = 2;
+        int32 integer = 3;
+        string text = 4;
+    }
+    //The name of the variable.
+    string name = 5;
+}
+
+//The Heartbeat is used internally.
+message Heartbeat {
+    int32 beat = 1;
+}
+
+//The driver-related settings, serialized as a dictionary.
+message Settings {
+    //Robot settings serialized as a dictionary.
+    map<string, string> settings_dictionary = 1;
+}
+
+//The Mesh describes a geometrical object through its vertices and how they are connected, with a single mesh color.
+message Mesh {
+    //The indices of the vertices in the Vertices field in order to define a mesh face.
+	repeated Int4 faces = 1;
+    //The vertices of the mesh.
+	repeated Vector3 vertices = 2;
+    //The normal vectors of the mesh.
+    repeated Vector3 normals = 3;
+    //The color of the mesh.
+    Int4 mesh_color = 4;
+}
+
+//The PolyMesh contains multiple meshes, a collision convex hull, a transform, and a name. A single robotic joint can be described as a PolyMesh, consisting of several meshes with different colors.
+message PolyMesh{
+    //The meshes making up the PolyMesh.
+	repeated Mesh meshes = 1;
+    //A convex hull to be used for collision checking. May contain a different number of meshes compared to the Meshes object.
+    repeated Mesh collision_convex_hull = 2;
+	//The transformation of the PolyMesh. To be applied in relation to WorldXY - right-handed coordinate system with Z+ = up.
+    Matrix4x4 transform = 3;
+    //The name of the PolyMesh.
+    string name = 4;
+}
+
+//The TransformationArray contains a list of transformation matrices. To be used e.g. for providing feedback on the transformations of external axes.
+message TransformationArray{
+	//The transformation matrix of the object.
+	repeated Matrix4x4 transformation = 1;
+}
+
+//The VariableArray contains a list of variables, that are currently active at the robot.
+message VariableArray{
+    //The variables of the robot.
+    repeated Variable variables = 1;
+}
+
+//Additional data
+message MetaData{
+    //The ID of the parent object.
+	string id = 1;
+    //Additional data serialized as a dictionary.
+	map<string, string> data = 2;
+}
+
+//Describes the type of joint.
+enum ExternalAxisType
+    {
+        LINEAR_RAIL = 0;
+        //Two linear rails.
+        LINEAR_DOUBLE = 1;
+        //Three-axis linear positioning system.
+        LINEAR_TRIPLE = 2;
+        //A single rotary joint.
+        ROTARY_SINGLE = 3;
+        //Two rotary joints.
+        ROTARY_DOUBLE = 4;
+        //An AGV, moving the robot around.
+        AGV = 5;
+    }
+
+//The CartesianReference enum describes if the current frame is absolute, relative, or linked to a parent.
+enum CartesianReference
+    {
+        ABSOLUTE = 0;
+        RELATIVE = 1;
+        PARENT = 2;
+    }
+
+//The type of the frame.
+enum FrameType
+    {
+        FIXED = 0;
+        EXTERNAL = 1;
+    }
+
+//The name of each axis, if they are not in order.
+enum AxisName
+    {
+        A1 = 0;
+        A2 = 1;
+        A3 = 2;
+        A4 = 3;
+        A5 = 4;
+        A6 = 5;
+        A7 = 6;
+        E1 = 7;
+        E2 = 8;
+        E3 = 9;
+        E4 = 10;
+    }
+
+//TaskType defines how new data sent to the robot should be processed.
+enum TaskType
+    {
+        //Simulates the task.
+        SIMULATE_TASK = 0;
+        //Executes a task directy.
+        EXECUTE_TASK = 1;
+        //Executes a task after a successful simulation.
+        EXECUTE_ON_SIMULATION_SUCCESS_TASK = 2;
+        //Executes a task no matter the result of the simulation.
+        SIMULATE_AND_EXECUTE_TASK = 3;
+        //Groups several commands
+        CONTAINER = 4;
+    }
+
+//The MotionGroupType can bei either CP, PTP, or SPLINE
+enum MotionGroupType
+    {
+        //Continuous path motion refers, e.g., to linear motions.
+        CP = 0;
+        //Point-to-point motion provide a fast and efficient way to get from this position to another,.
+        PTP = 1;
+        //Spline motion is used for smooth transitions between points.
+        SPLINE = 2;
+    }

@@ -1,0 +1,684 @@
+syntax = "proto3";
+
+option csharp_namespace = "PRC.GRPC";
+
+//ParametricRobotControlService provides an interface for simulating/controlling supported robots through GRPC.
+service ParametricRobotControlService {
+ //Step 1: Setup the simulation/control environemt.
+  rpc SetupRobot (SetupRobotRequest) returns (SetupRobotReply);
+  //Step 2: Define a task to be processed or simulated.
+  rpc AddRobotTask (AddRobotTaskRequest) returns (AddRobotTaskReply);
+  //Step 3: Subscribe to the feedback coming from the simulation/control environment..
+  rpc SubscribeRobotFeedback (SubscribeRobotFeedbackRequest) returns (stream RobotFeedback);
+  //Step 4: Request a simulation update, to be either provided directly or written to the feedback stream.
+  rpc GetSimulatedRobotState (GetSimulatedRobotStateRequest) returns (RobotState);
+  //Optional: Can update a variable. Always returns a list of all variables of all connected devices.
+  rpc UpdateVariable (UpdateVariableRequest) returns (UpdateVariableReply);
+  //Optional: Ping the controller.
+  rpc SendPing (Ping) returns (Ping);
+}
+
+//Each Action describes a non-movement related command. Use only one entry in the "oneof" action_node
+message Action{
+	oneof action_node {
+        //SetVariable sets a variable. A variable can contain a bool, float, or integer value, along with a name as string.
+        SetVariable set_variable_action = 1;
+        //WaitForVariable instructs the robot to wait for a variable to reach a certain state. A variable can contain a bool, float, or integer value, along with a name as string.
+        WaitForVariable wait_for_variable_action = 2;
+        //Hold has the robot wait for a given time in milliseconds.
+        Hold hold_action = 3;
+        //Ping pings the PRC server, used e.g. to verify communication.
+        Ping ping_action = 4;
+        //InsertCode inserts arbitrary code into the generated robot control data file. It is not parsed or simulated.
+        InsertCode insert_code_action = 5;
+    }
+}
+
+//SetVariable sets a variable. A variable can contain a bool, float, or integer value, along with a name as string.
+message SetVariable{
+	Variable new_state = 1;
+}
+
+//WaitForVariable instructs the robot to wait for a variable to reach a certain state. A variable can contain a bool, float, or integer value, along with a name as string.
+message WaitForVariable{
+	Variable await_state = 1;
+}
+
+//Hold has the robot wait for a given time in milliseconds.
+message Hold{
+	float hold_ms = 1;
+}
+
+//Ping pings the PRC server, used e.g. to verify communication.
+message Ping{
+    string payload = 1;
+    int64 time_ms = 2;
+}
+
+//InsertCode inserts arbitrary code into the generated robot control data file. It is not parsed or simulated.
+message InsertCode{
+	repeated string code = 1;
+}
+
+//SimulationResult contains the result of the robot simulation.
+message SimulationResult{
+	//Each (interpolated) command is represented by a SimulationResultUnit.
+	repeated SimulationResultUnit simulation_results = 1;
+	//IsValid is true if there are no reachability or collision problems.
+	bool is_valid = 2;
+	//Time is the total time in seconds.
+	float time = 3;
+	//Code contains the robot control data, to be written locally into a file with the suitable extension.
+	string code = 4;
+	//MetaData contains additional, optional information
+	MetaData data = 5;
+}
+
+//SimulationResultUnit contains the result of a single robot simulation step.
+message SimulationResultUnit{
+	//AxisValues contains the joint values of the robot at that position.
+	repeated float axis_values = 1;
+	//The Cartesian position of the robot.
+	Matrix4x4 position = 2;
+	//Time is the calculated time in seconds between the start of the simulation and the current SimulationResultUnit
+	float time = 3;
+	//One collision value per axis, set when the robot collides. Only active with collision checking enabled.
+	repeated bool collision = 4;
+	//One singularity value per axis, set when the robot is in a singularity.
+	repeated bool singularity = 5;
+	//One out of reach value per axis, set when the robot is out of reach.
+	repeated bool outofreach = 6;
+	//AxisValues contains the joint values of the robot at that position.
+	repeated float external_axis_values = 7;
+	//One out of reach value per external axis, set when the external axis is out of reach.
+	repeated bool external_axis_outofreach = 8;
+	//The InterpolationFactor describes whether a value is interpolated or not.
+	float interpolation_factor = 9;
+	//The Id is used to match the SimulationResultUnit with the initial simulation input.
+	string id = 10;
+}
+
+//RobotState is used the visualize the current or simulated state of the robot.
+message RobotState{
+	//The actual axis position of the robot.
+	JointTarget actual_axis_position = 1;
+	//A list of transformations for each axis plus base of the robot. First array is the robot, followed by an array for each external axis. To be applied in relation to WorldXY - right-handed coordinate system with Z+ = up.
+	repeated TransformationArray robot_transformations = 2;
+	//Normalized value describing the relative position along the toolpath.
+	float toolpath_index = 3;
+	//The ID of the actual tool.
+	string tool_id = 4;
+	//The position and orientation of the robot's TCP.
+	Matrix4x4 tool_frame = 5;
+	//The robot's root frame.
+	Matrix4x4 root_frame = 6;
+	//The position and orientation of the flange of the robot.
+	Matrix4x4 flange_frame = 7;
+	//A list of one boolean value per axis, to visually alert to unreachable positions or collisions.
+	repeated bool axis_alarm = 8;
+	//A list of one boolean value per external axis, to visually alert to unreachable positions or collisions.
+	repeated bool external_axis_alarm = 9;
+	//The current variables used at all the robots connected to the server, structured as a dictionary where the key is the ID of the robot and the value a list of its variables.
+	map<string, VariableArray> variables = 10;
+	//A dictionary for additional data.
+	map<string, string> data = 11;
+	//Connection feedback
+	string connection_feedback = 12;
+}
+
+//A Task contains a list of TaskPayload objects containing grouped robot commands. The TaskType enum describes how the Task is to be processed.
+message Task{
+    //A list of TaskPayload objects containt the robot commands.
+    repeated TaskPayload payload = 1;
+    //The type of the task.
+    TaskType type = 2;
+    //An arbitrary name.
+    string name = 3;
+    //Additional data, if needed.
+    MetaData data = 4;
+}
+
+//The TaskPayload may contain either a Flow object - describing the dataflow of the program - , a MotionGroup with motion commands, or an Action object.
+message TaskPayload
+{
+    oneof payload {
+        //A FlowTask describes the data flow of the program.
+        Flow flow_task = 1;
+        //A MotionGroup contains a list of motion commands.
+        MotionGroup motion_group_task = 2;
+        //An Action object contains a single non-motion command.
+        Action action_task = 3;
+    }
+}
+
+//A Flow describes the data flow of a program. The FlowNode supports three types of flows: IfElse, While, and End.
+message Flow{
+	oneof flow_node {
+        //The IfElse object contains a condition, with one of two tasks to be executed based on the condition.
+        IfElse if_else_flow = 2;
+        //The While object contains a condition and a task to be executed while the condition is true.
+        While while_flow = 3;
+        //The End flow ends the program.
+        End end_flow = 4;
+    }
+}
+
+//The IfElse flow contains a condition, with one of two tasks to be executed based on the condition.
+message IfElse{
+    //The condition to be evaluated.
+    Variable condition = 1;
+    //The task to be executed if the condition is true.
+    Task if_true = 2;
+    //The task to be executed if the condition is false.
+    Task if_false = 3;
+}
+
+//The While flow contains a condition and a task to be executed while the condition is true.
+message While{
+    //The condition to be evaluated.
+    Variable condition = 1;
+    //The task to be executed while the condition is true.
+    Task body = 2;
+}
+
+//The End flow ends the program.
+message End{
+}
+
+//The MotionCommand can contain either an AxisMotion, CircularMotion, PTPMotion or LINMotion. Take care to use e.g. a LINMotion only within CP motion group.
+message MotionCommand{
+	oneof command {
+		//The AxisMotion describes a robot position through its joint values.
+        AxisMotion axis_motion = 1;
+		//The CircularMotion describes a circular motion through three coordinate systems.
+        CircularMotion circular_motion = 2;
+		//The PTPMotion describes a point-to-point motion through a Cartesian target.
+        PTPMotion ptp_motion = 3;
+		//The LINMotion describes a linear motion through a Cartesian target.
+        LINMotion lin_motion = 4;
+    }
+}
+
+//The MotionGroup groups several motion commands, which share a type (CP, PTP, Spline), a tool and a base.
+message MotionGroup{
+	//The MotionGroupType can bei either CP, PTP, or SPLINE
+    MotionGroupType motion_group_type = 1;
+	//The list of MotionCommands. Take care to use commands that can be used the with current MotionGroupType (e.g. no AxisMotion commands when MotionGroupType is set to CP).
+	repeated MotionCommand commands = 2;
+	//The selected interpolation is output in the code, but currently not simulated.
+	string interpolation = 3;
+	//The tool ID, referring the the tool dictionary as defined in the Robot object.
+	string tool_id = 4;
+	//The base values to be used with the current motion group.
+	Base robot_base = 5;
+	//Additional data.
+	MetaData data = 6;
+}
+
+//The AxisMotion describes a robot position through its joint values.
+message AxisMotion{
+	//Additional data.
+	MetaData data = 1;
+	//The target described through joint values.
+	JointTarget target = 2;
+}
+//The CircularMotion describes a circular motion through three Cartsian positions.
+message CircularMotion{
+	//Additional data.	
+	MetaData data = 1;
+	//The circular motion described through three Cartesian positions.
+	repeated CartesianTarget targets = 2;
+}
+
+//The LINMotion describes a linear motion through a Cartesian target.
+message LINMotion{
+	//Additional data.
+	MetaData data = 1;
+	//The target described through Cartesian values.
+	CartesianTarget target = 2;
+}
+
+//The PTPMotion describes a point-to-point motion through a Cartesian target.
+message PTPMotion{
+	//Additional data.
+	MetaData data = 1;
+	//The target described through Cartesian values.
+	CartesianTarget target = 2;
+}
+
+//Matrix4x4 is to be used similar to System.Numerics.Matrix4x4
+message Matrix4x4 {
+  	float m11 = 1;
+	float m12 = 2;
+	float m13 = 3;
+	float m14 = 4;
+	float m21 = 5;
+	float m22 = 6;
+	float m23 = 7;
+	float m24 = 8;
+	float m31 = 9;
+	float m32 = 10;
+	float m33 = 11;
+	float m34 = 12;
+	float m41 = 13;
+	float m42 = 14;
+	float m43 = 15;
+	float m44 = 16;
+}
+
+//CartesianPosition uses one of three definitions to define a Cartesian position, either as a matrix, through Euler values, or a coordinate system.
+message CartesianPosition{
+    //The frame, defined either as matrix, Euler values, or coordinate system.
+    oneof frame {
+        Matrix4x4 matrix = 1;
+        Euler euler = 2;
+        CoordinateSystem cs = 3;
+    }
+    //The CartesianReference enum describes if the current frame is absolute, relative, or linked to a parent.
+    CartesianReference reference = 4;
+    //A parent matrix can be provided.
+    Matrix4x4 parent = 5;
+}
+
+//CartesianTarget contains the position defined as a CartesianPosition and addds information relating to the posture, speed, acceleration of the robot, as well as of its external axes.
+message CartesianTarget{
+    //The CartesianPosition of the target.
+    CartesianPosition position = 1;
+    //The posture of the robot.
+    string posture = 2;
+    //The speed of the robot, either one value per axis or a single value for all.
+    repeated float speed = 3;
+    //The acceleration of the robot, either one value per axis or a single value for all.
+    repeated float acceleration = 4;
+    //The position of any external axes of the robot.
+    repeated float external_axis_values = 5;
+}
+
+//JointTarget contains the target position of the robot in joint space, as well as the speed and acceleration of the robot.
+message JointTarget{
+    //The target position of the robot in joint space.
+    repeated float axis_values = 1;
+    //The speed of the robot, either one value per axis or a single value for all.
+    repeated float speed = 2;
+    //The acceleration of the robot, either one value per axis or a single value for all.
+    repeated float acceleration = 3;
+    //The position of any external axes of the robot.
+    repeated float external_axis_values = 4;
+}
+
+//A vector, similar to System.Numerics.Vector3
+message Vector3 {
+    //The X component of the vector.
+  	float x = 1;
+    //The Y component of the vector.
+	float y = 2;
+	//The Z component of the vector.
+    float z = 3;
+}
+
+//Int4 describes four integers, such as the indices of the corners of a mesh face.
+message Int4 {
+    //The first integer.
+	int32 x = 1;
+	//The second integer.
+	int32 y = 2;
+	//The third integer.
+	int32 z = 3;
+	//The fourth integer.
+	int32 w = 4;
+}
+
+//The Euler angles, describing a Cartesian position.
+message Euler {
+    //The X component of the Euler angles.
+	float x = 1;
+    //The Y component of the Euler angles.
+	float y = 2;
+    //The Z component of the Euler angles.
+	float z = 3;
+    //The A rotation component of the Euler angles.
+	float a = 4;
+    //The B rotation component of the Euler angles.
+	float b = 5;
+    //The C rotation component of the Euler angles.
+	float c = 6;
+}
+
+//The CoordinateSystem is defined through three vectors, the origin, the X axis, and the Y axis.
+message CoordinateSystem {
+    //The origin of the coordinate system.
+	Vector3 origin = 1;
+    //The X axis of the coordinate system.
+	Vector3 x_axis = 2;
+    //The Y axis of the coordinate system.
+    Vector3 y_axis = 3;
+}
+
+//The Variable can contain a bool, float, or integer value, along with a name as string.
+message Variable{
+    //The value of the variable, either a bool, float, or integer.
+	oneof variable_value {
+        bool boolean = 1;
+        float single = 2;
+        int32 integer = 3;
+        string text = 4;
+    }
+    //The name of the variable.
+    string name = 5;
+}
+
+//The Heartbeat is used internally.
+message Heartbeat {
+    int32 beat = 1;
+}
+
+//The driver-related settings, serialized as a dictionary.
+message Settings {
+    //Robot settings serialized as a dictionary.
+    map<string, string> settings_dictionary = 1;
+}
+
+//The Mesh describes a geometrical object through its vertices and how they are connected, with a single mesh color.
+message Mesh {
+    //The indices of the vertices in the Vertices field in order to define a mesh face.
+	repeated Int4 faces = 1;
+    //The vertices of the mesh.
+	repeated Vector3 vertices = 2;
+    //The normal vectors of the mesh.
+    repeated Vector3 normals = 3;
+    //The color of the mesh.
+    Int4 mesh_color = 4;
+}
+
+//The PolyMesh contains multiple meshes, a collision convex hull, a transform, and a name. A single robotic joint can be described as a PolyMesh, consisting of several meshes with different colors.
+message PolyMesh{
+    //The meshes making up the PolyMesh.
+	repeated Mesh meshes = 1;
+    //A convex hull to be used for collision checking. May contain a different number of meshes compared to the Meshes object.
+    repeated Mesh collision_convex_hull = 2;
+	//The transformation of the PolyMesh. To be applied in relation to WorldXY - right-handed coordinate system with Z+ = up.
+    Matrix4x4 transform = 3;
+    //The name of the PolyMesh.
+    string name = 4;
+}
+
+//The TransformationArray contains a list of transformation matrices. To be used e.g. for providing feedback on the transformations of external axes.
+message TransformationArray{
+	//The transformation matrix of the object.
+	repeated Matrix4x4 transformation = 1;
+}
+
+//The VariableArray contains a list of variables, that are currently active at the robot.
+message VariableArray{
+    //The variables of the robot.
+    repeated Variable variables = 1;
+}
+
+//Additional data
+message MetaData{
+    //The ID of the parent object.
+	string id = 1;
+    //Additional data serialized as a dictionary.
+	map<string, string> data = 2;
+}
+
+//Describes the type of joint.
+enum ExternalAxisType
+    {
+        LINEAR_RAIL = 0;
+        //Two linear rails.
+        LINEAR_DOUBLE = 1;
+        //Three-axis linear positioning system.
+        LINEAR_TRIPLE = 2;
+        //A single rotary joint.
+        ROTARY_SINGLE = 3;
+        //Two rotary joints.
+        ROTARY_DOUBLE = 4;
+        //An AGV, moving the robot around.
+        AGV = 5;
+    }
+
+//The CartesianReference enum describes if the current frame is absolute, relative, or linked to a parent.
+enum CartesianReference
+    {
+        ABSOLUTE = 0;
+        RELATIVE = 1;
+        PARENT = 2;
+    }
+
+//The type of the frame.
+enum FrameType
+    {
+        FIXED = 0;
+        EXTERNAL = 1;
+    }
+
+//The name of each axis, if they are not in order.
+enum AxisName
+    {
+        A1 = 0;
+        A2 = 1;
+        A3 = 2;
+        A4 = 3;
+        A5 = 4;
+        A6 = 5;
+        A7 = 6;
+        E1 = 7;
+        E2 = 8;
+        E3 = 9;
+        E4 = 10;
+    }
+
+//TaskType defines how new data sent to the robot should be processed.
+enum TaskType
+    {
+        //Simulates the task.
+        SIMULATE_TASK = 0;
+        //Executes a task directy.
+        EXECUTE_TASK = 1;
+        //Executes a task after a successful simulation.
+        EXECUTE_ON_SIMULATION_SUCCESS_TASK = 2;
+        //Executes a task no matter the result of the simulation.
+        SIMULATE_AND_EXECUTE_TASK = 3;
+        //Groups several commands
+        CONTAINER = 4;
+    }
+
+//The MotionGroupType can bei either CP, PTP, or SPLINE
+enum MotionGroupType
+    {
+        //Continuous path motion refers, e.g., to linear motions.
+        CP = 0;
+        //Point-to-point motion provide a fast and efficient way to get from this position to another,.
+        PTP = 1;
+        //Spline motion is used for smooth transitions between points.
+        SPLINE = 2;
+    }
+//SubscribeRobotFeedbackRequest subscribes to feedback of the robot with the provided ID.
+message SubscribeRobotFeedbackRequest{
+	//The unique ID of the robot.
+	string id = 1;
+}
+
+
+//The RobotFeedback returns feedback from the robot.
+message RobotFeedback{
+	//Connection feedback.
+	string status = 1;
+	//Feedback data.
+	oneof data_package {
+		//The heartbeat message is sent by the robot to indicate that it is still alive.
+        Heartbeat heartbeat_data = 2;
+		//The robot state message contains the current state of the robot.
+        RobotState robot_state_data = 3;
+		//The current settings of the robot.
+		Settings settings_data = 4;
+		//The ping message pings the controller.
+		Ping ping_data = 5;
+    }
+}
+
+//GetSimulatedRobotStateRequest is used to manually request the robot's state. Feedback can be provided either by the response or written to the feedback stream.
+message GetSimulatedRobotStateRequest{
+	//The unique ID of the robot.
+	string id = 1;
+	//The simulation state as defined by a float between 0.0 and 1.0.
+	float normalized_state = 2;
+	//If TRUE, the response will be written to the feedback stream instead and not returned by the call.
+	bool stream_update = 3;
+}
+
+//AddRobotTaskRequest adds a new task to the robot. Depending on the driver, the task may replace the previous task or be queued.
+message AddRobotTaskRequest{
+	//The unique ID of the robot.
+	string id = 1; 
+	//The task to be added.
+	Task robot_task = 2;
+	//The settings for the robot.
+	Settings robot_settings = 3;
+}
+
+//AddRobotTaskReply returns the simulation of the provided task.
+message AddRobotTaskReply{
+	//Task processing feedback.
+	string status = 1;
+	//The simulation result of the task.
+	SimulationResult simulation_result_data = 2;
+}
+
+//UpdateVariableRequest sets a variable on the robot.
+message UpdateVariableRequest{
+	//The unique ID of the robot.
+	string id = 1; 
+	//The variable to be set. May be omitted.
+	Variable var = 2;
+}
+
+//UpdateVariableReply returns the variables of all connected robots.
+message UpdateVariableReply{
+	//An array of the IDs of the connected robots, with the order matching the order of the VariableArray.
+	repeated string id = 1;
+	//An array of variables, with the order relating to the array of IDs.
+	repeated VariableArray variables = 2; 
+}
+
+//SetupRobotRequest sets up a new simulation environment.
+message SetupRobotRequest{
+	//ClientId sets the unique identifier of the robot, to be used in all following requests..
+	string client_id = 1;
+	//SoftwareVersion optionally provides the version of the client library.
+	string software_version = 2;
+	//Robot defines the robot and its environment.
+	Robot robot_setup = 3;
+}
+
+//SetupRobotReply confirms that the robot environment has been set up.
+message SetupRobotReply{
+	//Robot setup feedback.
+	string status = 1;
+	//The unique ID of the robot.
+	string id = 2;
+	//The license state of PRC.
+	string license_state = 3;
+	//The current settings of the robot environment, to be used/modified in AddRobotTaskRequest.
+	Settings robot_settings = 4;
+}
+
+//Robot defines the robot itself, along with its drivers and other data.
+message Robot{
+	//The RobotData field is a oneof field, meaning that only one of its fields can be set at a time.
+	//This is used to define the robot as either a preset robot or a custom robot.
+	oneof robot_data {
+		//The PresetRobotClass refers to the PRC.Library.Robots namespace.
+        string preset_robot_class = 1;
+		//The CustomRobot defines a custom robot model.
+        CustomRobot custom_robot = 2;
+    }
+	//The RobotDriverClass refers to the PRC.Library.Drivers namespace, e.g. PRC.Library.Drivers.KUKA.KSS_KRL.
+	string robot_driver_class = 3;
+	//A unique ID of the robot setup.
+	string friendly_id = 4;
+	//The tool dictionary must contain the data for each tool that is referred to in a motion group.
+	map<string, Tool> tool_dictionary = 5;
+	//The initial base to be used with the robot.
+	Base initial_base = 6;
+	//Optional collision geometry, evaluated if collision checking is enabled.
+	repeated PolyMesh collision_geometry = 7;
+	//The external axes of the robot.
+	repeated ExternalAxis external_axes = 8;
+	//Additional data.
+	MetaData data = 9;
+}
+
+//Tool describes a robotic tool.
+message Tool {
+	//The ToolType sets whether the tool is fixed or external.
+	FrameType tool_type = 1;
+	//The TCP is the tool center point, i.e. the tip of the current tool.
+	CartesianPosition tcp = 2;
+	//ToolId sets the id of the tool.
+	string tool_id = 3;
+	//ToolState can be used to switch between different tool states.
+	int32 tool_state = 4;
+	//ToolGeometry is the geometry of the mesh, represented through several convex mesh hulls.
+	PolyMesh tool_geometry = 5;
+}
+
+//Base describes the robot's local coordinate system.
+message Base {
+	//The BaseType sets whether the base is fixed or external.
+	FrameType base_type = 1;
+	//The base frame is the local coordinate system of the base.
+	CartesianPosition base_frame = 2;
+	//BaseIndex sets the name of the base.
+	string base_id = 3;
+}
+
+//CustomRobot defines a custom robot model.
+message CustomRobot {
+	//The center of each axis of the robot.
+	repeated Vector3 axis_center = 1;
+	//The rotary axis of each axis of the robot.
+	repeated Vector3 axis_direction = 2;
+	//The speed of each axis of the robot.
+	repeated float axis_speed = 3;
+	//The minimum range of each axis of the robot.
+	repeated float axis_range_min = 4;
+	//The maximum range of each axis of the robot.
+	repeated float axis_range_max = 5;
+	//The name of the robot.
+	string name = 6;
+	//The short name of the robot.
+	string short_name = 7;
+	//The geometry of the robot, with each PolyMesh representing one joint.
+	repeated PolyMesh geometry = 8;
+	//The root coordinate system of the robot.
+	Matrix4x4 root_cs = 9;
+	//The flange coordinate system of the robot.
+	Matrix4x4 flange_cs = 10;
+}
+
+//ExternalAxis describes an external axis of the robot.
+message ExternalAxis{
+	//Type of external axis.
+	ExternalAxisType external_axis_type = 1;
+	//Name of the external axis.
+	string name = 2;
+	//The short name of the external axis.
+	string short_name = 3;
+	//The minimum range of the external axis.
+	repeated float range_min = 4;
+	//The maximum range of the external axis.
+	repeated float range_max = 5;
+	//The speed of the external axis.
+	repeated float speed = 6;
+	//The position(s) and orientation(s) of each external axis. Z+ is used as the rotary axis/linear rail direction.
+	repeated Matrix4x4 orientation = 7;
+	//The position of the axis in relation to the robot, in particular for rotary axes.
+	CartesianPosition position = 8;
+	//The geometry of the external axis.
+	repeated PolyMesh geometry = 9;
+	//Additional data.
+	MetaData data = 10;
+}
+
