@@ -158,6 +158,6 @@ export async function updateRobotSimulation(simSlider) {
 
 	if (robotStateResponse != null && robotStateResponse.getRobotTransformationsList() != null && robotStateResponse.getRobotTransformationsList()[0] != null) {
 
-		await updateRobot(robotStateResponse.getRobotTransformationsList()[0].getTransformationList(), robotStateResponse.getActualAxisPosition().getAxisValuesList().toString());
+		await updateRobot(robotStateResponse.getRobotTransformationsList()[0].getTransformationList(), robotStateResponse.getAxisPosition().getAxisValuesList().toString());
 	}
 }
