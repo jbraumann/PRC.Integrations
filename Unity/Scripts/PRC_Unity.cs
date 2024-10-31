@@ -28,14 +28,14 @@ public class PRC_Unity : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (client.state != null && client.state.ActualAxisPosition != null)
+        if (client.state != null && client.state.AxisPosition != null)
         {
-            Text.text = "A01: " + client.state.ActualAxisPosition.AxisValues[0] + Environment.NewLine
-                + "A02: " + client.state.ActualAxisPosition.AxisValues[1] + Environment.NewLine
-                + "A03: " + client.state.ActualAxisPosition.AxisValues[2] + Environment.NewLine
-                + "A04: " + client.state.ActualAxisPosition.AxisValues[3] + Environment.NewLine
-                + "A05: " + client.state.ActualAxisPosition.AxisValues[4] + Environment.NewLine
-                + "A06: " + client.state.ActualAxisPosition.AxisValues[5] + Environment.NewLine;
+            Text.text = "A1: " + Math.Round(client.state.AxisPosition.AxisValues[0], 1) + Environment.NewLine +
+                                                "A2: " + Math.Round(client.state.AxisPosition.AxisValues[1], 1) + Environment.NewLine +
+                                                "A3: " + Math.Round(client.state.AxisPosition.AxisValues[2], 1) + Environment.NewLine +
+                                                "A4: " + Math.Round(client.state.AxisPosition.AxisValues[3], 1) + Environment.NewLine +
+                                                "A5: " + Math.Round(client.state.AxisPosition.AxisValues[4], 1) + Environment.NewLine +
+                                                "A6: " + Math.Round(client.state.AxisPosition.AxisValues[5], 1);
 
             List<UnityEngine.Matrix4x4> unityMatrices = new List<UnityEngine.Matrix4x4>();
             List<UnityEngine.Vector3> translations = new List<UnityEngine.Vector3>();

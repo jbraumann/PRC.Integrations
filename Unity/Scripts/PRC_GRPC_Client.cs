@@ -24,7 +24,7 @@ public class PRC_GRPC_Client
         Thread.CurrentThread.CurrentCulture = ci;
         Thread.CurrentThread.CurrentUICulture = ci;
 
-        string ip = "https://localhost:5001";
+        string ip = "https://127.0.0.1:5001";
 
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         AsyncServerStreamingCall<RobotFeedback> dataStreamingCall;
@@ -154,8 +154,15 @@ yu8bjTT/AtFEbHMv7oIOQg==
                             case RobotFeedback.DataPackageOneofCase.RobotStateData:
                                 //new robot state event
                                 state = response.RobotStateData;
-                                string actPos = "A1: " + response.RobotStateData.ActualAxisPosition.AxisValues[0] + ", A2: " + response.RobotStateData.ActualAxisPosition.AxisValues[1] + ", A3: " + response.RobotStateData.ActualAxisPosition.AxisValues[2] + ", A4: " + response.RobotStateData.ActualAxisPosition.AxisValues[3] + ", A5: " + response.RobotStateData.ActualAxisPosition.AxisValues[4] + ", A6: " + response.RobotStateData.ActualAxisPosition.AxisValues[5];
-                                Console.WriteLine("Robot is at: " + actPos);
+
+                                string actPos = "A1: " + Math.Round(response.RobotStateData.AxisPosition.AxisValues[0], 1) + Environment.NewLine +
+                                                "A2: " + Math.Round(response.RobotStateData.AxisPosition.AxisValues[1], 1) + Environment.NewLine +
+                                                "A3: " + Math.Round(response.RobotStateData.AxisPosition.AxisValues[2], 1) + Environment.NewLine +
+                                                "A4: " + Math.Round(response.RobotStateData.AxisPosition.AxisValues[3], 1) + Environment.NewLine +
+                                                "A5: " + Math.Round(response.RobotStateData.AxisPosition.AxisValues[4], 1) + Environment.NewLine +
+                                                "A6: " + Math.Round(response.RobotStateData.AxisPosition.AxisValues[5], 1);
+
+                                Console.WriteLine("Robot is at: " + Environment.NewLine + actPos);
                                 break;
                             case RobotFeedback.DataPackageOneofCase.SettingsData:
                                 //Settings updated event
