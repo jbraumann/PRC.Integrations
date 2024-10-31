@@ -124,7 +124,7 @@ namespace PRC.Integration
                                     break;
                                 case RobotFeedback.DataPackageOneofCase.RobotStateData:
                                     //new robot state event
-                                    string actPos = "A1: " + response.RobotStateData.ActualAxisPosition.AxisValues[0] + ", A2: " + response.RobotStateData.ActualAxisPosition.AxisValues[1] + ", A3: " + response.RobotStateData.ActualAxisPosition.AxisValues[2] + ", A4: " + response.RobotStateData.ActualAxisPosition.AxisValues[3] + ", A5: " + response.RobotStateData.ActualAxisPosition.AxisValues[4] + ", A6: " + response.RobotStateData.ActualAxisPosition.AxisValues[5];
+                                    string actPos = "A1: " + response.RobotStateData.AxisPosition.AxisValues[0] + ", A2: " + response.RobotStateData.AxisPosition.AxisValues[1] + ", A3: " + response.RobotStateData.AxisPosition.AxisValues[2] + ", A4: " + response.RobotStateData.AxisPosition.AxisValues[3] + ", A5: " + response.RobotStateData.AxisPosition.AxisValues[4] + ", A6: " + response.RobotStateData.AxisPosition.AxisValues[5];
                                     Console.WriteLine("Robot is at: " + actPos);
                                     break;
                                 case RobotFeedback.DataPackageOneofCase.SettingsData:

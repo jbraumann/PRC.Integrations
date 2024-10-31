@@ -107,9 +107,9 @@ namespace PRC.Integration
             if (e.RobotState != null)
             {
                 string actualAxisPosition = "";
-                for (int i = 0; i < e.RobotState.ActualAxisPosition.AxisValues.Length; i++)
+                for (int i = 0; i < e.RobotState.AxisPosition.AxisValues.Length; i++)
                 {
-                    actualAxisPosition += "A" + (i + 1).ToString() + ": " + e.RobotState.ActualAxisPosition.AxisValues[i].ToString() + " ";
+                    actualAxisPosition += "A" + (i + 1).ToString() + ": " + e.RobotState.AxisPosition.AxisValues[i].ToString() + " ";
                 }
                 Console.WriteLine("At simulation state " + e.RobotState.NormalizedToolpathFactor + " the actual axis position is: " + actualAxisPosition);
             }
