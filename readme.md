@@ -12,7 +12,7 @@ Currently, you can find code samples to integrate Parametric Robot Control into 
 - C# (both direct implementation and using our wrapper library)
 - Python (also used in Blender)
 
-These integrations provide a starting point for developers but do not constitute a full plugin, accessible to end-users, as we provide in Grasshopper. For any questions, please use the "Discussions" tab above.
+These integrations provide a starting point for developers but do not constitute a full plugin, accessible to end-users, as we provide in Grasshopper. For any questions, please use the ["Discussions"](https://github.com/jbraumann/PRC.Integrations/discussions) tab above.
 
 # Caution!
 
