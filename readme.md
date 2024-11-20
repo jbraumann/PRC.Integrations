@@ -1,5 +1,7 @@
 # Parametric Robot Control
 
+![Parametric Robot Control]([http://url/to/img.png](https://raw.githubusercontent.com/jbraumann/PRC.Integrations/refs/heads/main/prc_logo.webp))
+
 Parametric Robot Control uses [gRPC](https://grpc.io/) to establish a communication between the client software (e.g. Grasshopper) and the server, where the robot is simulated, real-time control is established etc.
 The communication is based on *.proto files, which can be translated into various programming languages. Please refer to our (beta) [documentation](https://parametricrobotcontrol.notion.site/) for more details.
 
