@@ -15,10 +15,13 @@ def run():
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
     with open(os.path.join(__location__, 'PRCServerCertificate.pem'), 'rb') as f:
         credentials = grpc.ssl_channel_credentials(f.read())
-
+    options=[
+        ('grpc.max_send_message_length', -1),
+        ('grpc.max_receive_message_length', -1),
+    ]
     print("Connecting to https://127.0.0.1:5001...")
 
-    with grpc.secure_channel("127.0.0.1:5001", credentials) as channel:
+    with grpc.secure_channel("127.0.0.1:5001", credentials, options, grpc._compression.Gzip) as channel:
         stub = prc_pb2_grpc.ParametricRobotControlServiceStub(channel)
         response = stub.SendPing(prc_pb2.Ping(payload="", time_ms=10))
         print("Successfully sent ping")
