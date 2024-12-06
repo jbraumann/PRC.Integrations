@@ -11,6 +11,7 @@ Currently, you can find code samples to integrate Parametric Robot Control into 
 - Unity (Game engine, using C#)
 - Blender (3D modeling, using Python)
 - Javascript (does not require node.js)
+- Adobe Illustrator (graphic design, builds upon Javascript)
 - C# (both direct implementation and using our wrapper library)
 - Python (also used in Blender)
 
