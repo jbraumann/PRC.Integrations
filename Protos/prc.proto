@@ -96,6 +96,8 @@ message SimulationResultUnit{
 	float interpolation_factor = 9;
 	//The Id is used to match the SimulationResultUnit with the initial simulation input.
 	string id = 10;
+	 //Alarm sums up the collision and out of reach values in a single Boolean
+	bool alarm = 11;
 }
 
 //RobotState is used the visualize the current or simulated state of the robot.
