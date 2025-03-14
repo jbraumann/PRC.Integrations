@@ -240,6 +240,9 @@ export class SimulationResultUnit extends jspb.Message {
   getId(): string;
   setId(value: string): SimulationResultUnit;
 
+  getAlarm(): boolean;
+  setAlarm(value: boolean): SimulationResultUnit;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SimulationResultUnit.AsObject;
   static toObject(includeInstance: boolean, msg: SimulationResultUnit): SimulationResultUnit.AsObject;
@@ -260,6 +263,7 @@ export namespace SimulationResultUnit {
     externalAxisOutofreachList: Array<boolean>,
     interpolationFactor: number,
     id: string,
+    alarm: boolean,
   }
 }
 
@@ -841,6 +845,9 @@ export class CartesianPosition extends jspb.Message {
   hasParent(): boolean;
   clearParent(): CartesianPosition;
 
+  getId(): string;
+  setId(value: string): CartesianPosition;
+
   getFrameCase(): CartesianPosition.FrameCase;
 
   serializeBinary(): Uint8Array;
@@ -858,6 +865,7 @@ export namespace CartesianPosition {
     cs?: CoordinateSystem.AsObject,
     reference: CartesianReference,
     parent?: Matrix4x4.AsObject,
+    id: string,
   }
 
   export enum FrameCase { 
@@ -892,6 +900,9 @@ export class CartesianTarget extends jspb.Message {
   clearExternalAxisValuesList(): CartesianTarget;
   addExternalAxisValues(value: number, index?: number): CartesianTarget;
 
+  getRedundancy(): number;
+  setRedundancy(value: number): CartesianTarget;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): CartesianTarget.AsObject;
   static toObject(includeInstance: boolean, msg: CartesianTarget): CartesianTarget.AsObject;
@@ -907,6 +918,7 @@ export namespace CartesianTarget {
     speedList: Array<number>,
     accelerationList: Array<number>,
     externalAxisValuesList: Array<number>,
+    redundancy: number,
   }
 }
 
@@ -1023,6 +1035,9 @@ export class Euler extends jspb.Message {
   getC(): number;
   setC(value: number): Euler;
 
+  getFormat(): EulerFormat;
+  setFormat(value: EulerFormat): Euler;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Euler.AsObject;
   static toObject(includeInstance: boolean, msg: Euler): Euler.AsObject;
@@ -1039,6 +1054,7 @@ export namespace Euler {
     a: number,
     b: number,
     c: number,
+    format: EulerFormat,
   }
 }
 
@@ -1838,6 +1854,11 @@ export enum CartesianReference {
 export enum FrameType { 
   FIXED = 0,
   EXTERNAL = 1,
+}
+export enum EulerFormat { 
+  ZYX = 0,
+  AXISANGLE = 1,
+  RPY = 2,
 }
 export enum AxisName { 
   A1 = 0,

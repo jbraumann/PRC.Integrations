@@ -2,15 +2,24 @@
 /**
  * @fileoverview
  * @enhanceable
+ * @suppress {missingRequire} reports error on implicit type usages.
  * @suppress {messageConventions} JS Compiler reports an error if a variable or
  *     field starts with 'MSG_' and isn't a translatable message.
  * @public
  */
 // GENERATED CODE -- DO NOT EDIT!
+/* eslint-disable */
+// @ts-nocheck
 
 var jspb = require('google-protobuf');
 var goog = jspb;
-var global = Function('return this')();
+var global =
+    (typeof globalThis !== 'undefined' && globalThis) ||
+    (typeof window !== 'undefined' && window) ||
+    (typeof global !== 'undefined' && global) ||
+    (typeof self !== 'undefined' && self) ||
+    (function () { return this; }).call(null) ||
+    Function('return this')();
 
 goog.exportSymbol('proto.Action', null, global);
 goog.exportSymbol('proto.Action.ActionNodeCase', null, global);
@@ -28,6 +37,7 @@ goog.exportSymbol('proto.CoordinateSystem', null, global);
 goog.exportSymbol('proto.CustomRobot', null, global);
 goog.exportSymbol('proto.End', null, global);
 goog.exportSymbol('proto.Euler', null, global);
+goog.exportSymbol('proto.EulerFormat', null, global);
 goog.exportSymbol('proto.ExternalAxis', null, global);
 goog.exportSymbol('proto.ExternalAxisType', null, global);
 goog.exportSymbol('proto.Flow', null, global);
@@ -1210,11 +1220,11 @@ proto.Action.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Action.toObject = function(includeInstance, msg) {
   var f, obj = {
-    setVariableAction: (f = msg.getSetVariableAction()) && proto.SetVariable.toObject(includeInstance, f),
-    waitForVariableAction: (f = msg.getWaitForVariableAction()) && proto.WaitForVariable.toObject(includeInstance, f),
-    holdAction: (f = msg.getHoldAction()) && proto.Hold.toObject(includeInstance, f),
-    pingAction: (f = msg.getPingAction()) && proto.Ping.toObject(includeInstance, f),
-    insertCodeAction: (f = msg.getInsertCodeAction()) && proto.InsertCode.toObject(includeInstance, f)
+setVariableAction: (f = msg.getSetVariableAction()) && proto.SetVariable.toObject(includeInstance, f),
+waitForVariableAction: (f = msg.getWaitForVariableAction()) && proto.WaitForVariable.toObject(includeInstance, f),
+holdAction: (f = msg.getHoldAction()) && proto.Hold.toObject(includeInstance, f),
+pingAction: (f = msg.getPingAction()) && proto.Ping.toObject(includeInstance, f),
+insertCodeAction: (f = msg.getInsertCodeAction()) && proto.InsertCode.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1565,7 +1575,7 @@ proto.SetVariable.prototype.toObject = function(opt_includeInstance) {
  */
 proto.SetVariable.toObject = function(includeInstance, msg) {
   var f, obj = {
-    newState: (f = msg.getNewState()) && proto.Variable.toObject(includeInstance, f)
+newState: (f = msg.getNewState()) && proto.Variable.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1716,7 +1726,7 @@ proto.WaitForVariable.prototype.toObject = function(opt_includeInstance) {
  */
 proto.WaitForVariable.toObject = function(includeInstance, msg) {
   var f, obj = {
-    awaitState: (f = msg.getAwaitState()) && proto.Variable.toObject(includeInstance, f)
+awaitState: (f = msg.getAwaitState()) && proto.Variable.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1867,7 +1877,7 @@ proto.Hold.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Hold.toObject = function(includeInstance, msg) {
   var f, obj = {
-    holdMs: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0)
+holdMs: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0)
   };
 
   if (includeInstance) {
@@ -1997,8 +2007,8 @@ proto.Ping.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Ping.toObject = function(includeInstance, msg) {
   var f, obj = {
-    payload: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    timeMs: jspb.Message.getFieldWithDefault(msg, 2, 0)
+payload: jspb.Message.getFieldWithDefault(msg, 1, ""),
+timeMs: jspb.Message.getFieldWithDefault(msg, 2, 0)
   };
 
   if (includeInstance) {
@@ -2164,7 +2174,7 @@ proto.InsertCode.prototype.toObject = function(opt_includeInstance) {
  */
 proto.InsertCode.toObject = function(includeInstance, msg) {
   var f, obj = {
-    codeList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f
+codeList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f
   };
 
   if (includeInstance) {
@@ -2320,12 +2330,12 @@ proto.SimulationResult.prototype.toObject = function(opt_includeInstance) {
  */
 proto.SimulationResult.toObject = function(includeInstance, msg) {
   var f, obj = {
-    simulationResultsList: jspb.Message.toObjectList(msg.getSimulationResultsList(),
+simulationResultsList: jspb.Message.toObjectList(msg.getSimulationResultsList(),
     proto.SimulationResultUnit.toObject, includeInstance),
-    isValid: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
-    time: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
-    code: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
+isValid: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
+time: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
+code: jspb.Message.getFieldWithDefault(msg, 4, ""),
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -2621,16 +2631,17 @@ proto.SimulationResultUnit.prototype.toObject = function(opt_includeInstance) {
  */
 proto.SimulationResultUnit.toObject = function(includeInstance, msg) {
   var f, obj = {
-    axisValuesList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 1)) == null ? undefined : f,
-    position: (f = msg.getPosition()) && proto.Matrix4x4.toObject(includeInstance, f),
-    time: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
-    collisionList: (f = jspb.Message.getRepeatedBooleanField(msg, 4)) == null ? undefined : f,
-    singularityList: (f = jspb.Message.getRepeatedBooleanField(msg, 5)) == null ? undefined : f,
-    outofreachList: (f = jspb.Message.getRepeatedBooleanField(msg, 6)) == null ? undefined : f,
-    externalAxisValuesList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 7)) == null ? undefined : f,
-    externalAxisOutofreachList: (f = jspb.Message.getRepeatedBooleanField(msg, 8)) == null ? undefined : f,
-    interpolationFactor: jspb.Message.getFloatingPointFieldWithDefault(msg, 9, 0.0),
-    id: jspb.Message.getFieldWithDefault(msg, 10, "")
+axisValuesList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 1)) == null ? undefined : f,
+position: (f = msg.getPosition()) && proto.Matrix4x4.toObject(includeInstance, f),
+time: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
+collisionList: (f = jspb.Message.getRepeatedBooleanField(msg, 4)) == null ? undefined : f,
+singularityList: (f = jspb.Message.getRepeatedBooleanField(msg, 5)) == null ? undefined : f,
+outofreachList: (f = jspb.Message.getRepeatedBooleanField(msg, 6)) == null ? undefined : f,
+externalAxisValuesList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 7)) == null ? undefined : f,
+externalAxisOutofreachList: (f = jspb.Message.getRepeatedBooleanField(msg, 8)) == null ? undefined : f,
+interpolationFactor: jspb.Message.getFloatingPointFieldWithDefault(msg, 9, 0.0),
+id: jspb.Message.getFieldWithDefault(msg, 10, ""),
+alarm: jspb.Message.getBooleanFieldWithDefault(msg, 11, false)
   };
 
   if (includeInstance) {
@@ -2668,8 +2679,10 @@ proto.SimulationResultUnit.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setAxisValuesList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addAxisValues(values[i]);
+      }
       break;
     case 2:
       var value = new proto.Matrix4x4;
@@ -2681,24 +2694,34 @@ proto.SimulationResultUnit.deserializeBinaryFromReader = function(msg, reader) {
       msg.setTime(value);
       break;
     case 4:
-      var value = /** @type {!Array<boolean>} */ (reader.readPackedBool());
-      msg.setCollisionList(value);
+      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addCollision(values[i]);
+      }
       break;
     case 5:
-      var value = /** @type {!Array<boolean>} */ (reader.readPackedBool());
-      msg.setSingularityList(value);
+      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addSingularity(values[i]);
+      }
       break;
     case 6:
-      var value = /** @type {!Array<boolean>} */ (reader.readPackedBool());
-      msg.setOutofreachList(value);
+      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addOutofreach(values[i]);
+      }
       break;
     case 7:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setExternalAxisValuesList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addExternalAxisValues(values[i]);
+      }
       break;
     case 8:
-      var value = /** @type {!Array<boolean>} */ (reader.readPackedBool());
-      msg.setExternalAxisOutofreachList(value);
+      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addExternalAxisOutofreach(values[i]);
+      }
       break;
     case 9:
       var value = /** @type {number} */ (reader.readFloat());
@@ -2707,6 +2730,10 @@ proto.SimulationResultUnit.deserializeBinaryFromReader = function(msg, reader) {
     case 10:
       var value = /** @type {string} */ (reader.readString());
       msg.setId(value);
+      break;
+    case 11:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setAlarm(value);
       break;
     default:
       reader.skipField();
@@ -2805,6 +2832,13 @@ proto.SimulationResultUnit.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writeString(
       10,
+      f
+    );
+  }
+  f = message.getAlarm();
+  if (f) {
+    writer.writeBool(
+      11,
       f
     );
   }
@@ -3124,6 +3158,24 @@ proto.SimulationResultUnit.prototype.setId = function(value) {
 };
 
 
+/**
+ * optional bool alarm = 11;
+ * @return {boolean}
+ */
+proto.SimulationResultUnit.prototype.getAlarm = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 11, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.SimulationResultUnit} returns this
+ */
+proto.SimulationResultUnit.prototype.setAlarm = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 11, value);
+};
+
+
 
 /**
  * List of repeated fields within this message type.
@@ -3163,23 +3215,23 @@ proto.RobotState.prototype.toObject = function(opt_includeInstance) {
  */
 proto.RobotState.toObject = function(includeInstance, msg) {
   var f, obj = {
-    axisPosition: (f = msg.getAxisPosition()) && proto.JointTarget.toObject(includeInstance, f),
-    robotTransformationsList: jspb.Message.toObjectList(msg.getRobotTransformationsList(),
+axisPosition: (f = msg.getAxisPosition()) && proto.JointTarget.toObject(includeInstance, f),
+robotTransformationsList: jspb.Message.toObjectList(msg.getRobotTransformationsList(),
     proto.TransformationArray.toObject, includeInstance),
-    toolpathIndex: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
-    toolId: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    toolFrame: (f = msg.getToolFrame()) && proto.Matrix4x4.toObject(includeInstance, f),
-    rootFrame: (f = msg.getRootFrame()) && proto.Matrix4x4.toObject(includeInstance, f),
-    flangeFrame: (f = msg.getFlangeFrame()) && proto.Matrix4x4.toObject(includeInstance, f),
-    axisAlarmList: (f = jspb.Message.getRepeatedBooleanField(msg, 8)) == null ? undefined : f,
-    externalAxisAlarmList: (f = jspb.Message.getRepeatedBooleanField(msg, 9)) == null ? undefined : f,
-    variablesMap: (f = msg.getVariablesMap()) ? f.toObject(includeInstance, proto.VariableArray.toObject) : [],
-    dataMap: (f = msg.getDataMap()) ? f.toObject(includeInstance, undefined) : [],
-    connectionFeedback: jspb.Message.getFieldWithDefault(msg, 12, ""),
-    taskId: jspb.Message.getFieldWithDefault(msg, 13, ""),
-    commandId: jspb.Message.getFieldWithDefault(msg, 14, ""),
-    robotId: jspb.Message.getFieldWithDefault(msg, 15, ""),
-    status: jspb.Message.getFieldWithDefault(msg, 16, 0)
+toolpathIndex: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
+toolId: jspb.Message.getFieldWithDefault(msg, 4, ""),
+toolFrame: (f = msg.getToolFrame()) && proto.Matrix4x4.toObject(includeInstance, f),
+rootFrame: (f = msg.getRootFrame()) && proto.Matrix4x4.toObject(includeInstance, f),
+flangeFrame: (f = msg.getFlangeFrame()) && proto.Matrix4x4.toObject(includeInstance, f),
+axisAlarmList: (f = jspb.Message.getRepeatedBooleanField(msg, 8)) == null ? undefined : f,
+externalAxisAlarmList: (f = jspb.Message.getRepeatedBooleanField(msg, 9)) == null ? undefined : f,
+variablesMap: (f = msg.getVariablesMap()) ? f.toObject(includeInstance, proto.VariableArray.toObject) : [],
+dataMap: (f = msg.getDataMap()) ? f.toObject(includeInstance, undefined) : [],
+connectionFeedback: jspb.Message.getFieldWithDefault(msg, 12, ""),
+taskId: jspb.Message.getFieldWithDefault(msg, 13, ""),
+commandId: jspb.Message.getFieldWithDefault(msg, 14, ""),
+robotId: jspb.Message.getFieldWithDefault(msg, 15, ""),
+status: jspb.Message.getFieldWithDefault(msg, 16, 0)
   };
 
   if (includeInstance) {
@@ -3250,12 +3302,16 @@ proto.RobotState.deserializeBinaryFromReader = function(msg, reader) {
       msg.setFlangeFrame(value);
       break;
     case 8:
-      var value = /** @type {!Array<boolean>} */ (reader.readPackedBool());
-      msg.setAxisAlarmList(value);
+      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addAxisAlarm(values[i]);
+      }
       break;
     case 9:
-      var value = /** @type {!Array<boolean>} */ (reader.readPackedBool());
-      msg.setExternalAxisAlarmList(value);
+      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addExternalAxisAlarm(values[i]);
+      }
       break;
     case 10:
       var value = msg.getVariablesMap();
@@ -3747,7 +3803,8 @@ proto.RobotState.prototype.getVariablesMap = function(opt_noLazyCreate) {
  */
 proto.RobotState.prototype.clearVariablesMap = function() {
   this.getVariablesMap().clear();
-  return this;};
+  return this;
+};
 
 
 /**
@@ -3769,7 +3826,8 @@ proto.RobotState.prototype.getDataMap = function(opt_noLazyCreate) {
  */
 proto.RobotState.prototype.clearDataMap = function() {
   this.getDataMap().clear();
-  return this;};
+  return this;
+};
 
 
 /**
@@ -3901,11 +3959,11 @@ proto.Task.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Task.toObject = function(includeInstance, msg) {
   var f, obj = {
-    payloadList: jspb.Message.toObjectList(msg.getPayloadList(),
+payloadList: jspb.Message.toObjectList(msg.getPayloadList(),
     proto.TaskPayload.toObject, includeInstance),
-    type: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    name: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
+type: jspb.Message.getFieldWithDefault(msg, 2, 0),
+name: jspb.Message.getFieldWithDefault(msg, 3, ""),
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4192,9 +4250,9 @@ proto.TaskPayload.prototype.toObject = function(opt_includeInstance) {
  */
 proto.TaskPayload.toObject = function(includeInstance, msg) {
   var f, obj = {
-    flowTask: (f = msg.getFlowTask()) && proto.Flow.toObject(includeInstance, f),
-    motionGroupTask: (f = msg.getMotionGroupTask()) && proto.MotionGroup.toObject(includeInstance, f),
-    actionTask: (f = msg.getActionTask()) && proto.Action.toObject(includeInstance, f)
+flowTask: (f = msg.getFlowTask()) && proto.Flow.toObject(includeInstance, f),
+motionGroupTask: (f = msg.getMotionGroupTask()) && proto.MotionGroup.toObject(includeInstance, f),
+actionTask: (f = msg.getActionTask()) && proto.Action.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4472,9 +4530,9 @@ proto.Flow.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Flow.toObject = function(includeInstance, msg) {
   var f, obj = {
-    ifElseFlow: (f = msg.getIfElseFlow()) && proto.IfElse.toObject(includeInstance, f),
-    whileFlow: (f = msg.getWhileFlow()) && proto.While.toObject(includeInstance, f),
-    endFlow: (f = msg.getEndFlow()) && proto.End.toObject(includeInstance, f)
+ifElseFlow: (f = msg.getIfElseFlow()) && proto.IfElse.toObject(includeInstance, f),
+whileFlow: (f = msg.getWhileFlow()) && proto.While.toObject(includeInstance, f),
+endFlow: (f = msg.getEndFlow()) && proto.End.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4725,9 +4783,9 @@ proto.IfElse.prototype.toObject = function(opt_includeInstance) {
  */
 proto.IfElse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    condition: (f = msg.getCondition()) && proto.Variable.toObject(includeInstance, f),
-    ifTrue: (f = msg.getIfTrue()) && proto.Task.toObject(includeInstance, f),
-    ifFalse: (f = msg.getIfFalse()) && proto.Task.toObject(includeInstance, f)
+condition: (f = msg.getCondition()) && proto.Variable.toObject(includeInstance, f),
+ifTrue: (f = msg.getIfTrue()) && proto.Task.toObject(includeInstance, f),
+ifFalse: (f = msg.getIfFalse()) && proto.Task.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4978,8 +5036,8 @@ proto.While.prototype.toObject = function(opt_includeInstance) {
  */
 proto.While.toObject = function(includeInstance, msg) {
   var f, obj = {
-    condition: (f = msg.getCondition()) && proto.Variable.toObject(includeInstance, f),
-    body: (f = msg.getBody()) && proto.Task.toObject(includeInstance, f)
+condition: (f = msg.getCondition()) && proto.Variable.toObject(includeInstance, f),
+body: (f = msg.getBody()) && proto.Task.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -5309,10 +5367,10 @@ proto.MotionCommand.prototype.toObject = function(opt_includeInstance) {
  */
 proto.MotionCommand.toObject = function(includeInstance, msg) {
   var f, obj = {
-    axisMotion: (f = msg.getAxisMotion()) && proto.AxisMotion.toObject(includeInstance, f),
-    circularMotion: (f = msg.getCircularMotion()) && proto.CircularMotion.toObject(includeInstance, f),
-    ptpMotion: (f = msg.getPtpMotion()) && proto.PTPMotion.toObject(includeInstance, f),
-    linMotion: (f = msg.getLinMotion()) && proto.LINMotion.toObject(includeInstance, f)
+axisMotion: (f = msg.getAxisMotion()) && proto.AxisMotion.toObject(includeInstance, f),
+circularMotion: (f = msg.getCircularMotion()) && proto.CircularMotion.toObject(includeInstance, f),
+ptpMotion: (f = msg.getPtpMotion()) && proto.PTPMotion.toObject(includeInstance, f),
+linMotion: (f = msg.getLinMotion()) && proto.LINMotion.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -5620,13 +5678,13 @@ proto.MotionGroup.prototype.toObject = function(opt_includeInstance) {
  */
 proto.MotionGroup.toObject = function(includeInstance, msg) {
   var f, obj = {
-    motionGroupType: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    commandsList: jspb.Message.toObjectList(msg.getCommandsList(),
+motionGroupType: jspb.Message.getFieldWithDefault(msg, 1, 0),
+commandsList: jspb.Message.toObjectList(msg.getCommandsList(),
     proto.MotionCommand.toObject, includeInstance),
-    interpolation: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    toolId: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    robotBase: (f = msg.getRobotBase()) && proto.Base.toObject(includeInstance, f),
-    data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
+interpolation: jspb.Message.getFieldWithDefault(msg, 3, ""),
+toolId: jspb.Message.getFieldWithDefault(msg, 4, ""),
+robotBase: (f = msg.getRobotBase()) && proto.Base.toObject(includeInstance, f),
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -5965,8 +6023,8 @@ proto.AxisMotion.prototype.toObject = function(opt_includeInstance) {
  */
 proto.AxisMotion.toObject = function(includeInstance, msg) {
   var f, obj = {
-    data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
-    target: (f = msg.getTarget()) && proto.JointTarget.toObject(includeInstance, f)
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
+target: (f = msg.getTarget()) && proto.JointTarget.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -6174,8 +6232,8 @@ proto.CircularMotion.prototype.toObject = function(opt_includeInstance) {
  */
 proto.CircularMotion.toObject = function(includeInstance, msg) {
   var f, obj = {
-    data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
-    targetsList: jspb.Message.toObjectList(msg.getTargetsList(),
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
+targetsList: jspb.Message.toObjectList(msg.getTargetsList(),
     proto.CartesianTarget.toObject, includeInstance)
   };
 
@@ -6378,8 +6436,8 @@ proto.LINMotion.prototype.toObject = function(opt_includeInstance) {
  */
 proto.LINMotion.toObject = function(includeInstance, msg) {
   var f, obj = {
-    data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
-    target: (f = msg.getTarget()) && proto.CartesianTarget.toObject(includeInstance, f)
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
+target: (f = msg.getTarget()) && proto.CartesianTarget.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -6580,8 +6638,8 @@ proto.PTPMotion.prototype.toObject = function(opt_includeInstance) {
  */
 proto.PTPMotion.toObject = function(includeInstance, msg) {
   var f, obj = {
-    data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
-    target: (f = msg.getTarget()) && proto.CartesianTarget.toObject(includeInstance, f)
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
+target: (f = msg.getTarget()) && proto.CartesianTarget.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -6782,22 +6840,22 @@ proto.Matrix4x4.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Matrix4x4.toObject = function(includeInstance, msg) {
   var f, obj = {
-    m11: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
-    m12: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
-    m13: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
-    m14: jspb.Message.getFloatingPointFieldWithDefault(msg, 4, 0.0),
-    m21: jspb.Message.getFloatingPointFieldWithDefault(msg, 5, 0.0),
-    m22: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0),
-    m23: jspb.Message.getFloatingPointFieldWithDefault(msg, 7, 0.0),
-    m24: jspb.Message.getFloatingPointFieldWithDefault(msg, 8, 0.0),
-    m31: jspb.Message.getFloatingPointFieldWithDefault(msg, 9, 0.0),
-    m32: jspb.Message.getFloatingPointFieldWithDefault(msg, 10, 0.0),
-    m33: jspb.Message.getFloatingPointFieldWithDefault(msg, 11, 0.0),
-    m34: jspb.Message.getFloatingPointFieldWithDefault(msg, 12, 0.0),
-    m41: jspb.Message.getFloatingPointFieldWithDefault(msg, 13, 0.0),
-    m42: jspb.Message.getFloatingPointFieldWithDefault(msg, 14, 0.0),
-    m43: jspb.Message.getFloatingPointFieldWithDefault(msg, 15, 0.0),
-    m44: jspb.Message.getFloatingPointFieldWithDefault(msg, 16, 0.0)
+m11: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
+m12: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
+m13: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
+m14: jspb.Message.getFloatingPointFieldWithDefault(msg, 4, 0.0),
+m21: jspb.Message.getFloatingPointFieldWithDefault(msg, 5, 0.0),
+m22: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0),
+m23: jspb.Message.getFloatingPointFieldWithDefault(msg, 7, 0.0),
+m24: jspb.Message.getFloatingPointFieldWithDefault(msg, 8, 0.0),
+m31: jspb.Message.getFloatingPointFieldWithDefault(msg, 9, 0.0),
+m32: jspb.Message.getFloatingPointFieldWithDefault(msg, 10, 0.0),
+m33: jspb.Message.getFloatingPointFieldWithDefault(msg, 11, 0.0),
+m34: jspb.Message.getFloatingPointFieldWithDefault(msg, 12, 0.0),
+m41: jspb.Message.getFloatingPointFieldWithDefault(msg, 13, 0.0),
+m42: jspb.Message.getFloatingPointFieldWithDefault(msg, 14, 0.0),
+m43: jspb.Message.getFloatingPointFieldWithDefault(msg, 15, 0.0),
+m44: jspb.Message.getFloatingPointFieldWithDefault(msg, 16, 0.0)
   };
 
   if (includeInstance) {
@@ -7389,11 +7447,12 @@ proto.CartesianPosition.prototype.toObject = function(opt_includeInstance) {
  */
 proto.CartesianPosition.toObject = function(includeInstance, msg) {
   var f, obj = {
-    matrix: (f = msg.getMatrix()) && proto.Matrix4x4.toObject(includeInstance, f),
-    euler: (f = msg.getEuler()) && proto.Euler.toObject(includeInstance, f),
-    cs: (f = msg.getCs()) && proto.CoordinateSystem.toObject(includeInstance, f),
-    reference: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    parent: (f = msg.getParent()) && proto.Matrix4x4.toObject(includeInstance, f)
+matrix: (f = msg.getMatrix()) && proto.Matrix4x4.toObject(includeInstance, f),
+euler: (f = msg.getEuler()) && proto.Euler.toObject(includeInstance, f),
+cs: (f = msg.getCs()) && proto.CoordinateSystem.toObject(includeInstance, f),
+reference: jspb.Message.getFieldWithDefault(msg, 4, 0),
+parent: (f = msg.getParent()) && proto.Matrix4x4.toObject(includeInstance, f),
+id: jspb.Message.getFieldWithDefault(msg, 6, "")
   };
 
   if (includeInstance) {
@@ -7453,6 +7512,10 @@ proto.CartesianPosition.deserializeBinaryFromReader = function(msg, reader) {
       var value = new proto.Matrix4x4;
       reader.readMessage(value,proto.Matrix4x4.deserializeBinaryFromReader);
       msg.setParent(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setId(value);
       break;
     default:
       reader.skipField();
@@ -7520,6 +7583,13 @@ proto.CartesianPosition.serializeBinaryToWriter = function(message, writer) {
       5,
       f,
       proto.Matrix4x4.serializeBinaryToWriter
+    );
+  }
+  f = message.getId();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
     );
   }
 };
@@ -7691,6 +7761,24 @@ proto.CartesianPosition.prototype.hasParent = function() {
 };
 
 
+/**
+ * optional string id = 6;
+ * @return {string}
+ */
+proto.CartesianPosition.prototype.getId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.CartesianPosition} returns this
+ */
+proto.CartesianPosition.prototype.setId = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
 
 /**
  * List of repeated fields within this message type.
@@ -7730,11 +7818,12 @@ proto.CartesianTarget.prototype.toObject = function(opt_includeInstance) {
  */
 proto.CartesianTarget.toObject = function(includeInstance, msg) {
   var f, obj = {
-    position: (f = msg.getPosition()) && proto.CartesianPosition.toObject(includeInstance, f),
-    posture: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    speedList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 3)) == null ? undefined : f,
-    accelerationList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 4)) == null ? undefined : f,
-    externalAxisValuesList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 5)) == null ? undefined : f
+position: (f = msg.getPosition()) && proto.CartesianPosition.toObject(includeInstance, f),
+posture: jspb.Message.getFieldWithDefault(msg, 2, ""),
+speedList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 3)) == null ? undefined : f,
+accelerationList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 4)) == null ? undefined : f,
+externalAxisValuesList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 5)) == null ? undefined : f,
+redundancy: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0)
   };
 
   if (includeInstance) {
@@ -7781,16 +7870,26 @@ proto.CartesianTarget.deserializeBinaryFromReader = function(msg, reader) {
       msg.setPosture(value);
       break;
     case 3:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setSpeedList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addSpeed(values[i]);
+      }
       break;
     case 4:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setAccelerationList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addAcceleration(values[i]);
+      }
       break;
     case 5:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setExternalAxisValuesList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addExternalAxisValues(values[i]);
+      }
+      break;
+    case 6:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setRedundancy(value);
       break;
     default:
       reader.skipField();
@@ -7854,6 +7953,13 @@ proto.CartesianTarget.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writePackedFloat(
       5,
+      f
+    );
+  }
+  f = message.getRedundancy();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      6,
       f
     );
   }
@@ -8026,6 +8132,24 @@ proto.CartesianTarget.prototype.clearExternalAxisValuesList = function() {
 };
 
 
+/**
+ * optional float redundancy = 6;
+ * @return {number}
+ */
+proto.CartesianTarget.prototype.getRedundancy = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 6, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.CartesianTarget} returns this
+ */
+proto.CartesianTarget.prototype.setRedundancy = function(value) {
+  return jspb.Message.setProto3FloatField(this, 6, value);
+};
+
+
 
 /**
  * List of repeated fields within this message type.
@@ -8065,10 +8189,10 @@ proto.JointTarget.prototype.toObject = function(opt_includeInstance) {
  */
 proto.JointTarget.toObject = function(includeInstance, msg) {
   var f, obj = {
-    axisValuesList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 1)) == null ? undefined : f,
-    speedList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 2)) == null ? undefined : f,
-    accelerationList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 3)) == null ? undefined : f,
-    externalAxisValuesList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 4)) == null ? undefined : f
+axisValuesList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 1)) == null ? undefined : f,
+speedList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 2)) == null ? undefined : f,
+accelerationList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 3)) == null ? undefined : f,
+externalAxisValuesList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 4)) == null ? undefined : f
   };
 
   if (includeInstance) {
@@ -8106,20 +8230,28 @@ proto.JointTarget.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setAxisValuesList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addAxisValues(values[i]);
+      }
       break;
     case 2:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setSpeedList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addSpeed(values[i]);
+      }
       break;
     case 3:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setAccelerationList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addAcceleration(values[i]);
+      }
       break;
     case 4:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setExternalAxisValuesList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addExternalAxisValues(values[i]);
+      }
       break;
     default:
       reader.skipField();
@@ -8361,9 +8493,9 @@ proto.Vector3.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Vector3.toObject = function(includeInstance, msg) {
   var f, obj = {
-    x: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
-    y: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
-    z: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0)
+x: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
+y: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
+z: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0)
   };
 
   if (includeInstance) {
@@ -8551,10 +8683,10 @@ proto.Int4.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Int4.toObject = function(includeInstance, msg) {
   var f, obj = {
-    x: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    y: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    z: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    w: jspb.Message.getFieldWithDefault(msg, 4, 0)
+x: jspb.Message.getFieldWithDefault(msg, 1, 0),
+y: jspb.Message.getFieldWithDefault(msg, 2, 0),
+z: jspb.Message.getFieldWithDefault(msg, 3, 0),
+w: jspb.Message.getFieldWithDefault(msg, 4, 0)
   };
 
   if (includeInstance) {
@@ -8771,12 +8903,13 @@ proto.Euler.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Euler.toObject = function(includeInstance, msg) {
   var f, obj = {
-    x: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
-    y: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
-    z: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
-    a: jspb.Message.getFloatingPointFieldWithDefault(msg, 4, 0.0),
-    b: jspb.Message.getFloatingPointFieldWithDefault(msg, 5, 0.0),
-    c: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0)
+x: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
+y: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
+z: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
+a: jspb.Message.getFloatingPointFieldWithDefault(msg, 4, 0.0),
+b: jspb.Message.getFloatingPointFieldWithDefault(msg, 5, 0.0),
+c: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0),
+format: jspb.Message.getFieldWithDefault(msg, 7, 0)
   };
 
   if (includeInstance) {
@@ -8836,6 +8969,10 @@ proto.Euler.deserializeBinaryFromReader = function(msg, reader) {
     case 6:
       var value = /** @type {number} */ (reader.readFloat());
       msg.setC(value);
+      break;
+    case 7:
+      var value = /** @type {!proto.EulerFormat} */ (reader.readEnum());
+      msg.setFormat(value);
       break;
     default:
       reader.skipField();
@@ -8905,6 +9042,13 @@ proto.Euler.serializeBinaryToWriter = function(message, writer) {
   if (f !== 0.0) {
     writer.writeFloat(
       6,
+      f
+    );
+  }
+  f = message.getFormat();
+  if (f !== 0.0) {
+    writer.writeEnum(
+      7,
       f
     );
   }
@@ -9019,6 +9163,24 @@ proto.Euler.prototype.setC = function(value) {
 };
 
 
+/**
+ * optional EulerFormat format = 7;
+ * @return {!proto.EulerFormat}
+ */
+proto.Euler.prototype.getFormat = function() {
+  return /** @type {!proto.EulerFormat} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
+};
+
+
+/**
+ * @param {!proto.EulerFormat} value
+ * @return {!proto.Euler} returns this
+ */
+proto.Euler.prototype.setFormat = function(value) {
+  return jspb.Message.setProto3EnumField(this, 7, value);
+};
+
+
 
 
 
@@ -9051,9 +9213,9 @@ proto.CoordinateSystem.prototype.toObject = function(opt_includeInstance) {
  */
 proto.CoordinateSystem.toObject = function(includeInstance, msg) {
   var f, obj = {
-    origin: (f = msg.getOrigin()) && proto.Vector3.toObject(includeInstance, f),
-    xAxis: (f = msg.getXAxis()) && proto.Vector3.toObject(includeInstance, f),
-    yAxis: (f = msg.getYAxis()) && proto.Vector3.toObject(includeInstance, f)
+origin: (f = msg.getOrigin()) && proto.Vector3.toObject(includeInstance, f),
+xAxis: (f = msg.getXAxis()) && proto.Vector3.toObject(includeInstance, f),
+yAxis: (f = msg.getYAxis()) && proto.Vector3.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -9332,11 +9494,11 @@ proto.Variable.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Variable.toObject = function(includeInstance, msg) {
   var f, obj = {
-    pb_boolean: jspb.Message.getBooleanFieldWithDefault(msg, 1, false),
-    single: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
-    integer: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    text: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    name: jspb.Message.getFieldWithDefault(msg, 5, "")
+pb_boolean: (f = jspb.Message.getBooleanField(msg, 1)) == null ? undefined : f,
+single: (f = jspb.Message.getOptionalFloatingPointField(msg, 2)) == null ? undefined : f,
+integer: (f = jspb.Message.getField(msg, 3)) == null ? undefined : f,
+text: (f = jspb.Message.getField(msg, 4)) == null ? undefined : f,
+name: jspb.Message.getFieldWithDefault(msg, 5, "")
   };
 
   if (includeInstance) {
@@ -9654,7 +9816,7 @@ proto.Heartbeat.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Heartbeat.toObject = function(includeInstance, msg) {
   var f, obj = {
-    beat: jspb.Message.getFieldWithDefault(msg, 1, 0)
+beat: jspb.Message.getFieldWithDefault(msg, 1, 0)
   };
 
   if (includeInstance) {
@@ -9784,7 +9946,7 @@ proto.Settings.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Settings.toObject = function(includeInstance, msg) {
   var f, obj = {
-    settingsDictionaryMap: (f = msg.getSettingsDictionaryMap()) ? f.toObject(includeInstance, undefined) : []
+settingsDictionaryMap: (f = msg.getSettingsDictionaryMap()) ? f.toObject(includeInstance, undefined) : []
   };
 
   if (includeInstance) {
@@ -9882,7 +10044,8 @@ proto.Settings.prototype.getSettingsDictionaryMap = function(opt_noLazyCreate) {
  */
 proto.Settings.prototype.clearSettingsDictionaryMap = function() {
   this.getSettingsDictionaryMap().clear();
-  return this;};
+  return this;
+};
 
 
 
@@ -9924,13 +10087,13 @@ proto.Mesh.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Mesh.toObject = function(includeInstance, msg) {
   var f, obj = {
-    facesList: jspb.Message.toObjectList(msg.getFacesList(),
+facesList: jspb.Message.toObjectList(msg.getFacesList(),
     proto.Int4.toObject, includeInstance),
-    verticesList: jspb.Message.toObjectList(msg.getVerticesList(),
+verticesList: jspb.Message.toObjectList(msg.getVerticesList(),
     proto.Vector3.toObject, includeInstance),
-    normalsList: jspb.Message.toObjectList(msg.getNormalsList(),
+normalsList: jspb.Message.toObjectList(msg.getNormalsList(),
     proto.Vector3.toObject, includeInstance),
-    meshColor: (f = msg.getMeshColor()) && proto.Int4.toObject(includeInstance, f)
+meshColor: (f = msg.getMeshColor()) && proto.Int4.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -10241,12 +10404,12 @@ proto.PolyMesh.prototype.toObject = function(opt_includeInstance) {
  */
 proto.PolyMesh.toObject = function(includeInstance, msg) {
   var f, obj = {
-    meshesList: jspb.Message.toObjectList(msg.getMeshesList(),
+meshesList: jspb.Message.toObjectList(msg.getMeshesList(),
     proto.Mesh.toObject, includeInstance),
-    collisionConvexHullList: jspb.Message.toObjectList(msg.getCollisionConvexHullList(),
+collisionConvexHullList: jspb.Message.toObjectList(msg.getCollisionConvexHullList(),
     proto.Mesh.toObject, includeInstance),
-    transform: (f = msg.getTransform()) && proto.Matrix4x4.toObject(includeInstance, f),
-    name: jspb.Message.getFieldWithDefault(msg, 4, "")
+transform: (f = msg.getTransform()) && proto.Matrix4x4.toObject(includeInstance, f),
+name: jspb.Message.getFieldWithDefault(msg, 4, "")
   };
 
   if (includeInstance) {
@@ -10535,7 +10698,7 @@ proto.TransformationArray.prototype.toObject = function(opt_includeInstance) {
  */
 proto.TransformationArray.toObject = function(includeInstance, msg) {
   var f, obj = {
-    transformationList: jspb.Message.toObjectList(msg.getTransformationList(),
+transformationList: jspb.Message.toObjectList(msg.getTransformationList(),
     proto.Matrix4x4.toObject, includeInstance)
   };
 
@@ -10695,7 +10858,7 @@ proto.VariableArray.prototype.toObject = function(opt_includeInstance) {
  */
 proto.VariableArray.toObject = function(includeInstance, msg) {
   var f, obj = {
-    variablesList: jspb.Message.toObjectList(msg.getVariablesList(),
+variablesList: jspb.Message.toObjectList(msg.getVariablesList(),
     proto.Variable.toObject, includeInstance)
   };
 
@@ -10848,8 +11011,8 @@ proto.MetaData.prototype.toObject = function(opt_includeInstance) {
  */
 proto.MetaData.toObject = function(includeInstance, msg) {
   var f, obj = {
-    id: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    dataMap: (f = msg.getDataMap()) ? f.toObject(includeInstance, undefined) : []
+id: jspb.Message.getFieldWithDefault(msg, 1, ""),
+dataMap: (f = msg.getDataMap()) ? f.toObject(includeInstance, undefined) : []
   };
 
   if (includeInstance) {
@@ -10976,7 +11139,8 @@ proto.MetaData.prototype.getDataMap = function(opt_noLazyCreate) {
  */
 proto.MetaData.prototype.clearDataMap = function() {
   this.getDataMap().clear();
-  return this;};
+  return this;
+};
 
 
 
@@ -11011,7 +11175,7 @@ proto.SubscribeRobotFeedbackRequest.prototype.toObject = function(opt_includeIns
  */
 proto.SubscribeRobotFeedbackRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    id: jspb.Message.getFieldWithDefault(msg, 1, "")
+id: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
 
   if (includeInstance) {
@@ -11169,11 +11333,11 @@ proto.RobotFeedback.prototype.toObject = function(opt_includeInstance) {
  */
 proto.RobotFeedback.toObject = function(includeInstance, msg) {
   var f, obj = {
-    status: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    heartbeatData: (f = msg.getHeartbeatData()) && proto.Heartbeat.toObject(includeInstance, f),
-    robotStateData: (f = msg.getRobotStateData()) && proto.RobotState.toObject(includeInstance, f),
-    settingsData: (f = msg.getSettingsData()) && proto.Settings.toObject(includeInstance, f),
-    pingData: (f = msg.getPingData()) && proto.Ping.toObject(includeInstance, f)
+status: jspb.Message.getFieldWithDefault(msg, 1, ""),
+heartbeatData: (f = msg.getHeartbeatData()) && proto.Heartbeat.toObject(includeInstance, f),
+robotStateData: (f = msg.getRobotStateData()) && proto.RobotState.toObject(includeInstance, f),
+settingsData: (f = msg.getSettingsData()) && proto.Settings.toObject(includeInstance, f),
+pingData: (f = msg.getPingData()) && proto.Ping.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -11503,9 +11667,9 @@ proto.GetSimulatedRobotStateRequest.prototype.toObject = function(opt_includeIns
  */
 proto.GetSimulatedRobotStateRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    id: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    normalizedState: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
-    streamUpdate: jspb.Message.getBooleanFieldWithDefault(msg, 3, false)
+id: jspb.Message.getFieldWithDefault(msg, 1, ""),
+normalizedState: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
+streamUpdate: jspb.Message.getBooleanFieldWithDefault(msg, 3, false)
   };
 
   if (includeInstance) {
@@ -11693,9 +11857,9 @@ proto.AddRobotTaskRequest.prototype.toObject = function(opt_includeInstance) {
  */
 proto.AddRobotTaskRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    id: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    robotTask: (f = msg.getRobotTask()) && proto.Task.toObject(includeInstance, f),
-    robotSettings: (f = msg.getRobotSettings()) && proto.Settings.toObject(includeInstance, f)
+id: jspb.Message.getFieldWithDefault(msg, 1, ""),
+robotTask: (f = msg.getRobotTask()) && proto.Task.toObject(includeInstance, f),
+robotSettings: (f = msg.getRobotSettings()) && proto.Settings.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -11925,8 +12089,8 @@ proto.AddRobotTaskReply.prototype.toObject = function(opt_includeInstance) {
  */
 proto.AddRobotTaskReply.toObject = function(includeInstance, msg) {
   var f, obj = {
-    status: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    simulationResultData: (f = msg.getSimulationResultData()) && proto.SimulationResult.toObject(includeInstance, f)
+status: jspb.Message.getFieldWithDefault(msg, 1, ""),
+simulationResultData: (f = msg.getSimulationResultData()) && proto.SimulationResult.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -12106,8 +12270,8 @@ proto.UpdateVariableRequest.prototype.toObject = function(opt_includeInstance) {
  */
 proto.UpdateVariableRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    id: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    pb_var: (f = msg.getVar()) && proto.Variable.toObject(includeInstance, f)
+id: jspb.Message.getFieldWithDefault(msg, 1, ""),
+pb_var: (f = msg.getVar()) && proto.Variable.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -12294,8 +12458,8 @@ proto.UpdateVariableReply.prototype.toObject = function(opt_includeInstance) {
  */
 proto.UpdateVariableReply.toObject = function(includeInstance, msg) {
   var f, obj = {
-    idList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f,
-    variablesList: jspb.Message.toObjectList(msg.getVariablesList(),
+idList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f,
+variablesList: jspb.Message.toObjectList(msg.getVariablesList(),
     proto.VariableArray.toObject, includeInstance)
   };
 
@@ -12496,9 +12660,9 @@ proto.SetupRobotRequest.prototype.toObject = function(opt_includeInstance) {
  */
 proto.SetupRobotRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    clientId: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    softwareVersion: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    robotSetup: (f = msg.getRobotSetup()) && proto.Robot.toObject(includeInstance, f)
+clientId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+softwareVersion: jspb.Message.getFieldWithDefault(msg, 2, ""),
+robotSetup: (f = msg.getRobotSetup()) && proto.Robot.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -12707,10 +12871,10 @@ proto.SetupRobotReply.prototype.toObject = function(opt_includeInstance) {
  */
 proto.SetupRobotReply.toObject = function(includeInstance, msg) {
   var f, obj = {
-    status: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    id: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    licenseState: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    robotSettings: (f = msg.getRobotSettings()) && proto.Settings.toObject(includeInstance, f)
+status: jspb.Message.getFieldWithDefault(msg, 1, ""),
+id: jspb.Message.getFieldWithDefault(msg, 2, ""),
+licenseState: jspb.Message.getFieldWithDefault(msg, 3, ""),
+robotSettings: (f = msg.getRobotSettings()) && proto.Settings.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -12981,17 +13145,17 @@ proto.Robot.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Robot.toObject = function(includeInstance, msg) {
   var f, obj = {
-    presetRobotClass: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    customRobot: (f = msg.getCustomRobot()) && proto.CustomRobot.toObject(includeInstance, f),
-    robotDriverClass: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    friendlyId: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    toolDictionaryMap: (f = msg.getToolDictionaryMap()) ? f.toObject(includeInstance, proto.Tool.toObject) : [],
-    initialBase: (f = msg.getInitialBase()) && proto.Base.toObject(includeInstance, f),
-    collisionGeometryList: jspb.Message.toObjectList(msg.getCollisionGeometryList(),
+presetRobotClass: (f = jspb.Message.getField(msg, 1)) == null ? undefined : f,
+customRobot: (f = msg.getCustomRobot()) && proto.CustomRobot.toObject(includeInstance, f),
+robotDriverClass: jspb.Message.getFieldWithDefault(msg, 3, ""),
+friendlyId: jspb.Message.getFieldWithDefault(msg, 4, ""),
+toolDictionaryMap: (f = msg.getToolDictionaryMap()) ? f.toObject(includeInstance, proto.Tool.toObject) : [],
+initialBase: (f = msg.getInitialBase()) && proto.Base.toObject(includeInstance, f),
+collisionGeometryList: jspb.Message.toObjectList(msg.getCollisionGeometryList(),
     proto.PolyMesh.toObject, includeInstance),
-    externalAxesList: jspb.Message.toObjectList(msg.getExternalAxesList(),
+externalAxesList: jspb.Message.toObjectList(msg.getExternalAxesList(),
     proto.ExternalAxis.toObject, includeInstance),
-    data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -13296,7 +13460,8 @@ proto.Robot.prototype.getToolDictionaryMap = function(opt_noLazyCreate) {
  */
 proto.Robot.prototype.clearToolDictionaryMap = function() {
   this.getToolDictionaryMap().clear();
-  return this;};
+  return this;
+};
 
 
 /**
@@ -13481,11 +13646,11 @@ proto.Tool.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Tool.toObject = function(includeInstance, msg) {
   var f, obj = {
-    toolType: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    tcp: (f = msg.getTcp()) && proto.CartesianPosition.toObject(includeInstance, f),
-    toolId: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    toolState: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    toolGeometry: (f = msg.getToolGeometry()) && proto.PolyMesh.toObject(includeInstance, f)
+toolType: jspb.Message.getFieldWithDefault(msg, 1, 0),
+tcp: (f = msg.getTcp()) && proto.CartesianPosition.toObject(includeInstance, f),
+toolId: jspb.Message.getFieldWithDefault(msg, 3, ""),
+toolState: jspb.Message.getFieldWithDefault(msg, 4, 0),
+toolGeometry: (f = msg.getToolGeometry()) && proto.PolyMesh.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -13773,9 +13938,9 @@ proto.Base.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Base.toObject = function(includeInstance, msg) {
   var f, obj = {
-    baseType: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    baseFrame: (f = msg.getBaseFrame()) && proto.CartesianPosition.toObject(includeInstance, f),
-    baseId: jspb.Message.getFieldWithDefault(msg, 3, "")
+baseType: jspb.Message.getFieldWithDefault(msg, 1, 0),
+baseFrame: (f = msg.getBaseFrame()) && proto.CartesianPosition.toObject(includeInstance, f),
+baseId: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
 
   if (includeInstance) {
@@ -13991,19 +14156,19 @@ proto.CustomRobot.prototype.toObject = function(opt_includeInstance) {
  */
 proto.CustomRobot.toObject = function(includeInstance, msg) {
   var f, obj = {
-    axisCenterList: jspb.Message.toObjectList(msg.getAxisCenterList(),
+axisCenterList: jspb.Message.toObjectList(msg.getAxisCenterList(),
     proto.Vector3.toObject, includeInstance),
-    axisDirectionList: jspb.Message.toObjectList(msg.getAxisDirectionList(),
+axisDirectionList: jspb.Message.toObjectList(msg.getAxisDirectionList(),
     proto.Vector3.toObject, includeInstance),
-    axisSpeedList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 3)) == null ? undefined : f,
-    axisRangeMinList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 4)) == null ? undefined : f,
-    axisRangeMaxList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 5)) == null ? undefined : f,
-    name: jspb.Message.getFieldWithDefault(msg, 6, ""),
-    shortName: jspb.Message.getFieldWithDefault(msg, 7, ""),
-    geometryList: jspb.Message.toObjectList(msg.getGeometryList(),
+axisSpeedList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 3)) == null ? undefined : f,
+axisRangeMinList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 4)) == null ? undefined : f,
+axisRangeMaxList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 5)) == null ? undefined : f,
+name: jspb.Message.getFieldWithDefault(msg, 6, ""),
+shortName: jspb.Message.getFieldWithDefault(msg, 7, ""),
+geometryList: jspb.Message.toObjectList(msg.getGeometryList(),
     proto.PolyMesh.toObject, includeInstance),
-    rootCs: (f = msg.getRootCs()) && proto.Matrix4x4.toObject(includeInstance, f),
-    flangeCs: (f = msg.getFlangeCs()) && proto.Matrix4x4.toObject(includeInstance, f)
+rootCs: (f = msg.getRootCs()) && proto.Matrix4x4.toObject(includeInstance, f),
+flangeCs: (f = msg.getFlangeCs()) && proto.Matrix4x4.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -14051,16 +14216,22 @@ proto.CustomRobot.deserializeBinaryFromReader = function(msg, reader) {
       msg.addAxisDirection(value);
       break;
     case 3:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setAxisSpeedList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addAxisSpeed(values[i]);
+      }
       break;
     case 4:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setAxisRangeMinList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addAxisRangeMin(values[i]);
+      }
       break;
     case 5:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setAxisRangeMaxList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addAxisRangeMax(values[i]);
+      }
       break;
     case 6:
       var value = /** @type {string} */ (reader.readString());
@@ -14566,18 +14737,18 @@ proto.ExternalAxis.prototype.toObject = function(opt_includeInstance) {
  */
 proto.ExternalAxis.toObject = function(includeInstance, msg) {
   var f, obj = {
-    externalAxisType: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    name: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    shortName: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    rangeMinList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 4)) == null ? undefined : f,
-    rangeMaxList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 5)) == null ? undefined : f,
-    speedList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 6)) == null ? undefined : f,
-    orientationList: jspb.Message.toObjectList(msg.getOrientationList(),
+externalAxisType: jspb.Message.getFieldWithDefault(msg, 1, 0),
+name: jspb.Message.getFieldWithDefault(msg, 2, ""),
+shortName: jspb.Message.getFieldWithDefault(msg, 3, ""),
+rangeMinList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 4)) == null ? undefined : f,
+rangeMaxList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 5)) == null ? undefined : f,
+speedList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 6)) == null ? undefined : f,
+orientationList: jspb.Message.toObjectList(msg.getOrientationList(),
     proto.Matrix4x4.toObject, includeInstance),
-    position: (f = msg.getPosition()) && proto.CartesianPosition.toObject(includeInstance, f),
-    geometryList: jspb.Message.toObjectList(msg.getGeometryList(),
+position: (f = msg.getPosition()) && proto.CartesianPosition.toObject(includeInstance, f),
+geometryList: jspb.Message.toObjectList(msg.getGeometryList(),
     proto.PolyMesh.toObject, includeInstance),
-    data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -14627,16 +14798,22 @@ proto.ExternalAxis.deserializeBinaryFromReader = function(msg, reader) {
       msg.setShortName(value);
       break;
     case 4:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setRangeMinList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addRangeMin(values[i]);
+      }
       break;
     case 5:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setRangeMaxList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addRangeMax(values[i]);
+      }
       break;
     case 6:
-      var value = /** @type {!Array<number>} */ (reader.readPackedFloat());
-      msg.setSpeedList(value);
+      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
+      for (var i = 0; i < values.length; i++) {
+        msg.addSpeed(values[i]);
+      }
       break;
     case 7:
       var value = new proto.Matrix4x4;
@@ -15106,6 +15283,15 @@ proto.CartesianReference = {
 proto.FrameType = {
   FIXED: 0,
   EXTERNAL: 1
+};
+
+/**
+ * @enum {number}
+ */
+proto.EulerFormat = {
+  ZYX: 0,
+  AXISANGLE: 1,
+  RPY: 2
 };
 
 /**
