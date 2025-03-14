@@ -26,6 +26,12 @@ class FrameType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     FIXED: _ClassVar[FrameType]
     EXTERNAL: _ClassVar[FrameType]
 
+class EulerFormat(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    ZYX: _ClassVar[EulerFormat]
+    AXISANGLE: _ClassVar[EulerFormat]
+    RPY: _ClassVar[EulerFormat]
+
 class AxisName(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     A1: _ClassVar[AxisName]
@@ -70,6 +76,9 @@ RELATIVE: CartesianReference
 PARENT: CartesianReference
 FIXED: FrameType
 EXTERNAL: FrameType
+ZYX: EulerFormat
+AXISANGLE: EulerFormat
+RPY: EulerFormat
 A1: AxisName
 A2: AxisName
 A3: AxisName
@@ -154,7 +163,7 @@ class SimulationResult(_message.Message):
     def __init__(self, simulation_results: _Optional[_Iterable[_Union[SimulationResultUnit, _Mapping]]] = ..., is_valid: bool = ..., time: _Optional[float] = ..., code: _Optional[str] = ..., data: _Optional[_Union[MetaData, _Mapping]] = ...) -> None: ...
 
 class SimulationResultUnit(_message.Message):
-    __slots__ = ("axis_values", "position", "time", "collision", "singularity", "outofreach", "external_axis_values", "external_axis_outofreach", "interpolation_factor", "id")
+    __slots__ = ("axis_values", "position", "time", "collision", "singularity", "outofreach", "external_axis_values", "external_axis_outofreach", "interpolation_factor", "id", "alarm")
     AXIS_VALUES_FIELD_NUMBER: _ClassVar[int]
     POSITION_FIELD_NUMBER: _ClassVar[int]
     TIME_FIELD_NUMBER: _ClassVar[int]
@@ -165,6 +174,7 @@ class SimulationResultUnit(_message.Message):
     EXTERNAL_AXIS_OUTOFREACH_FIELD_NUMBER: _ClassVar[int]
     INTERPOLATION_FACTOR_FIELD_NUMBER: _ClassVar[int]
     ID_FIELD_NUMBER: _ClassVar[int]
+    ALARM_FIELD_NUMBER: _ClassVar[int]
     axis_values: _containers.RepeatedScalarFieldContainer[float]
     position: Matrix4x4
     time: float
@@ -175,7 +185,8 @@ class SimulationResultUnit(_message.Message):
     external_axis_outofreach: _containers.RepeatedScalarFieldContainer[bool]
     interpolation_factor: float
     id: str
-    def __init__(self, axis_values: _Optional[_Iterable[float]] = ..., position: _Optional[_Union[Matrix4x4, _Mapping]] = ..., time: _Optional[float] = ..., collision: _Optional[_Iterable[bool]] = ..., singularity: _Optional[_Iterable[bool]] = ..., outofreach: _Optional[_Iterable[bool]] = ..., external_axis_values: _Optional[_Iterable[float]] = ..., external_axis_outofreach: _Optional[_Iterable[bool]] = ..., interpolation_factor: _Optional[float] = ..., id: _Optional[str] = ...) -> None: ...
+    alarm: bool
+    def __init__(self, axis_values: _Optional[_Iterable[float]] = ..., position: _Optional[_Union[Matrix4x4, _Mapping]] = ..., time: _Optional[float] = ..., collision: _Optional[_Iterable[bool]] = ..., singularity: _Optional[_Iterable[bool]] = ..., outofreach: _Optional[_Iterable[bool]] = ..., external_axis_values: _Optional[_Iterable[float]] = ..., external_axis_outofreach: _Optional[_Iterable[bool]] = ..., interpolation_factor: _Optional[float] = ..., id: _Optional[str] = ..., alarm: bool = ...) -> None: ...
 
 class RobotState(_message.Message):
     __slots__ = ("axis_position", "robot_transformations", "toolpath_index", "tool_id", "tool_frame", "root_frame", "flange_frame", "axis_alarm", "external_axis_alarm", "variables", "data", "connection_feedback", "task_id", "command_id", "robot_id", "status")
@@ -378,32 +389,36 @@ class Matrix4x4(_message.Message):
     def __init__(self, m11: _Optional[float] = ..., m12: _Optional[float] = ..., m13: _Optional[float] = ..., m14: _Optional[float] = ..., m21: _Optional[float] = ..., m22: _Optional[float] = ..., m23: _Optional[float] = ..., m24: _Optional[float] = ..., m31: _Optional[float] = ..., m32: _Optional[float] = ..., m33: _Optional[float] = ..., m34: _Optional[float] = ..., m41: _Optional[float] = ..., m42: _Optional[float] = ..., m43: _Optional[float] = ..., m44: _Optional[float] = ...) -> None: ...
 
 class CartesianPosition(_message.Message):
-    __slots__ = ("matrix", "euler", "cs", "reference", "parent")
+    __slots__ = ("matrix", "euler", "cs", "reference", "parent", "id")
     MATRIX_FIELD_NUMBER: _ClassVar[int]
     EULER_FIELD_NUMBER: _ClassVar[int]
     CS_FIELD_NUMBER: _ClassVar[int]
     REFERENCE_FIELD_NUMBER: _ClassVar[int]
     PARENT_FIELD_NUMBER: _ClassVar[int]
+    ID_FIELD_NUMBER: _ClassVar[int]
     matrix: Matrix4x4
     euler: Euler
     cs: CoordinateSystem
     reference: CartesianReference
     parent: Matrix4x4
-    def __init__(self, matrix: _Optional[_Union[Matrix4x4, _Mapping]] = ..., euler: _Optional[_Union[Euler, _Mapping]] = ..., cs: _Optional[_Union[CoordinateSystem, _Mapping]] = ..., reference: _Optional[_Union[CartesianReference, str]] = ..., parent: _Optional[_Union[Matrix4x4, _Mapping]] = ...) -> None: ...
+    id: str
+    def __init__(self, matrix: _Optional[_Union[Matrix4x4, _Mapping]] = ..., euler: _Optional[_Union[Euler, _Mapping]] = ..., cs: _Optional[_Union[CoordinateSystem, _Mapping]] = ..., reference: _Optional[_Union[CartesianReference, str]] = ..., parent: _Optional[_Union[Matrix4x4, _Mapping]] = ..., id: _Optional[str] = ...) -> None: ...
 
 class CartesianTarget(_message.Message):
-    __slots__ = ("position", "posture", "speed", "acceleration", "external_axis_values")
+    __slots__ = ("position", "posture", "speed", "acceleration", "external_axis_values", "redundancy")
     POSITION_FIELD_NUMBER: _ClassVar[int]
     POSTURE_FIELD_NUMBER: _ClassVar[int]
     SPEED_FIELD_NUMBER: _ClassVar[int]
     ACCELERATION_FIELD_NUMBER: _ClassVar[int]
     EXTERNAL_AXIS_VALUES_FIELD_NUMBER: _ClassVar[int]
+    REDUNDANCY_FIELD_NUMBER: _ClassVar[int]
     position: CartesianPosition
     posture: str
     speed: _containers.RepeatedScalarFieldContainer[float]
     acceleration: _containers.RepeatedScalarFieldContainer[float]
     external_axis_values: _containers.RepeatedScalarFieldContainer[float]
-    def __init__(self, position: _Optional[_Union[CartesianPosition, _Mapping]] = ..., posture: _Optional[str] = ..., speed: _Optional[_Iterable[float]] = ..., acceleration: _Optional[_Iterable[float]] = ..., external_axis_values: _Optional[_Iterable[float]] = ...) -> None: ...
+    redundancy: float
+    def __init__(self, position: _Optional[_Union[CartesianPosition, _Mapping]] = ..., posture: _Optional[str] = ..., speed: _Optional[_Iterable[float]] = ..., acceleration: _Optional[_Iterable[float]] = ..., external_axis_values: _Optional[_Iterable[float]] = ..., redundancy: _Optional[float] = ...) -> None: ...
 
 class JointTarget(_message.Message):
     __slots__ = ("axis_values", "speed", "acceleration", "external_axis_values")
@@ -440,20 +455,22 @@ class Int4(_message.Message):
     def __init__(self, x: _Optional[int] = ..., y: _Optional[int] = ..., z: _Optional[int] = ..., w: _Optional[int] = ...) -> None: ...
 
 class Euler(_message.Message):
-    __slots__ = ("x", "y", "z", "a", "b", "c")
+    __slots__ = ("x", "y", "z", "a", "b", "c", "format")
     X_FIELD_NUMBER: _ClassVar[int]
     Y_FIELD_NUMBER: _ClassVar[int]
     Z_FIELD_NUMBER: _ClassVar[int]
     A_FIELD_NUMBER: _ClassVar[int]
     B_FIELD_NUMBER: _ClassVar[int]
     C_FIELD_NUMBER: _ClassVar[int]
+    FORMAT_FIELD_NUMBER: _ClassVar[int]
     x: float
     y: float
     z: float
     a: float
     b: float
     c: float
-    def __init__(self, x: _Optional[float] = ..., y: _Optional[float] = ..., z: _Optional[float] = ..., a: _Optional[float] = ..., b: _Optional[float] = ..., c: _Optional[float] = ...) -> None: ...
+    format: EulerFormat
+    def __init__(self, x: _Optional[float] = ..., y: _Optional[float] = ..., z: _Optional[float] = ..., a: _Optional[float] = ..., b: _Optional[float] = ..., c: _Optional[float] = ..., format: _Optional[_Union[EulerFormat, str]] = ...) -> None: ...
 
 class CoordinateSystem(_message.Message):
     __slots__ = ("origin", "x_axis", "y_axis")

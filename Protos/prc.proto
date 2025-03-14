@@ -96,7 +96,7 @@ message SimulationResultUnit{
 	float interpolation_factor = 9;
 	//The Id is used to match the SimulationResultUnit with the initial simulation input.
 	string id = 10;
-	 //Alarm sums up the collision and out of reach values in a single Boolean
+	//Alarm sums up the collision and out of reach values in a single Boolean
 	bool alarm = 11;
 }
 
@@ -288,6 +288,8 @@ message CartesianPosition{
     CartesianReference reference = 4;
     //A parent matrix can be provided.
     Matrix4x4 parent = 5;
+    //The ID of the Cartesian position.
+    string id = 6;
 }
 
 //CartesianTarget contains the position defined as a CartesianPosition and addds information relating to the posture, speed, acceleration of the robot, as well as of its external axes.
@@ -302,6 +304,8 @@ message CartesianTarget{
     repeated float acceleration = 4;
     //The position of any external axes of the robot.
     repeated float external_axis_values = 5;
+    //Value of a redundant axis, such as within a seven-axis robot.
+    float redundancy = 6;
 }
 
 //JointTarget contains the target position of the robot in joint space, as well as the speed and acceleration of the robot.
@@ -352,6 +356,8 @@ message Euler {
 	float b = 5;
     //The C rotation component of the Euler angles.
 	float c = 6;
+    //The format of Euler (like) angles, either ZYX (e.g. for KUKA) or AxisAngle (e.g. for UR).
+    EulerFormat format = 7;
 }
 
 //The CoordinateSystem is defined through three vectors, the origin, the X axis, and the Y axis.
@@ -434,87 +440,96 @@ message MetaData{
 
 //Describes the type of joint.
 enum ExternalAxisType
-    {
-        LINEAR_RAIL = 0;
-        //Two linear rails.
-        LINEAR_DOUBLE = 1;
-        //Three-axis linear positioning system.
-        LINEAR_TRIPLE = 2;
-        //A single rotary joint.
-        ROTARY_SINGLE = 3;
-        //Two rotary joints.
-        ROTARY_DOUBLE = 4;
-        //An AGV, moving the robot around.
-        AGV = 5;
-    }
+{
+    LINEAR_RAIL = 0;
+    //Two linear rails.
+    LINEAR_DOUBLE = 1;
+    //Three-axis linear positioning system.
+    LINEAR_TRIPLE = 2;
+    //A single rotary joint.
+    ROTARY_SINGLE = 3;
+    //Two rotary joints.
+    ROTARY_DOUBLE = 4;
+    //An AGV, moving the robot around.
+    AGV = 5;
+}
 
 //The CartesianReference enum describes if the current frame is absolute, relative, or linked to a parent.
 enum CartesianReference
-    {
-        ABSOLUTE = 0;
-        RELATIVE = 1;
-        PARENT = 2;
-    }
+{
+    ABSOLUTE = 0;
+    RELATIVE = 1;
+    PARENT = 2;
+}
 
 //The type of the frame.
 enum FrameType
-    {
-        FIXED = 0;
-        EXTERNAL = 1;
-    }
+{
+    FIXED = 0;
+    EXTERNAL = 1;
+}
+
+//The format of the Euler angles.
+enum EulerFormat
+{
+    ZYX = 0;
+    AXISANGLE = 1;
+    RPY = 2;
+}
 
 //The name of each axis, if they are not in order.
 enum AxisName
-    {
-        A1 = 0;
-        A2 = 1;
-        A3 = 2;
-        A4 = 3;
-        A5 = 4;
-        A6 = 5;
-        A7 = 6;
-        E1 = 7;
-        E2 = 8;
-        E3 = 9;
-        E4 = 10;
-    }
+{
+    A1 = 0;
+    A2 = 1;
+    A3 = 2;
+    A4 = 3;
+    A5 = 4;
+    A6 = 5;
+    A7 = 6;
+    E1 = 7;
+    E2 = 8;
+    E3 = 9;
+    E4 = 10;
+}
 
 //TaskType defines how new data sent to the robot should be processed.
 enum TaskType
-    {
-        //Simulates the task.
-        SIMULATE_TASK = 0;
-        //Executes a task directy.
-        EXECUTE_TASK = 1;
-        //Executes a task after a successful simulation.
-        EXECUTE_ON_SIMULATION_SUCCESS_TASK = 2;
-        //Executes a task no matter the result of the simulation.
-        SIMULATE_AND_EXECUTE_TASK = 3;
-        //Groups several commands
-        CONTAINER = 4;
-    }
+{
+    //Simulates the task.
+    SIMULATE_TASK = 0;
+    //Executes a task directy.
+    EXECUTE_TASK = 1;
+    //Executes a task after a successful simulation.
+    EXECUTE_ON_SIMULATION_SUCCESS_TASK = 2;
+    //Executes a task no matter the result of the simulation.
+    SIMULATE_AND_EXECUTE_TASK = 3;
+    //Groups several commands
+    CONTAINER = 4;
+}
 
 //RobotStatus defines the overall state of the robot.
 enum RobotStatus
-    {
-        //Robot is ready for receiving data.
-        IDLE = 0;
-        //Robot is active processing data.
-        ACTIVE = 1;
-        //Robot is in an error state.
-        ERROR = 2;
-    }
+{
+    //Robot is ready for receiving data.
+    IDLE = 0;
+    //Robot is active processing data.
+    ACTIVE = 1;
+    //Robot is in an error state.
+    ERROR = 2;
+}
 
 //The MotionGroupType can bei either CP, PTP, or SPLINE
 enum MotionGroupType
-    {
-        //Continuous path motion refers, e.g., to linear motions.
-        CP = 0;
-        //Point-to-point motion provide a fast and efficient way to get from this position to another,.
-        PTP = 1;
-        //Spline motion is used for smooth transitions between points.
-        SPLINE = 2;
-    }
+{
+    //Continuous path motion refers, e.g., to linear motions.
+    CP = 0;
+    //Point-to-point motion provide a fast and efficient way to get from this position to another,.
+    PTP = 1;
+    //Spline motion is used for smooth transitions between points.
+    SPLINE = 2;
+}
+
 //SubscribeRobotFeedbackRequest subscribes to feedback of the robot with the provided ID.
 message SubscribeRobotFeedbackRequest{
 	//The unique ID of the robot.
@@ -702,4 +717,3 @@ message ExternalAxis{
 	//Additional data.
 	MetaData data = 10;
 }
-
