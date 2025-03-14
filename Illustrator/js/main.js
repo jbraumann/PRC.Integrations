@@ -194,7 +194,7 @@
             .setAxisMotion(new prc.AxisMotion()
                 .setTarget(new prc.JointTarget()
                     .setAxisValuesList([0, -85, 95, -5, 5, -10])
-                    .setSpeedList([0.1])
+                    .setSpeedList([10])
                 ));
 
         var ptpMotion2 = new prc.MotionCommand()
@@ -219,7 +219,7 @@
                             )
                         )
                     )
-                    .setSpeedList([0.1])
+                    .setSpeedList([10])
                     .setPosture('010')
                 ));
 
