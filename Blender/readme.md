@@ -1,1 +1,0 @@
-To include the GRPC library, you can unzip the grpc.zip file here.

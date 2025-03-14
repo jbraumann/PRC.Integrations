@@ -1,0 +1,13 @@
+{
+	"autodeskProduct":	"Fusion",
+	"type":	"addin",
+	"id":	"ea92870e-4b0d-4d7b-a8d4-bfcc3a766090",
+	"author":	"Johannes Braumann",
+	"description":	{
+		"":	"Parametric Robot Control by Robots in Architecture"
+	},
+	"version":	"0.1",
+	"runOnStartup":	false,
+	"supportedOS":	"windows|mac",
+	"editEnabled":	true
+}

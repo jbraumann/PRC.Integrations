@@ -1,0 +1,9 @@
+{
+    "python.autoComplete.extraPaths": [
+        
+    "C:\\Users\\jbrau\\OneDrive\\PRC\\Integrations\\Blender\\fake_bpy_modules_2.93-20241010"
+    ],
+    "python.analysis.extraPaths": [
+    "C:\\Users\\jbrau\\OneDrive\\PRC\\Integrations\\Blender\\fake_bpy_modules_2.93-20241010"
+],
+}

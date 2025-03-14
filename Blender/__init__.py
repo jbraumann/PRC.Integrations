@@ -19,6 +19,7 @@ from threading import Thread
 import grpc
 from . import prc_pb2
 from . import prc_pb2_grpc
+import webbrowser
 
 #xforms are the transformation matrices of the robot's joints
 xforms = [None] * 7
@@ -331,6 +332,14 @@ class PRC_OT_cancel_button(bpy.types.Operator):
         stop_event.set()
         return {'FINISHED'}
 
+class PRC_OT_settings_button(bpy.types.Operator):
+    bl_label = "Settings"
+    bl_idname = "prc.settings"
+
+    def execute(self, context):
+        webbrowser.open_new("https://127.0.0.1:5001")
+        return {'FINISHED'}
+
 class PRC_PT_main_panel(bpy.types.Panel):
     bl_label = "Parametric Robot Control"
     bl_idname = "prc.main_panel"
@@ -342,6 +351,7 @@ class PRC_PT_main_panel(bpy.types.Panel):
         layout = self.layout
         layout.operator(PRC_OT_core.bl_idname)
         layout.operator(PRC_OT_add_task_button.bl_idname)
+        layout.operator(PRC_OT_settings_button.bl_idname)
         layout.prop(context.scene.custom_props, 'simulation_slider')
 
 def register():
@@ -349,6 +359,7 @@ def register():
     bpy.types.Scene.custom_props = bpy.props.PointerProperty(type=CustomPropertyGroup)
     bpy.utils.register_class(PRC_OT_add_task_button)
     bpy.utils.register_class(PRC_OT_core)
+    bpy.utils.register_class(PRC_OT_settings_button)
     bpy.utils.register_class(PRC_PT_main_panel)
 
 
@@ -357,6 +368,7 @@ def unregister():
     bpy.utils.unregister_class(CustomPropertyGroup)
     bpy.utils.unregister_class(PRC_OT_add_task_button)
     bpy.utils.unregister_class(PRC_OT_core)
+    bpy.utils.unregister_class(PRC_OT_settings_button)
     bpy.utils.unregister_class(PRC_PT_main_panel)
 
 
