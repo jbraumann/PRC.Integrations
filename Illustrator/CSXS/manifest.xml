@@ -17,7 +17,7 @@
 <ExtensionManifest Version="5.0" ExtensionBundleId="com.jbraumann.prc" ExtensionBundleVersion="1.0.0"
 		ExtensionBundleName="Parametric Robot Control" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ExtensionList>
-		<Extension Id="com.jbraumann.prc" Version="1.0" />
+		<Extension Id="com.jbraumann.prc.panel" Version="1.0" />
 	</ExtensionList>
 	<ExecutionEnvironment>
 		<HostList>
@@ -33,7 +33,7 @@
 		</RequiredRuntimeList>
 	</ExecutionEnvironment>
 	<DispatchInfoList>
-		<Extension Id="com.jbraumann.prc">
+		<Extension Id="com.jbraumann.prc.panel">
 			<DispatchInfo >
 				<Resources>
 				<MainPath>./index.html</MainPath>
