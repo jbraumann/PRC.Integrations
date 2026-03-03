@@ -15,6 +15,8 @@ Currently, you can find code samples to integrate Parametric Robot Control into 
 - C# (both direct implementation and using our wrapper library)
 - Python (also used in Blender)
 
+##### The PRC_LLM_Integration_Guide.md file is automatically generated and serves as a starting point for the LLM-guided integration of PRC into custom software. It outlines most functions and how they are used, providing context to the LLM. #####
+
 These integrations provide a starting point for developers but do not constitute a full plugin, accessible to end-users, as we provide in Grasshopper. For any questions, please use the ["Discussions"](https://github.com/jbraumann/PRC.Integrations/discussions) tab above.
 
 # Caution!
@@ -25,3 +27,4 @@ We welcome suggestions on how to improve the code, as well as entirely new integ
 Please use the "Discussions" tab above for feedback. You can also contact the developer at johannes@robotsinarchitecture.org
 
 **Disclaimer:** This software is provided “as is” without any warranties or guarantees. The creators and developers of this software do not accept any liability for any damages or losses arising from its use.
+
