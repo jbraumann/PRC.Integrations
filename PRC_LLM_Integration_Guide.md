@@ -108,8 +108,8 @@ simulation_result = AddRobotTask(
                 type     = PTP,
                 tool_id  = "0",
                 commands = [
-                    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 0.15),
-                    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 0.15),
+                    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 50),  // KUKA: 50%
+                    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 50),  // KUKA: 50%
                 ]
             )
         ]
@@ -342,8 +342,8 @@ task.TaskType = SimulateAndExecuteTask
 motionGroup = new PTPMotionGroup()
 motionGroup.ToolID = "0"
 motionGroup.PTPMotions = [
-    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 0.15),
-    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 0.15),
+    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 50),  // KUKA PTP: 50%
+    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 50),  // KUKA PTP: 50%
 ]
 task.Commands.Add(motionGroup)
 
@@ -421,7 +421,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { -45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 0.15f }
+                Speed = new float[] { 50f }  // KUKA PTP: 50% max speed
             }
         },
         new PRC.Core.Commands.Motion.Axis
@@ -429,7 +429,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { 45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 0.15f }
+                Speed = new float[] { 50f }  // KUKA PTP: 50% max speed
             }
         }
     };
@@ -642,8 +642,8 @@ Wraps a `CartesianPosition` with motion parameters:
 |---|---|---|
 | `position` | `CartesianPosition` | The target frame |
 | `posture` | `string` | Robot posture/configuration string (e.g., `"110"` for KUKA turn/status) |
-| `speed` | `repeated float` | Speed — single value for all axes, or one per axis. Normalized 0.0–1.0. |
-| `acceleration` | `repeated float` | Acceleration — single value or one per axis. Normalized 0.0–1.0. |
+| `speed` | `repeated float` | Speed — single value for all axes, or one per axis. **Interpretation is driver-specific** (see [Speed & Acceleration](#speed--acceleration) below). |
+| `acceleration` | `repeated float` | Acceleration — single value or one per axis. **Currently unused / reserved for future use.** |
 | `external_axis_values` | `repeated float` | Positions of external axes (in mm or degrees depending on type) |
 | `redundancy` | `float` | Redundant axis value (e.g., 7th axis of a 7-DOF robot) |
 
@@ -652,8 +652,8 @@ Wraps a `CartesianPosition` with motion parameters:
 CartesianTarget:
     position             = CartesianPosition
     posture              = "110"          // robot configuration string
-    speed                = [0.15]         // single value or per-axis, 0.0–1.0
-    acceleration         = [0.1]          // single value or per-axis, 0.0–1.0
+    speed                = [0.5]          // driver-specific (see Speed section)
+    acceleration         = []             // currently unused
     external_axis_values = [500.0, 0.0]   // mm or degrees
     redundancy           = 0.0            // 7th axis value
 ```
@@ -665,18 +665,31 @@ Defines a robot position in joint space:
 | Field | Type | Description |
 |---|---|---|
 | `axis_values` | `repeated float` | Joint angles in **degrees** (e.g., 6 values for a 6-axis robot) |
-| `speed` | `repeated float` | Speed — single value or one per axis. Normalized 0.0–1.0. |
-| `acceleration` | `repeated float` | Acceleration — single value or one per axis. Normalized 0.0–1.0. |
+| `speed` | `repeated float` | Speed — single value or one per axis. **Interpretation is driver-specific** (see [Speed & Acceleration](#speed--acceleration) below). |
+| `acceleration` | `repeated float` | Acceleration — single value or one per axis. **Currently unused / reserved for future use.** |
 | `external_axis_values` | `repeated float` | External axis positions |
 
 **Pseudocode:**
 ```
 JointTarget:
     axis_values          = [A1_deg, A2_deg, A3_deg, A4_deg, A5_deg, A6_deg]
-    speed                = [0.15]         // 15% of max speed
-    acceleration         = [0.1]          // 10% of max acceleration
+    speed                = [50]           // driver-specific (see Speed section)
+    acceleration         = []             // currently unused
     external_axis_values = [E1, E2, ...]  // mm or degrees
 ```
+
+#### Speed & Acceleration
+
+The `speed` field is a `repeated float` — you can provide a **single value** (applied to all axes) or **one value per axis**. The **interpretation of the speed value depends on the robot driver and motion type**. It is **not** automatically normalized:
+
+| Driver | Motion Type | Speed Unit | Typical Range | Example |
+|---|---|---|---|---|
+| **KUKA KSS_KRL** | PTP (joint space) | **Percentage** of maximum axis speed | 0–100 | `speed = [50]` → 50% max speed |
+| **KUKA KSS_KRL** | LIN / CP (Cartesian) | **m/s** — TCP travel speed | 0.0–2.0 | `speed = [0.5]` → 0.5 m/s |
+| **ABB ABB_RAPID** | All | **Speed profile name** mapped to a numeric value | e.g., 500 | `speed = [500]` → corresponds to `V500` speed data |
+| **UR UR_Driver** | All | **m/s** or **rad/s** depending on motion type | 0.0–2.0 | `speed = [0.5]` → 0.5 m/s |
+
+**Important:** The `acceleration` field is **currently unused** and reserved for future implementation. You can leave it empty or omit it entirely. Setting values will not cause errors but will have no effect on simulation or code generation.
 
 #### `Vector3`
 
@@ -998,21 +1011,24 @@ Each motion message contains:
 ```
 MotionCommand = ONE OF:
 
-    AxisMotion:                           // Joint-space target
+    AxisMotion:                           // Joint-space target (use in PTP groups)
         target = JointTarget(
             axis_values = [-45, -90, 90, 0, 0, 0],  // degrees
-            speed       = [0.15]                      // 15% max speed
+            speed       = [50]                        // KUKA: 50% max speed
         )
 
     PTPMotion:                            // Cartesian target, PTP interpolation
         target = CartesianTarget(
             position = CartesianPosition(matrix or euler or cs),
             posture  = "110",
-            speed    = [0.1]
+            speed    = [50]                           // KUKA PTP: 50% max speed
         )
 
     LINMotion:                            // Cartesian target, linear interpolation
-        target = CartesianTarget(...)
+        target = CartesianTarget(
+            ...
+            speed    = [0.5]                          // KUKA LIN: 0.5 m/s
+        )
 
     CircularMotion:                       // Arc through 3 Cartesian points
         targets = [CartesianTarget, CartesianTarget, CartesianTarget]
@@ -1025,7 +1041,7 @@ motion = prc_pb2.MotionCommand(
     axis_motion=prc_pb2.AxisMotion(
         target=prc_pb2.JointTarget(
             axis_values=[-45, -90, 90, 0, 0, 0],  # 6 joint angles in degrees
-            speed=[0.15]                            # 15% of max speed
+            speed=[50]                              # KUKA PTP: 50% of max speed
         )
     )
 )
@@ -1045,7 +1061,7 @@ motion = prc_pb2.MotionCommand(
                 )
             ),
             posture="110",
-            speed=[0.1]
+            speed=[50]  # KUKA PTP: 50% max speed
         )
     )
 )
@@ -1066,7 +1082,7 @@ motion = prc_pb2.MotionCommand(
         target=prc_pb2.CartesianTarget(
             position=prc_pb2.CartesianPosition(matrix=matrix),
             posture="110",
-            speed=[0.1]
+            speed=[50]  # KUKA PTP: 50% max speed
         )
     )
 )
@@ -1924,7 +1940,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { -45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 0.15f }
+                Speed = new float[] { 50f }  // KUKA PTP: 50% max speed
             }
         },
         new PRC.Core.Commands.Motion.Axis
@@ -1932,7 +1948,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { 45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 0.15f }
+                Speed = new float[] { 50f }  // KUKA PTP: 50% max speed
             }
         }
     };
@@ -2039,11 +2055,11 @@ var taskReply = await client.AddRobotTaskAsync(new AddRobotTaskRequest
                         new MotionCommand { AxisMotion = new AxisMotion {
                             Target = new JointTarget {
                                 AxisValues = { -45, -90, 90, 0, 0, 0 },
-                                Speed = { 0.15f } } } },
+                                Speed = { 50f } } } },
                         new MotionCommand { AxisMotion = new AxisMotion {
                             Target = new JointTarget {
                                 AxisValues = { 45, -90, 90, 0, 0, 0 },
-                                Speed = { 0.15f } } } }
+                                Speed = { 50f } } } }
                     }
                 }
             }
@@ -2159,10 +2175,10 @@ thread.start()
 motions = [
     prc_pb2.MotionCommand(axis_motion=prc_pb2.AxisMotion(
         target=prc_pb2.JointTarget(
-            axis_values=[0, 20, -90, 90, 70, -115], speed=[0.1]))),
+            axis_values=[0, 20, -90, 90, 70, -115], speed=[50]))),  # KUKA PTP: 50%
     prc_pb2.MotionCommand(axis_motion=prc_pb2.AxisMotion(
         target=prc_pb2.JointTarget(
-            axis_values=[0, -40, 75, -80, -90, -125], speed=[0.15]))),
+            axis_values=[0, -40, 75, -80, -90, -125], speed=[50]))),  # KUKA PTP: 50%
 ]
 
 task_reply = stub.AddRobotTask(prc_pb2.AddRobotTaskRequest(
@@ -2256,12 +2272,12 @@ const addTaskReply = await client.addRobotTask(
                             new prc.AxisMotion().setTarget(
                                 new prc.JointTarget()
                                     .setAxisValuesList([0, 20, -90, 90, 70, -115])
-                                    .setSpeedList([0.1]))),
+                                    .setSpeedList([50]))),
                         new prc.MotionCommand().setAxisMotion(
                             new prc.AxisMotion().setTarget(
                                 new prc.JointTarget()
                                     .setAxisValuesList([0, -40, 75, -80, -90, -125])
-                                    .setSpeedList([0.1])))
+                                    .setSpeedList([50])))
                     ])
                 )
             ])
