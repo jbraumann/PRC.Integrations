@@ -1,0 +1,30 @@
+schema_version = "1.0.0"
+
+id = "prc_blender"
+version = "0.1.0"
+name = "Parametric Robot Control"
+tagline = "Create and simulate robot toolpaths with Geometry Nodes and run them through PRC."
+maintainer = "Johannes Braumann | Robots in Architecture and Creative Robotics"
+type = "add-on"
+
+tags = ["3D View", "Geometry Nodes"]
+
+blender_version_min = "5.0.0"
+
+license = ["SPDX:MIT"]
+
+# Bundled Python wheels — Blender 5.x ships CPython 3.13. The extension
+# system installs the wheel matching the host platform/ABI into a private
+# site-packages on enable.
+platforms = ["windows-x64", "linux-x64", "macos-arm64", "macos-x64"]
+
+website = "https://prc.robotsinarchitecture.org"
+
+wheels = [
+    "./wheels/grpcio-1.80.0-cp313-cp313-win_amd64.whl",
+    "./wheels/grpcio-1.80.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+    "./wheels/grpcio-1.80.0-cp313-cp313-macosx_11_0_universal2.whl",
+    "./wheels/protobuf-7.34.1-cp310-abi3-win_amd64.whl",
+    "./wheels/protobuf-7.34.1-cp310-abi3-manylinux2014_x86_64.whl",
+    "./wheels/protobuf-7.34.1-cp310-abi3-macosx_10_9_universal2.whl",
+]
