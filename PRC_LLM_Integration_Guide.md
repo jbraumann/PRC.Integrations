@@ -108,8 +108,8 @@ simulation_result = AddRobotTask(
                 type     = PTP,
                 tool_id  = "0",
                 commands = [
-                    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 50),  // KUKA: 50%
-                    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 50),  // KUKA: 50%
+                    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 0.15),
+                    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 0.15),
                 ]
             )
         ]
@@ -164,7 +164,7 @@ Each call returns a fresh `SimulationResult`. The settings dictionary can be mod
 ### SubscribeRobotFeedback — Continuous Stream
 
 After setup, `SubscribeRobotFeedback` opens a **server-streaming** connection that continuously delivers:
-- **Heartbeats** — periodic alive signals
+- **Heartbeats** — sent roughly once per second. The `beat` value carries the **current simulation progress in percent (0–100)**, so long-running `AddRobotTask` calls can drive a progress bar. Because heartbeats arrive continuously, they also double as a liveness signal: if no feedback message has arrived for several seconds, the server is gone or the stream broke.
 - **RobotState updates** — when `GetSimulatedRobotState` is called with `stream_update=true`, or during real-time robot control
 - **Settings updates** — when the server modifies settings (e.g., during real-time control)
 - **Pings** — response to ping requests
@@ -288,9 +288,10 @@ The `PRC.GRPC.Client.Client` class exposes the following methods and properties:
 |---|---|---|
 | `Connect` | `async Task<TaskFeedback> Connect(string ip, bool grpcWeb = false)` | Establish connection to PRC server. Handles TLS certificates automatically. |
 | `SetupRobot` | `async Task<SetupFeedback> SetupRobot(string clientId, IRobotProperties robot, string robotDriver)` | Initialize robot environment. Automatically subscribes to the feedback stream. Returns settings dictionary. |
-| `AddTask` | `async Task<SimulationFeedback> AddTask(Task task, Dictionary<string, string> settings)` | Send motion commands. Returns simulation result with code, axis data, reachability. |
+| `AddTask` | `async Task<SimulationFeedback> AddTask(Task task, Dictionary<string, string> settings, CancellationToken cancellationToken = default)` | Send motion commands. Returns simulation result with code, axis data, reachability. Pass a `CancellationToken` to abandon a task that has been superseded by a newer request — a cancelled call returns an error feedback (`"Task superseded by a newer request."`) instead of throwing. |
 | `UpdateRobot` | `async Task<RobotState> UpdateRobot(float simulationState, bool streamFeedback = false)` | Query robot state at a normalized position (0.0–1.0). |
 | `UpdateVariable` | `async Task<Dictionary<string, List<Variable>>> UpdateVariable(Variable variable)` | Set/update a robot variable. Returns all variables of all connected robots. |
+| `GetRobotData` | `async Task<PRC.GRPC.Robot?> GetRobotData()` | Retrieve the resolved robot definition (per-joint geometry, kinematics, tools, base, collision geometry, external axes) for the robot already set up on this client. Returns `null` if `SetupRobot` has not been called successfully, or if the server returns an error. |
 | `Ping` | `async Task<Ping> Ping(string payload = "")` | Connection health check. |
 | `Disconnect` | `async Task<TaskFeedback> Disconnect()` | Close the connection gracefully. |
 | `Reconnect` | `async Task<TaskFeedback> Reconnect()` | Reconnect, re-setup robot, and re-send last task. |
@@ -301,6 +302,13 @@ The `PRC.GRPC.Client.Client` class exposes the following methods and properties:
 | `clientID` | `string` | The server-assigned robot ID. |
 | `actSettings` | `Dictionary<string, string>` | Current settings dictionary. |
 | `connectivityState` | `ConnectivityState` | Current GRPC channel state. |
+| `SimulationProgress` | `int` | Simulation progress in percent (0–100), taken from the latest server heartbeat. Useful for progress bars during long `AddTask` calls. |
+| `LastFeedbackUtc` | `DateTime` | UTC time of the last message received on the feedback stream. The server heartbeats every second, so a stale value means the server is gone or the stream broke — use it as a liveness watchdog. |
+| `ShortCallTimeout` | `TimeSpan` | Client-side deadline for quick calls (`UpdateRobot`, `UpdateVariable`, `Ping`). Default **10 s**. |
+| `SetupTimeout` | `TimeSpan` | Client-side deadline for `SetupRobot` and `GetRobotData`. Default **60 s**. |
+| `TaskTimeout` | `TimeSpan` | Client-side deadline for `AddTask`. Default **10 min** — generous because it covers the full simulation plus code generation of a potentially large toolpath. |
+
+**Deadlines & error handling:** All RPC calls carry a client-side deadline (the three timeout properties above, settable per client instance), so a hung or unreachable server never blocks a caller indefinitely. A timed-out or failed call returns an error `TaskFeedback`/`SimulationFeedback` with a descriptive message rather than throwing. Note that `AddTask` treats only the server status `"Processed."` as success — an empty or unrecognized status (old servers, `"Environment ID not found"`, …) surfaces as an error, never as success with empty data.
 
 ### Event Handlers
 
@@ -311,6 +319,7 @@ The Client library automatically subscribes to the `SubscribeRobotFeedback` stre
 | `RobotStateUpdatedEventHandler` | `RobotStateUpdatedEventArgs` (`.RobotState`) | A new robot state is received (simulation update, real-time control). |
 | `RobotSettingsUpdatedEventHandler` | `RobotSettingsUpdatedEventArgs` (`.RobotSettings`) | Settings are updated by the server. |
 | `PingEventHandler` | `RobotPingEventArgs` (`.PingPayload`) | A ping response is received. |
+| `SimulationProgressEventHandler` | `SimulationProgressEventArgs` (`.Progress`) | A heartbeat is received. `Progress` is the simulation progress in percent (0–100) as reported by the server. |
 
 Call `client.ClearEvents()` to unsubscribe all handlers.
 
@@ -342,8 +351,8 @@ task.TaskType = SimulateAndExecuteTask
 motionGroup = new PTPMotionGroup()
 motionGroup.ToolID = "0"
 motionGroup.PTPMotions = [
-    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 50),  // KUKA PTP: 50%
-    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 50),  // KUKA PTP: 50%
+    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 0.15),
+    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 0.15),
 ]
 task.Commands.Add(motionGroup)
 
@@ -421,7 +430,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { -45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 50f }  // KUKA PTP: 50% max speed
+                Speed = new float[] { 0.15f }
             }
         },
         new PRC.Core.Commands.Motion.Axis
@@ -429,7 +438,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { 45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 50f }  // KUKA PTP: 50% max speed
+                Speed = new float[] { 0.15f }
             }
         }
     };
@@ -458,7 +467,7 @@ if (connectFeedback.Status == Status.Success)
 
 ## 5. GRPC Service Definition
 
-The PRC protobuf definition exposes **6 RPC methods** in the `ParametricRobotControlService`:
+The PRC protobuf definition exposes **7 RPC methods** in the `ParametricRobotControlService`:
 
 ```protobuf
 service ParametricRobotControlService {
@@ -477,6 +486,10 @@ service ParametricRobotControlService {
   // Optional: Update a variable. Returns all variables of all connected devices.
   rpc UpdateVariable (UpdateVariableRequest) returns (UpdateVariableReply);
 
+  // Optional: Retrieve the resolved robot definition (geometry, kinematics,
+  // tools, base, collision geometry, external axes) of an already set up robot.
+  rpc GetRobotData (GetRobotDataRequest) returns (GetRobotDataReply);
+
   // Optional: Ping the controller.
   rpc SendPing (Ping) returns (Ping);
 }
@@ -489,6 +502,7 @@ service ParametricRobotControlService {
 | `SubscribeRobotFeedback` | Server streaming | Real-time stream of heartbeats, robot state, settings updates, pings. |
 | `GetSimulatedRobotState` | Unary | Query robot state at a normalized position (0.0–1.0) along the toolpath. |
 | `UpdateVariable` | Unary | Set a variable on the robot. Returns all variables of all connected robots. |
+| `GetRobotData` | Unary | Retrieve the resolved robot definition (geometry, kinematics, tools, base, collision geometry, external axes) for a robot already set up via `SetupRobot`. Returns an error status before setup completes. |
 | `SendPing` | Unary | Connection health check. |
 
 ---
@@ -642,8 +656,8 @@ Wraps a `CartesianPosition` with motion parameters:
 |---|---|---|
 | `position` | `CartesianPosition` | The target frame |
 | `posture` | `string` | Robot posture/configuration string (e.g., `"110"` for KUKA turn/status) |
-| `speed` | `repeated float` | Speed — single value for all axes, or one per axis. **Interpretation is driver-specific** (see [Speed & Acceleration](#speed--acceleration) below). |
-| `acceleration` | `repeated float` | Acceleration — single value or one per axis. **Currently unused / reserved for future use.** |
+| `speed` | `repeated float` | Speed — single value for all axes, or one per axis. Normalized 0.0–1.0. |
+| `acceleration` | `repeated float` | Acceleration — single value or one per axis. Normalized 0.0–1.0. |
 | `external_axis_values` | `repeated float` | Positions of external axes (in mm or degrees depending on type) |
 | `redundancy` | `float` | Redundant axis value (e.g., 7th axis of a 7-DOF robot) |
 
@@ -652,8 +666,8 @@ Wraps a `CartesianPosition` with motion parameters:
 CartesianTarget:
     position             = CartesianPosition
     posture              = "110"          // robot configuration string
-    speed                = [0.5]          // driver-specific (see Speed section)
-    acceleration         = []             // currently unused
+    speed                = [0.15]         // single value or per-axis, 0.0–1.0
+    acceleration         = [0.1]          // single value or per-axis, 0.0–1.0
     external_axis_values = [500.0, 0.0]   // mm or degrees
     redundancy           = 0.0            // 7th axis value
 ```
@@ -665,31 +679,18 @@ Defines a robot position in joint space:
 | Field | Type | Description |
 |---|---|---|
 | `axis_values` | `repeated float` | Joint angles in **degrees** (e.g., 6 values for a 6-axis robot) |
-| `speed` | `repeated float` | Speed — single value or one per axis. **Interpretation is driver-specific** (see [Speed & Acceleration](#speed--acceleration) below). |
-| `acceleration` | `repeated float` | Acceleration — single value or one per axis. **Currently unused / reserved for future use.** |
+| `speed` | `repeated float` | Speed — single value or one per axis. Normalized 0.0–1.0. |
+| `acceleration` | `repeated float` | Acceleration — single value or one per axis. Normalized 0.0–1.0. |
 | `external_axis_values` | `repeated float` | External axis positions |
 
 **Pseudocode:**
 ```
 JointTarget:
     axis_values          = [A1_deg, A2_deg, A3_deg, A4_deg, A5_deg, A6_deg]
-    speed                = [50]           // driver-specific (see Speed section)
-    acceleration         = []             // currently unused
+    speed                = [0.15]         // 15% of max speed
+    acceleration         = [0.1]          // 10% of max acceleration
     external_axis_values = [E1, E2, ...]  // mm or degrees
 ```
-
-#### Speed & Acceleration
-
-The `speed` field is a `repeated float` — you can provide a **single value** (applied to all axes) or **one value per axis**. The **interpretation of the speed value depends on the robot driver and motion type**. It is **not** automatically normalized:
-
-| Driver | Motion Type | Speed Unit | Typical Range | Example |
-|---|---|---|---|---|
-| **KUKA KSS_KRL** | PTP (joint space) | **Percentage** of maximum axis speed | 0–100 | `speed = [50]` → 50% max speed |
-| **KUKA KSS_KRL** | LIN / CP (Cartesian) | **m/s** — TCP travel speed | 0.0–2.0 | `speed = [0.5]` → 0.5 m/s |
-| **ABB ABB_RAPID** | All | **Speed profile name** mapped to a numeric value | e.g., 500 | `speed = [500]` → corresponds to `V500` speed data |
-| **UR UR_Driver** | All | **m/s** or **rad/s** depending on motion type | 0.0–2.0 | `speed = [0.5]` → 0.5 m/s |
-
-**Important:** The `acceleration` field is **currently unused** and reserved for future implementation. You can leave it empty or omit it entirely. Setting values will not cause errors but will have no effect on simulation or code generation.
 
 #### `Vector3`
 
@@ -868,18 +869,20 @@ Defines a robotic end-effector tool:
 |---|---|---|
 | `tool_type` | `FrameType` | `FIXED` (mounted on flange) or `EXTERNAL` (stationary tool in the cell) |
 | `tcp` | `CartesianPosition` | Tool Center Point — the tip of the tool, relative to the robot flange. Any of the three `CartesianPosition` representations can be used. |
-| `tool_id` | `string` | Unique identifier. Must match keys in `Robot.tool_dictionary` and references in `MotionGroup.tool_id`. |
-| `tool_state` | `int32` | Switch between different tool configurations |
+| `tool_id` | `string` | **Dictionary key / display name.** Must match the key in `Robot.tool_dictionary` and is what `MotionGroup.tool_id` references. May be a number (`"0"`, `"6"`) or a descriptive name (`"gripper_open"`). |
 | `tool_geometry` | `PolyMesh` | Visual and collision mesh of the tool |
+| `tool_robot_variable` | `string` | **Controller-side tool identifier** — the tool number written into generated code (e.g. `"6"` → KUKA `Tool6`). Several `Tool` entries may share one `tool_robot_variable` (and the same TCP) while differing only in geometry; this is how multiple geometric states of one physical tool are expressed. **Defaults to `tool_id` when left empty.** |
+
+> **Note (field 4 reserved):** The former `int32 tool_state` field (field number 4) has been **removed**. It is now `reserved` in the proto, so the field number is never reused. Switching tool configurations is now done with `tool_robot_variable` + multiple dictionary entries (see below), not a per-tool state index.
 
 **Pseudocode:**
 ```
 Tool:
-    tool_type    = FIXED                // mounted on flange
-    tcp          = CartesianPosition    // offset from flange to tool tip
-    tool_id      = "0"
-    tool_state   = 0
-    tool_geometry = PolyMesh(...)       // optional visual + collision geometry
+    tool_type           = FIXED                // mounted on flange
+    tcp                 = CartesianPosition    // offset from flange to tool tip
+    tool_id             = "gripper_open"       // dictionary key / display name
+    tool_robot_variable = "6"                  // controller tool number; empty → tool_id
+    tool_geometry       = PolyMesh(...)        // optional visual + collision geometry
 ```
 
 **Minimal tool setup (identity TCP at the flange):**
@@ -913,6 +916,42 @@ tool = prc_pb2.Tool(
     )
 )
 ```
+
+##### Multiple Tool States (geometry-only switch)
+
+`tool_id` (the dictionary key / display name) and `tool_robot_variable` (the controller tool number) are **decoupled**. This lets you represent several geometric states of the *same* physical tool — for example an open vs. closed gripper — as **separate dictionary entries that share a `tool_robot_variable`**. Each entry carries its own `tool_id` and its own geometry, but the same controller tool number and TCP:
+
+```python
+shared_tcp = prc_pb2.CartesianPosition(
+    euler=prc_pb2.Euler(x=0, y=0, z=200, a=0, b=0, c=0, format=prc_pb2.EulerFormat.ZYX)
+)
+
+tool_dictionary = {
+    "gripper_open": prc_pb2.Tool(
+        tool_id="gripper_open",
+        tool_robot_variable="6",          # controller Tool6
+        tool_type=prc_pb2.FrameType.FIXED,
+        tcp=shared_tcp,                    # identical TCP across states
+        tool_geometry=open_geometry,
+    ),
+    "gripper_closed": prc_pb2.Tool(
+        tool_id="gripper_closed",
+        tool_robot_variable="6",          # SAME controller Tool6
+        tool_type=prc_pb2.FrameType.FIXED,
+        tcp=shared_tcp,                    # must match
+        tool_geometry=closed_geometry,
+    ),
+}
+```
+
+A `MotionGroup` selects a state by its `tool_id` (`"gripper_open"` / `"gripper_closed"`). Because both keys resolve to the same `tool_robot_variable`, switching between them:
+
+- **swaps the visual / collision geometry** in the simulation and live feedback (resolved per `tool_id`), but
+- **emits no redundant tool-change statement** in the generated robot code (the controller tool number `6` is unchanged).
+
+A motion group that switches to a `tool_id` whose `tool_robot_variable` *differs* from the previously emitted one **does** emit a tool-change in the generated code, as before.
+
+**Constraint:** all `Tool` entries that share a `tool_robot_variable` **must have an identical `tcp` and `tool_type`**. Otherwise the server rejects `SetupRobot` with an error such as *"Tools sharing ToolRobotVariable "6" must have identical TCP and FrameType. Mismatch between "gripper_open" and "gripper_closed"."* — because code generation emits one tool declaration per `tool_robot_variable`, and visualization assumes the underlying physical tool is the same.
 
 #### `Base`
 
@@ -970,7 +1009,7 @@ Defines an external axis (linear rail, rotary positioner, AGV, etc.):
 | `motion_group_type` | `MotionGroupType` | `CP` (Continuous Path / Linear), `PTP` (Point-to-Point), or `SPLINE` |
 | `commands` | `repeated MotionCommand` | The list of motion commands. Must be compatible with the group type. |
 | `interpolation` | `string` | Interpolation mode string output in generated code (e.g., `"C_PTP"`, `"C_DIS"`). Not currently simulated. |
-| `tool_id` | `string` | References a tool in `Robot.tool_dictionary` |
+| `tool_id` | `string` | The `tool_id` (dictionary key) of a tool in `Robot.tool_dictionary`. May be a number (`"0"`) or a name (`"gripper_open"`). Switching to a different key that resolves to the **same** `tool_robot_variable` swaps geometry only — no tool-change is emitted in the generated code (see the [Tool](#tool) message). |
 | `robot_base` | `Base` | Base frame for this motion group |
 | `data` | `MetaData` | Additional data |
 
@@ -980,7 +1019,7 @@ MotionGroup:
     motion_group_type = PTP | CP | SPLINE
     commands          = [MotionCommand, MotionCommand, ...]
     interpolation     = "C_PTP"           // written to generated code
-    tool_id           = "0"               // must exist in Robot.tool_dictionary
+    tool_id           = "0"               // dictionary key; must exist in Robot.tool_dictionary
     robot_base        = Base(...)
 ```
 
@@ -990,7 +1029,9 @@ MotionGroup:
 |---|---|---|
 | `PTP` | `AxisMotion`, `PTPMotion` | Joint-space or Cartesian point-to-point. Robot chooses fastest path. |
 | `CP` | `LINMotion`, `CircularMotion` | Continuous path. TCP follows a straight line or arc in Cartesian space. |
-| `SPLINE` | `PTPMotion`, `LINMotion` | Smooth spline interpolation through waypoints. |
+| `SPLINE` | `PTPMotion`, `LINMotion` | Smooth spline interpolation through waypoints. Not yet supported by the KSS_KRL code generator. |
+
+> **KUKA spline motion commands:** Independently of the `SPLINE` group type, the KUKA KSS_KRL driver can emit single-point spline commands — **SPTP** instead of PTP, **SLIN** instead of LIN, **SCIRC** instead of CIRC (with `C_SPL` as the approximation criterion) — for regular `PTP` and `CP` motion groups when the `UseSplineMotions` setting is enabled. Requires KSS 8.3 or higher. See [Section 8](#8-settings-dictionary).
 
 #### `MotionCommand`
 
@@ -1011,24 +1052,21 @@ Each motion message contains:
 ```
 MotionCommand = ONE OF:
 
-    AxisMotion:                           // Joint-space target (use in PTP groups)
+    AxisMotion:                           // Joint-space target
         target = JointTarget(
             axis_values = [-45, -90, 90, 0, 0, 0],  // degrees
-            speed       = [50]                        // KUKA: 50% max speed
+            speed       = [0.15]                      // 15% max speed
         )
 
     PTPMotion:                            // Cartesian target, PTP interpolation
         target = CartesianTarget(
             position = CartesianPosition(matrix or euler or cs),
             posture  = "110",
-            speed    = [50]                           // KUKA PTP: 50% max speed
+            speed    = [0.1]
         )
 
     LINMotion:                            // Cartesian target, linear interpolation
-        target = CartesianTarget(
-            ...
-            speed    = [0.5]                          // KUKA LIN: 0.5 m/s
-        )
+        target = CartesianTarget(...)
 
     CircularMotion:                       // Arc through 3 Cartesian points
         targets = [CartesianTarget, CartesianTarget, CartesianTarget]
@@ -1041,7 +1079,7 @@ motion = prc_pb2.MotionCommand(
     axis_motion=prc_pb2.AxisMotion(
         target=prc_pb2.JointTarget(
             axis_values=[-45, -90, 90, 0, 0, 0],  # 6 joint angles in degrees
-            speed=[50]                              # KUKA PTP: 50% of max speed
+            speed=[0.15]                            # 15% of max speed
         )
     )
 )
@@ -1061,7 +1099,7 @@ motion = prc_pb2.MotionCommand(
                 )
             ),
             posture="110",
-            speed=[50]  # KUKA PTP: 50% max speed
+            speed=[0.1]
         )
     )
 )
@@ -1082,7 +1120,7 @@ motion = prc_pb2.MotionCommand(
         target=prc_pb2.CartesianTarget(
             position=prc_pb2.CartesianPosition(matrix=matrix),
             posture="110",
-            speed=[50]  # KUKA PTP: 50% max speed
+            speed=[0.1]
         )
     )
 )
@@ -1098,7 +1136,7 @@ Actions are non-movement commands embedded in a task via `TaskPayload.action_tas
 |---|---|---|
 | `set_variable_action` | `SetVariable` | Sets a robot variable (bool/float/int/string) |
 | `wait_for_variable_action` | `WaitForVariable` | Pauses execution until a variable reaches a target state |
-| `hold_action` | `Hold` | Pauses execution for `hold_ms` milliseconds |
+| `hold_action` | `Hold` | Pauses execution for `hold_ms` milliseconds. Advances the simulation timeline by that duration and emits a sample at the held (preceding waypoint's) pose. |
 | `ping_action` | `Ping` | Pings the PRC server |
 | `insert_code_action` | `InsertCode` | Inserts arbitrary lines of robot code. Not parsed or simulated. |
 
@@ -1215,7 +1253,7 @@ Returned in `AddRobotTaskReply.simulation_result_data`. Contains the complete si
 | `simulation_results` | `repeated SimulationResultUnit` | One entry per interpolated position along the toolpath |
 | `is_valid` | `bool` | `true` if no reachability or collision problems were detected |
 | `time` | `float` | Total estimated execution time in **seconds** |
-| `code` | `string` | Generated robot control code (KRL for KUKA, URScript for UR, RAPID for ABB, etc.). Write this to a file with the appropriate extension. |
+| `code` | `string` | Generated robot control code (KRL for KUKA, URScript for UR, RAPID for ABB, etc.). Write this to a file with the appropriate extension (e.g. `.src` for KUKA KRL, `.script` for UR; for ABB RAPID, `.mod` or `.modx` depending on the `IRCVersion` setting — see [Section 8](#8-settings-dictionary)). Exception: `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON axis_recorder take file here instead of KRL. |
 | `data` | `MetaData` | Additional information |
 
 #### `SimulationResultUnit`
@@ -1226,7 +1264,7 @@ One row of simulation data at a specific interpolated position:
 |---|---|---|
 | `axis_values` | `repeated float` | Joint angles in **degrees** at this position |
 | `position` | `Matrix4x4` | Cartesian TCP position at this point (mm, right-handed Z-up) |
-| `time` | `float` | Time in **seconds** from simulation start to this point |
+| `time` | `float` | Time in **seconds** from simulation start to this point. Monotonically non-decreasing across the full `simulation_results` list — including across `Hold` pauses — so consumers can safely binary-search the timeline by time and interpolate poses between samples. |
 | `collision` | `repeated bool` | One per axis — `true` if that axis is in collision. Only active with collision checking enabled. |
 | `singularity` | `repeated bool` | One per axis — `true` if the robot is near a singularity |
 | `outofreach` | `repeated bool` | One per axis — `true` if that axis is out of its valid range |
@@ -1260,7 +1298,7 @@ Used for real-time visualization. Returned by `GetSimulatedRobotState` and strea
 | `axis_position` | `JointTarget` | Current joint angles in degrees |
 | `robot_transformations` | `repeated TransformationArray` | **Key for visualization.** First array = robot joints (base through flange). Subsequent arrays = external axes. Each `TransformationArray` contains one `Matrix4x4` per joint. |
 | `toolpath_index` | `float` | Normalized position along the toolpath (0.0–1.0) |
-| `tool_id` | `string` | Currently active tool ID |
+| `tool_id` | `string` | The `tool_id` (dictionary key) of the currently active tool. With multiple tool states sharing one `tool_robot_variable`, this is the per-state key — so visualization can swap to the correct geometry even when the controller tool number is unchanged. |
 | `tool_frame` | `Matrix4x4` | TCP position and orientation in world space |
 | `root_frame` | `Matrix4x4` | Robot base frame in world space |
 | `flange_frame` | `Matrix4x4` | Flange frame (before tool offset) in world space |
@@ -1325,7 +1363,7 @@ RobotState:
 
 | Field | Type | Description |
 |---|---|---|
-| `status` | `string` | Processing feedback. Starts with `"Error"` on failure. |
+| `status` | `string` | Processing feedback. **Exactly `"Processed."` on success** — treat any other value as an error (e.g. `"Error: …"` for processing failures, `"Environment ID not found"` for an unknown/expired robot ID, or an empty string from very old servers). |
 | `simulation_result_data` | `SimulationResult` | Full simulation result including axis values, reachability, collision data, and generated code. |
 
 #### `GetSimulatedRobotStateRequest`
@@ -1348,7 +1386,7 @@ Server-streaming response. Uses a `oneof` for the data payload:
 
 | Case | Message | Description |
 |---|---|---|
-| `heartbeat_data` | `Heartbeat` | Periodic alive signal with incrementing `beat` counter |
+| `heartbeat_data` | `Heartbeat` | Periodic alive signal, sent roughly once per second. `beat` carries the **current simulation progress in percent (0–100)** — 0 when idle. Doubles as a liveness watchdog: no heartbeat for several seconds means the server is gone or the stream broke. |
 | `robot_state_data` | `RobotState` | Full robot state including transformations |
 | `settings_data` | `Settings` | Updated settings dictionary |
 | `ping_data` | `Ping` | Ping response |
@@ -1361,7 +1399,7 @@ Additional field:
 for each feedback in stream:
     switch feedback.data_package:
         case heartbeat_data:
-            // server is alive, beat counter increments
+            // server is alive; beat = simulation progress in percent (0-100)
         case robot_state_data:
             state = feedback.robot_state_data
             // apply state.robot_transformations to joint meshes
@@ -1377,6 +1415,38 @@ for each feedback in stream:
 
 Request sets a `Variable` on the robot. Reply returns the complete variable state of all connected robots as parallel arrays of `id` and `VariableArray`.
 
+#### `GetRobotDataRequest`
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `string` | Robot ID (from `SetupRobotReply.id`) |
+
+#### `GetRobotDataReply`
+
+| Field | Type | Description |
+|---|---|---|
+| `status` | `string` | `"OK"` on success, or a human-readable error description (e.g. `"Environment ID not found"`). When set to an error, `robot_data` is unset. |
+| `robot_data` | `Robot` | The resolved robot definition. Always populates the `custom_robot` side of the `Robot.robot_data` oneof — even when the robot was set up via a preset — so that per-joint geometry and kinematic parameters (`axis_center`, `axis_direction`, `axis_speed`, `axis_range_min`, `axis_range_max`, `root_cs`, `flange_cs`) are always present. The original preset class (if any) is echoed in `custom_robot.preset_robot_class`. The enclosing `Robot` message also carries `tool_dictionary`, `initial_base`, `collision_geometry`, `cell_geometry`, `external_axes`, `robot_driver_class`, `friendly_id`, and `data`. |
+
+**Pre-condition:** `SetupRobot` must have completed successfully for the given `id`. Before that, `GetRobotData` returns `status = "Environment ID not found"` and an unset `robot_data`.
+
+**Pseudocode:**
+```
+reply = GetRobotData(id = robot_id)
+
+if reply.status != "OK":
+    // setup has not happened yet, or id is wrong
+    handle_error(reply.status)
+else:
+    robot   = reply.robot_data                   // proto Robot
+    custom  = robot.custom_robot                 // always populated
+    for joint_index, poly in enumerate(custom.geometry):
+        render(poly, transform = poly.transform)  // initial placement
+    for tool_id, tool in robot.tool_dictionary.items(): ...
+    for poly in robot.collision_geometry:        ...
+    for axis in robot.external_axes:             ...
+```
+
 ---
 
 ## 7. Available Robots & Drivers
@@ -1387,28 +1457,39 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 
 | Driver Class | Status | Description |
 |---|---|---|
-| `KUKA.KSS_KRL_Driver` | **Preview** | Driver for KUKA robots running KSS (KRC1-5). Outputs KRL code. |
+| `KUKA.KSS_KRL_Driver` | **Preview** | Driver for KUKA robots running KSS (KRC1-5). Outputs KRL code. Can optionally emit spline motion commands (SLIN/SPTP/SCIRC) instead of LIN/PTP/CIRC via the `UseSplineMotions` setting (see [Section 8](#8-settings-dictionary)). |
+| `KUKA.KSS_IOB_Driver` | Experimental | KUKA driver for the IO Builder integration, derived from KSS_KRL. Two interaction modes (chosen via the `Interaction` setting): **Servoing** streams the robot's current axis position as JSON over UDP to an external system whenever the simulation updates, and visualizes positions received back live; **Path-Table** takes each motion's absolute time from the metadata key `TimeStamp` (seconds, on `MetaData.data`) instead of computing timing from speed, and generates a time-stamped axis_recorder take file (JSON) as its `code` output instead of KRL. |
 | `KUKA.KSS_MXA_Driver` | Experimental | KUKA mxAutomation real-time interface. Requires matching mxAutomation.dll. |
-| `UR.UR_Driver` | Experimental | Universal Robots (UR10e, UR20). Supports Polyscope 5 and Polyscope X. |
+| `UR.UR_Driver` | Experimental | Universal Robots offline code generation (UR5e/7e, UR10e, UR20). Outputs URScript. Supports Polyscope 5 and Polyscope X. |
+| `UR.UR_RT_Driver` | Experimental | Universal Robots **realtime** driver: simulates PRC tasks with the UR solver, streams them as URScript programs over the controller's secondary interface (port 30002), and displays the actual robot position live via RTDE (port 30004). Both channels are officially supported on Polyscope 5 and PolyScope X. |
 | `ABB.ABB_RAPID_Driver` | Experimental | ABB robots using RAPID language. |
 | `IGUS.IGUS_Driver` | Proof of Concept | IGUS ReBel robot support. |
-| `NEURA.NEURA_SIM_Driver` | Proof of Concept | NEURA MAiRA 7 robot. Generates Python code using NeuraPy library. |
+| `NEURA.NEURA_SIM_Driver` | Proof of Concept | NEURA robots (MAiRA 7-DOF and LARA 6-DOF). Generates Python code using the NeuraPy library. |
+| `NEURA.NEURA_RT_Driver` | Experimental | NEURA **realtime** driver: connects to the NeuraPy server on the robot control box (default `192.168.2.13`) and executes/streams motions live, with configurable blending, follow-target mode, and feedback interval. |
 | `Generic.Generic_Driver` | Placeholder | For accessing I/O values and data from other robots/IoT devices. |
 
 ### Robot Models (Selection)
 
 **KUKA** (50+ models):
-`KUKA.KUKA_KR610R11002`, `KUKA.KUKA_KR610R9002`, `KUKA.KUKA_KR10R1420`, `KUKA.KUKA_KR120R1800`, `KUKA.KUKA_KR210R31002`, `KUKA.KUKA_KR3060`, `KUKA.KUKA_KR6R18402`, `KUKA.KUKA_KR8R1620`, `KUKA.KUKA_KR50R2500`, `KUKA.KUKA_KR1000`, `KUKA.KUKA_LBR3R760`, `KUKA.KUKA_KR120R3900K`, `KUKA.KUKA_KR210KR240R2700`, `KUKA.KUKA_KR3R540`, `KUKA.KUKA_KR4R600`, `KUKA.KUKA_KR5arcHW`, `KUKA.KUKA_KR600R2830`, `KUKA.KUKA_KR480R3330`, `KUKA.KUKA_KR3605002`, and many more.
+`KUKA.KUKA_KR610R11002`, `KUKA.KUKA_KR610R9002`, `KUKA.KUKA_KR10R1420`, `KUKA.KUKA_KR120R1800`, `KUKA.KUKA_KR210R31002`, `KUKA.KUKA_KR3060`, `KUKA.KUKA_KR6R18402`, `KUKA.KUKA_KR8R1620`, `KUKA.KUKA_KR50R2500`, `KUKA.KUKA_KR1000`, `KUKA.KUKA_LBR3R760`, `KUKA.KUKA_KR120R3900K`, `KUKA.KUKA_KR210KR240R2700`, `KUKA.KUKA_KR3R540`, `KUKA.KUKA_KR4R600`, `KUKA.KUKA_KR5arcHW`, `KUKA.KUKA_KR600R2830`, `KUKA.KUKA_KR480R3330`, `KUKA.KUKA_KR3605002`, `KUKA.KUKA_KR100120P2`, and many more.
 
-**Universal Robots:** `UR.UR_10e`, `UR.UR_20`
+**Universal Robots:** `UR.UR_57e` (UR5e/7e), `UR.UR_10e`, `UR.UR_20`
 
-**ABB:** `ABB.ABB_IRB6700_150_320`
+**ABB:** `ABB.ABB_IRB6620`, `ABB.ABB_IRB6700_150_320`
 
 **IGUS:** `IGUS.IGUS_ReBel`
 
-**NEURA:** `NEURA.NEURA_MAIRA_M`
+**NEURA:** `NEURA.NEURA_MAIRA_M` (7-DOF), `NEURA.NEURA_LARA_3` (LARA 3, 6-DOF)
 
 The class strings map to `PRC.Library.Robots.<class>()` constructors internally. For example, `"KUKA.KUKA_KR610R11002"` constructs a robot with pre-configured kinematic data, axis limits, speeds, and 3D geometry.
+
+### External Axis Presets (.NET Library)
+
+External axes travel over GRPC as full `ExternalAxis` definitions (type, kinematics, geometry) — there is no preset class string on the wire. .NET Client Library users can instead instantiate ready-made presets from `PRC.Library.ExternalAxes`:
+
+**KUKA:** `KUKA_KL4000` (linear axis), `KUKA_KP1V` (KP1V500 single rotary axis), `KUKA_DKP400` (2-axis positioner), `KUKA_DKP500` (DKP500-2 HW 2-axis positioner), `KUKA_KP2HV500` (KP2 HV500 2-axis positioner)
+
+**NEURA:** `MAV500` (MAV-500 AGV)
 
 ---
 
@@ -1444,6 +1525,19 @@ AddRobotTask(id, task, settings)
 ```
 
 Settings may also be pushed through the feedback stream when changed by the server or during real-time control, allowing the client to stay synchronized.
+
+### Known Driver-Specific Settings
+
+Setting keys vary by driver — always inspect the dictionary returned from `SetupRobot` rather than hard-coding keys. Notable examples that affect the generated code:
+
+| Driver | Key | Values | Effect |
+|---|---|---|---|
+| `ABB.ABB_RAPID_Driver` | `IRCVersion` | `"IRC5"` or `"IRC7/OmniCore"` (**default**) | Targets the controller generation. **`IRC5`** → save the generated module as a **`.mod`** file; **`IRC7/OmniCore`** → save it as a **`.modx`** file. A missing or unrecognised value falls back to `.modx`, so older projects keep producing OmniCore-compatible files. |
+| `KUKA.KSS_KRL_Driver` (and derived `KUKA.KSS_IOB_Driver`) | `UseSplineMotions` | `"True"` or `"False"` (**default**) | If enabled, spline motion commands (**SLIN**, **SPTP**, **SCIRC**) are generated instead of LIN, PTP, and CIRC. Approximated motions use the `C_SPL` criterion instead of `C_DIS`/`C_PTP`. Requires KUKA KSS 8.3 or higher. |
+| `KUKA.KSS_IOB_Driver` | `Interaction` | `"Path-Table"` (**default**) or `"Servoing"` | Selects the IO Builder interaction mode. In **Path-Table** mode every motion must carry an absolute time stamp in seconds under the metadata key `TimeStamp` (`MetaData.data["TimeStamp"]`, invariant culture); the solver uses those times instead of speed-derived timing, and the `code` output is a time-stamped axis_recorder take file (JSON) rather than KRL. In **Servoing** mode the current axis position is streamed as JSON over UDP (`ExternalIP`/`ExternalPort`), and positions received on `LocalPort` are visualized live. |
+| `KUKA.KSS_IOB_Driver` | `PathSmoothing` | `"Spline"` (**default**) or `"Linear"` | With `"Spline"`, the simulation is smoothed with cubic splines through the programmed targets — every target is still reached at its exact time, but velocity stays continuous across targets instead of cornering. |
+
+When writing `SimulationResult.code` to disk, choose the file extension based on the driver (and, for ABB, the `IRCVersion` setting). Note that `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON take file, not KRL. See [Section 6.6](#66-feedback) and [Section 9](#9-simulationresult-addtaskreply-data).
 
 ---
 
@@ -1501,7 +1595,8 @@ for i, unit in enumerate(result.simulation_results):
         print(f"  Axes: {list(unit.axis_values)}")
 
 # Save generated code to file
-with open("robot_program.src", "w") as f:  # .src for KRL, .script for UR
+# .src for KUKA KRL, .script for UR, .mod/.modx for ABB RAPID (see IRCVersion in Section 8)
+with open("robot_program.src", "w") as f:
     f.write(result.code)
 ```
 
@@ -1808,6 +1903,81 @@ A `PolyMesh` is a compound object that may contain:
 
 **Important:** The count of `meshes` and `collision_convex_hull` within a single `PolyMesh` are **independent**. A PolyMesh might have 5 visual meshes but 1 collision hull, or 2 visual meshes and 3 collision hulls.
 
+### How a Mesh Is Put Together — Faces and Vertices
+
+A single `Mesh` is a flat record of four parallel arrays:
+
+| Array | Type | Role |
+|---|---|---|
+| `vertices` | `repeated Vector3` | 3D positions in **mm**. Ordered — each entry is referenced by its index. |
+| `faces` | `repeated Int4` | Each `Int4` stores **four indices** into `vertices`. Quad if all four indices are distinct; triangle if `z == w`. No other winding encoding is used. |
+| `normals` | `repeated Vector3` | **Per-vertex** shading normals, parallel to `vertices` (same length, same index). |
+| `mesh_color` | `Int4` | Single uniform `{A, R, G, B}` colour (0–255) for the entire mesh. For different colours, split the geometry across multiple `Mesh` entries inside one `PolyMesh`. |
+
+**Rules:**
+- Face indices are **0-based** into the mesh's own `vertices` array (not into any global index).
+- For a triangle, set `w = z` (the last index is simply repeated). Renderers that only do triangles can treat every face as two triangles `(x, y, z)` + `(x, z, w)`, which degenerates correctly when `z == w`.
+- Winding direction is not encoded in the face itself; use the per-vertex `normals` for shading.
+- `vertices` and `normals` must have the **same length**. `faces` can have any length independent of the vertex count.
+
+**Concrete example — a quad plus a triangle sharing vertices:**
+
+```
+vertices = [
+    (0,   0,   0),    // index 0
+    (100, 0,   0),    // index 1
+    (100, 100, 0),    // index 2
+    (0,   100, 0),    // index 3
+    (50,  50,  80),   // index 4 — apex used only by the triangle
+]
+
+normals = [               // one per vertex, same ordering as vertices
+    (0, 0, 1),
+    (0, 0, 1),
+    (0, 0, 1),
+    (0, 0, 1),
+    (0, 0, 1),
+]
+
+faces = [
+    Int4(x=0, y=1, z=2, w=3),   // quad  {v0, v1, v2, v3}
+    Int4(x=1, y=2, z=4, w=4),   // triangle {v1, v2, v4}  (w == z → triangle)
+]
+
+mesh_color = Int4(A=255, R=155, G=155, B=155)   // opaque mid-grey
+```
+
+### How a PolyMesh Puts Meshes Together
+
+A `PolyMesh` groups one or more `Mesh` entries that belong to the same logical object (for example, all parts of a single robot joint link):
+
+```
+PolyMesh
+├── meshes                  → list of visualization Mesh (each with its own mesh_color)
+├── collision_convex_hull   → list of collision Mesh (independent count from meshes)
+├── transform               → Matrix4x4, the PolyMesh's initial placement in WorldXY
+└── name                    → string identifier, e.g. "Axis_3"
+```
+
+- Each `Mesh` inside a `PolyMesh` is self-contained: its `faces` indices refer to its **own** `vertices` array. There is no global vertex pool across meshes.
+- To render a joint with several colours, emit one `Mesh` per colour region and keep them all inside the same `PolyMesh`.
+- `transform` is the PolyMesh's **initial** placement relative to WorldXY. At simulation time, joint transformations from `RobotState.robot_transformations` are applied on top (see [Section 10](#10-robotstate--visualization)).
+
+### How the Robot Puts PolyMeshes Together
+
+The resolved robot (as returned by `GetRobotData`) carries its geometry across several fields:
+
+```
+Robot
+├── custom_robot.geometry     → one PolyMesh per kinematic link (base, axis 1, axis 2, …)
+├── tool_dictionary[*].tool_geometry → one PolyMesh per tool
+├── collision_geometry        → repeated PolyMesh for environment obstacles
+├── cell_geometry             → a single PolyMesh for the work cell
+└── external_axes[*].geometry → repeated PolyMesh per external axis (rail, positioner, AGV)
+```
+
+For rendering, iterate each `PolyMesh`, then each `Mesh` inside it, and expand each `Int4` face into triangles as described above.
+
 ### Building Meshes for Sending to PRC
 
 When defining tool geometry or collision objects:
@@ -1940,7 +2110,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { -45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 50f }  // KUKA PTP: 50% max speed
+                Speed = new float[] { 0.15f }
             }
         },
         new PRC.Core.Commands.Motion.Axis
@@ -1948,7 +2118,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { 45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 50f }  // KUKA PTP: 50% max speed
+                Speed = new float[] { 0.15f }
             }
         }
     };
@@ -2055,11 +2225,11 @@ var taskReply = await client.AddRobotTaskAsync(new AddRobotTaskRequest
                         new MotionCommand { AxisMotion = new AxisMotion {
                             Target = new JointTarget {
                                 AxisValues = { -45, -90, 90, 0, 0, 0 },
-                                Speed = { 50f } } } },
+                                Speed = { 0.15f } } } },
                         new MotionCommand { AxisMotion = new AxisMotion {
                             Target = new JointTarget {
                                 AxisValues = { 45, -90, 90, 0, 0, 0 },
-                                Speed = { 50f } } } }
+                                Speed = { 0.15f } } } }
                     }
                 }
             }
@@ -2175,10 +2345,10 @@ thread.start()
 motions = [
     prc_pb2.MotionCommand(axis_motion=prc_pb2.AxisMotion(
         target=prc_pb2.JointTarget(
-            axis_values=[0, 20, -90, 90, 70, -115], speed=[50]))),  # KUKA PTP: 50%
+            axis_values=[0, 20, -90, 90, 70, -115], speed=[0.1]))),
     prc_pb2.MotionCommand(axis_motion=prc_pb2.AxisMotion(
         target=prc_pb2.JointTarget(
-            axis_values=[0, -40, 75, -80, -90, -125], speed=[50]))),  # KUKA PTP: 50%
+            axis_values=[0, -40, 75, -80, -90, -125], speed=[0.15]))),
 ]
 
 task_reply = stub.AddRobotTask(prc_pb2.AddRobotTaskRequest(
@@ -2272,12 +2442,12 @@ const addTaskReply = await client.addRobotTask(
                             new prc.AxisMotion().setTarget(
                                 new prc.JointTarget()
                                     .setAxisValuesList([0, 20, -90, 90, 70, -115])
-                                    .setSpeedList([50]))),
+                                    .setSpeedList([0.1]))),
                         new prc.MotionCommand().setAxisMotion(
                             new prc.AxisMotion().setTarget(
                                 new prc.JointTarget()
                                     .setAxisValuesList([0, -40, 75, -80, -90, -125])
-                                    .setSpeedList([50])))
+                                    .setSpeedList([0.1])))
                     ])
                 )
             ])
