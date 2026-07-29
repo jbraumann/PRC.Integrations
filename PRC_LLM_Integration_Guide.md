@@ -287,11 +287,13 @@ The `PRC.GRPC.Client.Client` class exposes the following methods and properties:
 | Method | Signature | Description |
 |---|---|---|
 | `Connect` | `async Task<TaskFeedback> Connect(string ip, bool grpcWeb = false)` | Establish connection to PRC server. Handles TLS certificates automatically. |
-| `SetupRobot` | `async Task<SetupFeedback> SetupRobot(string clientId, IRobotProperties robot, string robotDriver)` | Initialize robot environment. Automatically subscribes to the feedback stream. Returns settings dictionary. |
+| `SetupRobot` | `async Task<SetupFeedback> SetupRobot(string clientId, IRobotProperties robot, string robotDriver)` | Initialize robot environment. Automatically subscribes to the feedback stream. Returns settings dictionary. For a robot-less monitoring connection, pass `new PRC.Library.Robots.Supervisor.Supervisor_Device()` as the robot with `"Supervisor.Supervisor_Driver"` as the driver. |
 | `AddTask` | `async Task<SimulationFeedback> AddTask(Task task, Dictionary<string, string> settings, CancellationToken cancellationToken = default)` | Send motion commands. Returns simulation result with code, axis data, reachability. Pass a `CancellationToken` to abandon a task that has been superseded by a newer request — a cancelled call returns an error feedback (`"Task superseded by a newer request."`) instead of throwing. |
 | `UpdateRobot` | `async Task<RobotState> UpdateRobot(float simulationState, bool streamFeedback = false)` | Query robot state at a normalized position (0.0–1.0). |
 | `UpdateVariable` | `async Task<Dictionary<string, List<Variable>>> UpdateVariable(Variable variable)` | Set/update a robot variable. Returns all variables of all connected robots. |
+| `QueryVariables` | `async Task<Dictionary<string, List<Variable>>> QueryVariables()` | Read the variables of all connected robots without modifying anything (sends an `UpdateVariableRequest` without a variable). |
 | `GetRobotData` | `async Task<PRC.GRPC.Robot?> GetRobotData()` | Retrieve the resolved robot definition (per-joint geometry, kinematics, tools, base, collision geometry, external axes) for the robot already set up on this client. Returns `null` if `SetupRobot` has not been called successfully, or if the server returns an error. |
+| `GetMachineData` | `async Task<GetRobotDataReply?> GetMachineData(string id, bool excludeGeometry = true)` | Retrieve the full `GetRobotDataReply` for **any connected machine** by its server-assigned ID — not just the robot set up on this client: the resolved definition plus its **live state** (current driver settings, variables, axis position, tool/flange frames, and visualization transformations). With `excludeGeometry` (the default) all mesh data is omitted, making the call cheap enough for high-frequency polling (30–60 Hz) — e.g. by a Supervisor client monitoring the other connected machines. Returns `null` on error. |
 | `Ping` | `async Task<Ping> Ping(string payload = "")` | Connection health check. |
 | `Disconnect` | `async Task<TaskFeedback> Disconnect()` | Close the connection gracefully. |
 | `Reconnect` | `async Task<TaskFeedback> Reconnect()` | Reconnect, re-setup robot, and re-send last task. |
@@ -304,8 +306,8 @@ The `PRC.GRPC.Client.Client` class exposes the following methods and properties:
 | `connectivityState` | `ConnectivityState` | Current GRPC channel state. |
 | `SimulationProgress` | `int` | Simulation progress in percent (0–100), taken from the latest server heartbeat. Useful for progress bars during long `AddTask` calls. |
 | `LastFeedbackUtc` | `DateTime` | UTC time of the last message received on the feedback stream. The server heartbeats every second, so a stale value means the server is gone or the stream broke — use it as a liveness watchdog. |
-| `ShortCallTimeout` | `TimeSpan` | Client-side deadline for quick calls (`UpdateRobot`, `UpdateVariable`, `Ping`). Default **10 s**. |
-| `SetupTimeout` | `TimeSpan` | Client-side deadline for `SetupRobot` and `GetRobotData`. Default **60 s**. |
+| `ShortCallTimeout` | `TimeSpan` | Client-side deadline for quick calls (`UpdateRobot`, `UpdateVariable`, `Ping`, and geometry-free `GetMachineData`). Default **10 s**. |
+| `SetupTimeout` | `TimeSpan` | Client-side deadline for `SetupRobot`, `GetRobotData`, and full-geometry `GetMachineData`. Default **60 s**. |
 | `TaskTimeout` | `TimeSpan` | Client-side deadline for `AddTask`. Default **10 min** — generous because it covers the full simulation plus code generation of a potentially large toolpath. |
 
 **Deadlines & error handling:** All RPC calls carry a client-side deadline (the three timeout properties above, settable per client instance), so a hung or unreachable server never blocks a caller indefinitely. A timed-out or failed call returns an error `TaskFeedback`/`SimulationFeedback` with a descriptive message rather than throwing. Note that `AddTask` treats only the server status `"Processed."` as success — an empty or unrecognized status (old servers, `"Environment ID not found"`, …) surfaces as an error, never as success with empty data.
@@ -487,7 +489,9 @@ service ParametricRobotControlService {
   rpc UpdateVariable (UpdateVariableRequest) returns (UpdateVariableReply);
 
   // Optional: Retrieve the resolved robot definition (geometry, kinematics,
-  // tools, base, collision geometry, external axes) of an already set up robot.
+  // tools, base, collision geometry, external axes) and current live state
+  // (settings, variables, axis position, tool/flange frames, transformations)
+  // of any already set up machine. Geometry can be excluded for fast polling.
   rpc GetRobotData (GetRobotDataRequest) returns (GetRobotDataReply);
 
   // Optional: Ping the controller.
@@ -501,8 +505,8 @@ service ParametricRobotControlService {
 | `AddRobotTask` | Unary | Send motion commands. Returns `SimulationResult` with axis data, reachability, generated code. |
 | `SubscribeRobotFeedback` | Server streaming | Real-time stream of heartbeats, robot state, settings updates, pings. |
 | `GetSimulatedRobotState` | Unary | Query robot state at a normalized position (0.0–1.0) along the toolpath. |
-| `UpdateVariable` | Unary | Set a variable on the robot. Returns all variables of all connected robots. |
-| `GetRobotData` | Unary | Retrieve the resolved robot definition (geometry, kinematics, tools, base, collision geometry, external axes) for a robot already set up via `SetupRobot`. Returns an error status before setup completes. |
+| `UpdateVariable` | Unary | Set a variable on the robot. Returns all variables of all connected robots. The variable may be omitted to query without modifying anything. |
+| `GetRobotData` | Unary | Retrieve the resolved robot definition **and live state** (current settings, variables, axis position, tool/flange frames, visualization transformations) for any machine already set up via `SetupRobot` — any connected machine's ID may be queried, e.g. by a Supervisor client monitoring the other machines. Set `exclude_geometry` to skip all mesh data for high-frequency polling. Returns an error status before setup completes. |
 | `SendPing` | Unary | Connection health check. |
 
 ---
@@ -833,9 +837,9 @@ The top-level robot definition, sent in `SetupRobotRequest`:
 
 | Field | Type | Description |
 |---|---|---|
-| `preset_robot_class` | `string` (oneof `robot_data`) | Reference to a built-in robot. Format: `Manufacturer.ModelClass`, e.g., `"KUKA.KUKA_KR610R11002"`. Maps to `PRC.Library.Robots` namespace. |
+| `preset_robot_class` | `string` (oneof `robot_data`) | Reference to a built-in robot. Format: `Manufacturer.ModelClass`, e.g., `"KUKA.KUKA_KR610R11002"`. Maps to `PRC.Library.Robots` namespace. If neither `preset_robot_class` nor `custom_robot` is provided, the server falls back to `"Supervisor.Supervisor_Device"` — a robot-less placeholder for clients that only exchange variables. |
 | `custom_robot` | `CustomRobot` (oneof `robot_data`) | Full custom robot definition with kinematic chain and geometry. |
-| `robot_driver_class` | `string` | Robot driver. Format: `Manufacturer.DriverClass`, e.g., `"KUKA.KSS_KRL_Driver"`. Maps to `PRC.Library.Drivers` namespace. |
+| `robot_driver_class` | `string` | Robot driver. Format: `Manufacturer.DriverClass`, e.g., `"KUKA.KSS_KRL_Driver"`. Maps to `PRC.Library.Drivers` namespace. When no robot definition is provided, an empty driver class defaults to `"Supervisor.Supervisor_Driver"`. |
 | `friendly_id` | `string` | Human-readable name for the robot setup |
 | `tool_dictionary` | `map<string, Tool>` | Dictionary of tools keyed by tool ID string. Every `tool_id` referenced in a `MotionGroup` must exist here. |
 | `initial_base` | `Base` | The robot's base coordinate system |
@@ -1253,7 +1257,7 @@ Returned in `AddRobotTaskReply.simulation_result_data`. Contains the complete si
 | `simulation_results` | `repeated SimulationResultUnit` | One entry per interpolated position along the toolpath |
 | `is_valid` | `bool` | `true` if no reachability or collision problems were detected |
 | `time` | `float` | Total estimated execution time in **seconds** |
-| `code` | `string` | Generated robot control code (KRL for KUKA, URScript for UR, RAPID for ABB, etc.). Write this to a file with the appropriate extension (e.g. `.src` for KUKA KRL, `.script` for UR; for ABB RAPID, `.mod` or `.modx` depending on the `IRCVersion` setting — see [Section 8](#8-settings-dictionary)). Exception: `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON axis_recorder take file here instead of KRL. |
+| `code` | `string` | Generated robot control code (KRL for KUKA, URScript for UR, RAPID for ABB, NeuraPy Python for NEURA, etc.). Write this to a file with the appropriate extension (e.g. `.src` for KUKA KRL, `.script` for UR; for ABB RAPID, `.mod` or `.modx` depending on the `IRCVersion` setting; for NEURA, `.py` — or `.json` when the `OutputFormat` setting selects `NeuraPy [JSON]` — see [Section 8](#8-settings-dictionary)). Exception: `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON axis_recorder take file here instead of KRL. |
 | `data` | `MetaData` | Additional information |
 
 #### `SimulationResultUnit`
@@ -1413,24 +1417,33 @@ for each feedback in stream:
 
 #### `UpdateVariableRequest` / `UpdateVariableReply`
 
-Request sets a `Variable` on the robot. Reply returns the complete variable state of all connected robots as parallel arrays of `id` and `VariableArray`.
+Request sets a `Variable` on the robot; the `var` field may be omitted to query without modifying anything. Reply returns the complete variable state of all connected robots as parallel arrays of `id` and `VariableArray`.
 
 #### `GetRobotDataRequest`
 
 | Field | Type | Description |
 |---|---|---|
-| `id` | `string` | Robot ID (from `SetupRobotReply.id`) |
+| `id` | `string` | Robot ID (from `SetupRobotReply.id`). **Any connected machine's ID may be queried** — not just your own setup — e.g. by a Supervisor client monitoring the other machines. |
+| `exclude_geometry` | `bool` | When `true`, the reply omits the robot's joint geometry, collision geometry, cell geometry, and all tool geometry, making the call cheap enough for high-frequency polling (30–60 Hz) — for a KR6 the reply shrinks from ~900 KB to under 1 KB. Geometry-free requests are not logged by the server. Defaults to `false`, which preserves the original full-geometry behaviour for older clients. |
 
 #### `GetRobotDataReply`
 
 | Field | Type | Description |
 |---|---|---|
 | `status` | `string` | `"OK"` on success, or a human-readable error description (e.g. `"Environment ID not found"`). When set to an error, `robot_data` is unset. |
-| `robot_data` | `Robot` | The resolved robot definition. Always populates the `custom_robot` side of the `Robot.robot_data` oneof — even when the robot was set up via a preset — so that per-joint geometry and kinematic parameters (`axis_center`, `axis_direction`, `axis_speed`, `axis_range_min`, `axis_range_max`, `root_cs`, `flange_cs`) are always present. The original preset class (if any) is echoed in `custom_robot.preset_robot_class`. The enclosing `Robot` message also carries `tool_dictionary`, `initial_base`, `collision_geometry`, `cell_geometry`, `external_axes`, `robot_driver_class`, `friendly_id`, and `data`. |
+| `robot_data` | `Robot` | The resolved robot definition. Always populates the `custom_robot` side of the `Robot.robot_data` oneof — even when the robot was set up via a preset — so that per-joint geometry and kinematic parameters (`axis_center`, `axis_direction`, `axis_speed`, `axis_range_min`, `axis_range_max`, `root_cs`, `flange_cs`) are always present. The original preset class (if any) is echoed in `custom_robot.preset_robot_class`. The enclosing `Robot` message also carries `tool_dictionary`, `initial_base`, `collision_geometry`, `cell_geometry`, `external_axes`, `robot_driver_class`, `friendly_id` (echoing the name the client chose at setup), and `data`. With `exclude_geometry = true`, all geometry fields are left empty. |
+| `robot_settings` | `Settings` | Current driver settings of the machine, as also returned by `SetupRobot`. |
+| `variables` | `VariableArray` | Current variables of the machine. |
+| `axis_position` | `JointTarget` | Current axis position (including external axes), from the machine's last simulated or streamed state. |
+| `tool_frame` | `Matrix4x4` | Current Cartesian tool position (TCP frame relative to WorldXY). |
+| `flange_frame` | `Matrix4x4` | Current Cartesian flange position, before the tool is applied. |
+| `robot_transformations` | `repeated TransformationArray` | Current visualization transformations per kinematic element, in the same format as `RobotState.robot_transformations` (see [Section 10](#10-robotstate--visualization)). |
+
+The live-state fields (`robot_settings` through `robot_transformations`) are **always** populated, regardless of `exclude_geometry` — they are sourced from the machine's last simulated or streamed state. Older clients simply ignore the added fields, so the reply stays wire-compatible.
 
 **Pre-condition:** `SetupRobot` must have completed successfully for the given `id`. Before that, `GetRobotData` returns `status = "Environment ID not found"` and an unset `robot_data`.
 
-**Pseudocode:**
+**Pseudocode — full definition query:**
 ```
 reply = GetRobotData(id = robot_id)
 
@@ -1445,6 +1458,20 @@ else:
     for tool_id, tool in robot.tool_dictionary.items(): ...
     for poly in robot.collision_geometry:        ...
     for axis in robot.external_axes:             ...
+```
+
+**Pseudocode — high-frequency machine monitoring (geometry excluded):**
+```
+// Poll any connected machine's live state at 30-60 Hz
+reply = GetRobotData(id = machine_id, exclude_geometry = true)
+
+if reply.status == "OK":
+    axes       = reply.axis_position.axis_values       // degrees, incl. external axes
+    tcp        = reply.tool_frame                       // Matrix4x4, world frame, mm
+    flange     = reply.flange_frame
+    variables  = reply.variables.variables              // current Variable list
+    settings   = reply.robot_settings.settings_dictionary
+    transforms = reply.robot_transformations            // apply to meshes as in Section 10
 ```
 
 ---
@@ -1464,9 +1491,9 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 | `UR.UR_RT_Driver` | Experimental | Universal Robots **realtime** driver: simulates PRC tasks with the UR solver, streams them as URScript programs over the controller's secondary interface (port 30002), and displays the actual robot position live via RTDE (port 30004). Both channels are officially supported on Polyscope 5 and PolyScope X. |
 | `ABB.ABB_RAPID_Driver` | Experimental | ABB robots using RAPID language. |
 | `IGUS.IGUS_Driver` | Proof of Concept | IGUS ReBel robot support. |
-| `NEURA.NEURA_SIM_Driver` | Proof of Concept | NEURA robots (MAiRA 7-DOF and LARA 6-DOF). Generates Python code using the NeuraPy library. |
-| `NEURA.NEURA_RT_Driver` | Experimental | NEURA **realtime** driver: connects to the NeuraPy server on the robot control box (default `192.168.2.13`) and executes/streams motions live, with configurable blending, follow-target mode, and feedback interval. |
-| `Generic.Generic_Driver` | Placeholder | For accessing I/O values and data from other robots/IoT devices. |
+| `NEURA.NEURA_SIM_Driver` | Proof of Concept | NEURA robots (MAiRA 7-DOF and LARA 6-DOF). Generates NeuraPy v5 Python code — `move_joint` blocks for PTP groups and one `move_composite` per CP group (linear/circular children with per-child velocities, each child's `target_pose` seeded with the pose the segment starts from) — or a neutral JSON toolpath format, selected via the `OutputFormat` setting. Oversized CP groups are split into several `move_composite` calls (`CPTargetsPerCall` setting) because the NeuraPy socket server rejects requests beyond its read buffer. |
+| `NEURA.NEURA_RT_Driver` | Experimental | NEURA **realtime** driver: connects to the NeuraPy socket server on the robot control box (default `192.168.2.13:65432`) and executes/streams motions live, with configurable blending and feedback interval; oversized CP groups are split into several `move_composite` calls (`CPTargetsPerCall` setting). In **Follow Target Mode** the task's last **Cartesian PTP** target is chased via the servo interface (`movelinear_online`), with a real PTP to the solver's joint solution priming the commanded posture at session start and on posture changes — see [Section 8](#8-settings-dictionary). |
+| `Supervisor.Supervisor_Driver` | Functional | Connection-only driver for accessing I/O values and data from other robots/IoT devices. Does not accept tasks. `GetSimulatedRobotState` returns the variables of **all** connected robots plus a machine inventory in `data` (`Machines` = comma-separated IDs, and per machine `<id> Name`, `<id> Model`, `<id> Driver`, `<id> Status`). Any machine ID from the inventory can then be queried in detail via `GetRobotData` — with `exclude_geometry = true` for high-frequency live-state polling (see [Section 6.7](#67-requestreply)). Pairs with the `Supervisor.Supervisor_Device` robot class, which is also the server-side default when a setup request contains no robot definition. |
 
 ### Robot Models (Selection)
 
@@ -1480,6 +1507,8 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 **IGUS:** `IGUS.IGUS_ReBel`
 
 **NEURA:** `NEURA.NEURA_MAIRA_M` (7-DOF), `NEURA.NEURA_LARA_3` (LARA 3, 6-DOF)
+
+**Supervisor:** `Supervisor.Supervisor_Device` — robot-less placeholder (no kinematics, no geometry) for variable-exchange clients such as IoT devices or monitoring dashboards. Used automatically when a setup request contains no robot definition.
 
 The class strings map to `PRC.Library.Robots.<class>()` constructors internally. For example, `"KUKA.KUKA_KR610R11002"` constructs a robot with pre-configured kinematic data, axis limits, speeds, and 3D geometry.
 
@@ -1536,8 +1565,12 @@ Setting keys vary by driver — always inspect the dictionary returned from `Set
 | `KUKA.KSS_KRL_Driver` (and derived `KUKA.KSS_IOB_Driver`) | `UseSplineMotions` | `"True"` or `"False"` (**default**) | If enabled, spline motion commands (**SLIN**, **SPTP**, **SCIRC**) are generated instead of LIN, PTP, and CIRC. Approximated motions use the `C_SPL` criterion instead of `C_DIS`/`C_PTP`. Requires KUKA KSS 8.3 or higher. |
 | `KUKA.KSS_IOB_Driver` | `Interaction` | `"Path-Table"` (**default**) or `"Servoing"` | Selects the IO Builder interaction mode. In **Path-Table** mode every motion must carry an absolute time stamp in seconds under the metadata key `TimeStamp` (`MetaData.data["TimeStamp"]`, invariant culture); the solver uses those times instead of speed-derived timing, and the `code` output is a time-stamped axis_recorder take file (JSON) rather than KRL. In **Servoing** mode the current axis position is streamed as JSON over UDP (`ExternalIP`/`ExternalPort`), and positions received on `LocalPort` are visualized live. |
 | `KUKA.KSS_IOB_Driver` | `PathSmoothing` | `"Spline"` (**default**) or `"Linear"` | With `"Spline"`, the simulation is smoothed with cubic splines through the programmed targets — every target is still reached at its exact time, but velocity stays continuous across targets instead of cornering. |
+| `NEURA.NEURA_SIM_Driver` | `OutputFormat` | `"NeuraPy"` (**default**) or `"NeuraPy [JSON]"` | Selects the `code` output: a runnable NeuraPy v5 Python script (save as **`.py`** and run it with the NeuraPy wheel installed, connected to the robot's socket server) or a neutral JSON toolpath representation (save as **`.json`**) for custom postprocessors. |
+| `NEURA.NEURA_SIM_Driver`, `NEURA.NEURA_RT_Driver` | `CPTargetsPerCall` | Number of poses, `"250"` (**default**); `"0"` = one call per group | Splits large CP groups into several `move_composite` calls of at most this many poses (seed poses included), each follow-up call seeded with the previous chunk's end pose so the path stays gapless. The stock NeuraPy socket server reads each request with an 8 KB buffer and resets the connection on requests beyond ~48 KB, so one oversized call would die at runtime. The robot pauses briefly at each seam — blending cannot span separate calls. |
+| `NEURA.NEURA_SIM_Driver`, `NEURA.NEURA_RT_Driver` | `CPRotationSpeed` | rad/s, `"0.5"` (**default**); `"0"` = leave to the controller | Composite-level rotational speed for CP motions: segments that mostly reorient the tool are paced by this limit rather than the translational CP speed. PRC has no per-target rotational speed, so one value applies to the whole group; NeuraPy's own default is 0.5 rad/s. |
+| `NEURA.NEURA_RT_Driver` | `FollowTargetMode` | `"True"` or `"False"` (**default**) | Streams the task's **last Cartesian PTP target** via the servo interface (`movelinear_online`): the robot continuously chases the most recent target and re-plans on the fly when it changes — ideal for live target following. The first target of a session, and any change of the commanded posture, first runs a real PTP to the solver's joint solution so servoing starts in the commanded posture rather than whatever configuration the controller's own IK drifts into. The target's PTP speed percentage scales the servo speed (100 % = 2 m/s); rotation is paced by `CPRotationSpeed`. Joint-space, LIN and circular targets are not executed in this mode, and an out-of-reach target is refused while the previous reachable target is kept. |
 
-When writing `SimulationResult.code` to disk, choose the file extension based on the driver (and, for ABB, the `IRCVersion` setting). Note that `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON take file, not KRL. See [Section 6.6](#66-feedback) and [Section 9](#9-simulationresult-addtaskreply-data).
+When writing `SimulationResult.code` to disk, choose the file extension based on the driver (and, for ABB, the `IRCVersion` setting; for NEURA, the `OutputFormat` setting). Note that `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON take file, not KRL. See [Section 6.6](#66-feedback) and [Section 9](#9-simulationresult-addtaskreply-data).
 
 ---
 
@@ -1595,7 +1628,8 @@ for i, unit in enumerate(result.simulation_results):
         print(f"  Axes: {list(unit.axis_values)}")
 
 # Save generated code to file
-# .src for KUKA KRL, .script for UR, .mod/.modx for ABB RAPID (see IRCVersion in Section 8)
+# .src for KUKA KRL, .script for UR, .mod/.modx for ABB RAPID (see IRCVersion
+# in Section 8), .py for NEURA NeuraPy (.json with the NeuraPy [JSON] format)
 with open("robot_program.src", "w") as f:
     f.write(result.code)
 ```
