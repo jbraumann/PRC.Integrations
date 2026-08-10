@@ -166,8 +166,7 @@
                 )
             );
 
-        var setupRobotReply = new prc.SetupRobotReply();
-        setupRobotReply = await client.setupRobot(setupRobotRequest, {});
+        var setupRobotReply = await client.setupRobot(setupRobotRequest, {});
         settings = setupRobotReply.getRobotSettings();
 
         alert('Robot is connected.', 'Parametric Robot Control');
@@ -229,14 +228,18 @@
             .setToolId(tool_id)
             .setMotionGroupType(prc.MotionGroupType.PTP);
 
+        // LIN motions run in a continuous-path (CP) motion group.
         var linMotionGroup = new prc.MotionGroup()
             .setInterpolation('C_DIS')
             .setToolId(tool_id)
-            .setMotionGroupType(prc.MotionGroupType.LIN);
+            .setMotionGroupType(prc.MotionGroupType.CP);
 
+        // Every subpath of the artwork is approached from above at z_height,
+        // drawn at Z = 0, and left upwards again.
         for (var i = 0; i < toolpath.length; i++) {
             for (var j = 0; j < toolpath[i].length; j++) {
                 if (j == 0) {
+                    // approach point above the first point of the subpath
                     var linMotion = new prc.MotionCommand()
                         .setLinMotion(new prc.LINMotion()
                             .setTarget(new prc.CartesianTarget()
@@ -265,6 +268,7 @@
                         );
                     linMotionGroup.getCommandsList().push(linMotion);
                 }
+                // the point itself at drawing height
                 var linMotion = new prc.MotionCommand()
                     .setLinMotion(new prc.LINMotion()
                         .setTarget(new prc.CartesianTarget()
@@ -291,7 +295,9 @@
                             .setPosture('010')
                         )
                     );
+                linMotionGroup.getCommandsList().push(linMotion);
                 if (j == toolpath[i].length - 1) {
+                    // retract point above the last point of the subpath
                     var linMotion = new prc.MotionCommand()
                         .setLinMotion(new prc.LINMotion()
                             .setTarget(new prc.CartesianTarget()
@@ -320,8 +326,6 @@
                         );
                     linMotionGroup.getCommandsList().push(linMotion);
                 }
-
-                linMotionGroup.getCommandsList().push(linMotion);
             }
         }
 

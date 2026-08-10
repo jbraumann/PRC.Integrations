@@ -41,6 +41,13 @@ export class ParametricRobotControlServiceClient {
                response: prc_pb.UpdateVariableReply) => void
   ): grpcWeb.ClientReadableStream<prc_pb.UpdateVariableReply>;
 
+  getRobotData(
+    request: prc_pb.GetRobotDataRequest,
+    metadata: grpcWeb.Metadata | undefined,
+    callback: (err: grpcWeb.RpcError,
+               response: prc_pb.GetRobotDataReply) => void
+  ): grpcWeb.ClientReadableStream<prc_pb.GetRobotDataReply>;
+
   sendPing(
     request: prc_pb.Ping,
     metadata: grpcWeb.Metadata | undefined,
@@ -79,6 +86,11 @@ export class ParametricRobotControlServicePromiseClient {
     request: prc_pb.UpdateVariableRequest,
     metadata?: grpcWeb.Metadata
   ): Promise<prc_pb.UpdateVariableReply>;
+
+  getRobotData(
+    request: prc_pb.GetRobotDataRequest,
+    metadata?: grpcWeb.Metadata
+  ): Promise<prc_pb.GetRobotDataReply>;
 
   sendPing(
     request: prc_pb.Ping,

@@ -16,6 +16,8 @@ const createScene = async function() {
 
 	await BABYLON.SceneLoader.ImportMeshAsync("", "assets/", "agilus2.gltf", scene);
 
+	// The glTF robot is modelled Y-up, while PRC data is Z-up, so the meshes
+	// are rotated upright once and the transform baked into the vertices.
 	for (let mesh of scene.meshes) {
 		mesh.rotation.x = Math.PI / 2;
 		mesh.bakeCurrentTransformIntoVertices();
@@ -95,6 +97,10 @@ export async function updateRobot(xForms, feedback) {
 	}
 
 	if (xForms != null) {
+		// The robot meshes are named a00 to a06 (with a/b suffixes for split
+		// joints), so the third character is the index of the joint whose
+		// transformation applies. PRC works in millimetres and Babylon.js in
+		// metres, which scales the translation row by 1/1000.
 		for (let mesh of scene.meshes) {
 			var axisIndex = parseInt(mesh.name.charAt(2));
 			if (isNaN(axisIndex)) {
