@@ -5,7 +5,7 @@ import warnings
 
 import prc_pb2 as prc__pb2
 
-GRPC_GENERATED_VERSION = '1.71.0'
+GRPC_GENERATED_VERSION = '1.67.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -26,7 +26,18 @@ if _version_not_supported:
 
 
 class ParametricRobotControlServiceStub(object):
-    """ParametricRobotControlService provides an interface for simulating/controlling supported robots through GRPC.
+    """======================================================================
+    SERVICE
+    ======================================================================
+
+    ParametricRobotControlService provides an interface for simulating and
+    controlling supported industrial robots through gRPC.
+
+    Typical integration lifecycle:
+    1. SetupRobot   — define the robot model, driver, tools, and base.
+    2. AddRobotTask — send motion commands; receive simulation results and code.
+    3. SubscribeRobotFeedback — open a persistent feedback stream.
+    4. GetSimulatedRobotState — query robot state at any toolpath position (0.0–1.0).
     """
 
     def __init__(self, channel):
@@ -60,6 +71,11 @@ class ParametricRobotControlServiceStub(object):
                 request_serializer=prc__pb2.UpdateVariableRequest.SerializeToString,
                 response_deserializer=prc__pb2.UpdateVariableReply.FromString,
                 _registered_method=True)
+        self.GetRobotData = channel.unary_unary(
+                '/ParametricRobotControlService/GetRobotData',
+                request_serializer=prc__pb2.GetRobotDataRequest.SerializeToString,
+                response_deserializer=prc__pb2.GetRobotDataReply.FromString,
+                _registered_method=True)
         self.SendPing = channel.unary_unary(
                 '/ParametricRobotControlService/SendPing',
                 request_serializer=prc__pb2.Ping.SerializeToString,
@@ -68,46 +84,76 @@ class ParametricRobotControlServiceStub(object):
 
 
 class ParametricRobotControlServiceServicer(object):
-    """ParametricRobotControlService provides an interface for simulating/controlling supported robots through GRPC.
+    """======================================================================
+    SERVICE
+    ======================================================================
+
+    ParametricRobotControlService provides an interface for simulating and
+    controlling supported industrial robots through gRPC.
+
+    Typical integration lifecycle:
+    1. SetupRobot   — define the robot model, driver, tools, and base.
+    2. AddRobotTask — send motion commands; receive simulation results and code.
+    3. SubscribeRobotFeedback — open a persistent feedback stream.
+    4. GetSimulatedRobotState — query robot state at any toolpath position (0.0–1.0).
     """
 
     def SetupRobot(self, request, context):
-        """Step 1: Setup the simulation/control environemt.
+        """Step 1: Initialise the simulation/control environment with a robot model,
+        driver, tools, base frame, and optional collision geometry.
+        Returns a settings dictionary to be passed back with subsequent AddRobotTask calls.
+        Calling SetupRobot again with the same client_id replaces the previous setup.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def AddRobotTask(self, request, context):
-        """Step 2: Define a task to be processed or simulated.
+        """Step 2: Submit a task (motion commands, actions, flow control) for
+        simulation and/or execution. Returns a SimulationResult containing
+        per-step axis data, reachability flags, and the generated robot program code.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def SubscribeRobotFeedback(self, request, context):
-        """Step 3: Subscribe to the feedback coming from the simulation/control environment..
+        """Step 3: Open a persistent server-streaming connection to receive
+        continuous feedback: heartbeats, robot state updates, settings changes, and pings.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetSimulatedRobotState(self, request, context):
-        """Step 4: Request a simulation update, to be either provided directly or written to the feedback stream.
+        """Step 4: Query the simulated robot state at a normalised position (0.0–1.0)
+        along the toolpath. The result is returned directly or written to the
+        feedback stream when stream_update is true.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def UpdateVariable(self, request, context):
-        """Optional: Can update a variable. Always returns a list of all variables of all connected devices.
+        """Optional: Set a variable on the robot. Always returns the current variables
+        of all connected robots.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetRobotData(self, request, context):
+        """Optional: Retrieve the resolved robot definition (geometry, kinematics,
+        tools, base, collision geometry, external axes) for a robot that has
+        already been set up via SetupRobot. Fails with a non-empty status and
+        an unset robot_data field when no matching setup exists.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def SendPing(self, request, context):
-        """Optional: Ping the controller.
+        """Optional: Ping the controller for connection health checks.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -141,6 +187,11 @@ def add_ParametricRobotControlServiceServicer_to_server(servicer, server):
                     request_deserializer=prc__pb2.UpdateVariableRequest.FromString,
                     response_serializer=prc__pb2.UpdateVariableReply.SerializeToString,
             ),
+            'GetRobotData': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRobotData,
+                    request_deserializer=prc__pb2.GetRobotDataRequest.FromString,
+                    response_serializer=prc__pb2.GetRobotDataReply.SerializeToString,
+            ),
             'SendPing': grpc.unary_unary_rpc_method_handler(
                     servicer.SendPing,
                     request_deserializer=prc__pb2.Ping.FromString,
@@ -155,7 +206,18 @@ def add_ParametricRobotControlServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class ParametricRobotControlService(object):
-    """ParametricRobotControlService provides an interface for simulating/controlling supported robots through GRPC.
+    """======================================================================
+    SERVICE
+    ======================================================================
+
+    ParametricRobotControlService provides an interface for simulating and
+    controlling supported industrial robots through gRPC.
+
+    Typical integration lifecycle:
+    1. SetupRobot   — define the robot model, driver, tools, and base.
+    2. AddRobotTask — send motion commands; receive simulation results and code.
+    3. SubscribeRobotFeedback — open a persistent feedback stream.
+    4. GetSimulatedRobotState — query robot state at any toolpath position (0.0–1.0).
     """
 
     @staticmethod
@@ -283,6 +345,33 @@ class ParametricRobotControlService(object):
             '/ParametricRobotControlService/UpdateVariable',
             prc__pb2.UpdateVariableRequest.SerializeToString,
             prc__pb2.UpdateVariableReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetRobotData(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ParametricRobotControlService/GetRobotData',
+            prc__pb2.GetRobotDataRequest.SerializeToString,
+            prc__pb2.GetRobotDataReply.FromString,
             options,
             channel_credentials,
             insecure,

@@ -51,6 +51,12 @@ service ParametricRobotControlService {
     // of all connected robots.
     rpc UpdateVariable (UpdateVariableRequest) returns (UpdateVariableReply);
 
+    // Optional: Retrieve the resolved robot definition (geometry, kinematics,
+    // tools, base, collision geometry, external axes) for a robot that has
+    // already been set up via SetupRobot. Fails with a non-empty status and
+    // an unset robot_data field when no matching setup exists.
+    rpc GetRobotData (GetRobotDataRequest) returns (GetRobotDataReply);
+
     // Optional: Ping the controller for connection health checks.
     rpc SendPing (Ping) returns (Ping);
 }
@@ -81,6 +87,46 @@ message AddRobotTaskRequest {
     Settings robot_settings = 3;
 }
 
+// GetRobotDataRequest asks the server for the resolved robot definition of an
+// already set up robot. Any connected robot's ID may be queried, e.g. by a
+// Supervisor client monitoring the other machines.
+message GetRobotDataRequest {
+    // The server-assigned robot ID (from SetupRobotReply.id).
+    string id = 1;
+    // When true, the reply omits the robot's joint geometry, collision
+    // geometry, cell geometry and all tool geometry, making the call cheap
+    // enough for high-frequency polling (30-60 Hz). Defaults to false, which
+    // preserves the original full-geometry behavior.
+    bool exclude_geometry = 2;
+}
+
+// GetRobotDataReply returns the resolved robot definition, or an error status
+// when no matching setup exists.
+message GetRobotDataReply {
+    // "OK" on success, or a human-readable error description (e.g.,
+    // "Environment ID not found"). When set to an error, robot_data is unset.
+    string status = 1;
+    // Resolved robot data. Always populates the custom_robot side of the
+    // oneof (even when the robot was set up via a preset) so that joint
+    // geometry and kinematic parameters are always present. The original
+    // preset class, if any, is echoed in custom_robot.preset_robot_class.
+    Robot robot_data = 2;
+    // Current driver settings of the robot, as also returned by SetupRobot.
+    Settings robot_settings = 3;
+    // Current variables of the robot.
+    VariableArray variables = 4;
+    // Current axis position (including external axes), from the robot's last
+    // simulated or streamed state.
+    JointTarget axis_position = 5;
+    // Current Cartesian tool position (TCP frame relative to WorldXY).
+    Matrix4x4 tool_frame = 6;
+    // Current Cartesian flange position, before the tool is applied.
+    Matrix4x4 flange_frame = 7;
+    // Current visualization transformations per kinematic element, in the
+    // same format as RobotState.robot_transformations.
+    repeated TransformationArray robot_transformations = 8;
+}
+
 // GetSimulatedRobotStateRequest queries the robot state at a specific position
 // along the simulated toolpath.
 message GetSimulatedRobotStateRequest {
@@ -91,6 +137,12 @@ message GetSimulatedRobotStateRequest {
     // If true, the result is written to the SubscribeRobotFeedback stream
     // instead of being returned directly by this call.
     bool stream_update = 3;
+    // If true, the reply omits the variables map. Intended for clients that
+    // only visualize the robot state (e.g. slider scrubbing) and do not
+    // consume variables; the map otherwise carries every connected robot's
+    // variables on every query. Defaults to false, preserving the current
+    // behavior for existing clients.
+    bool omit_variables = 4;
 }
 
 // RobotFeedback is the streamed message returned by SubscribeRobotFeedback.
@@ -445,6 +497,8 @@ message IfElse {
 message InsertCode {
     // Lines of code to insert verbatim into the generated robot control file.
     repeated string code = 1;
+    //Defines if the code should be executed or treated as a comment in the generated program.
+    bool is_comment = 2;
 }
 
 // [Primitives] Int4 holds four integers (x, y, z, w). Serves two distinct roles:
@@ -760,6 +814,9 @@ message SimulationResultUnit {
     string id = 10;
     // True if any collision or out-of-reach flag is set for this step.
     bool alarm = 11;
+    // Type of the originating motion command, as the PRC.Core CommandType name
+    // ("LIN", "PTP", "Circular", "Spline", "Axis"). Empty when unknown.
+    string motion_type = 12;
 }
 
 // [Flow Control] Task is the top-level container for robot commands sent to the server.
@@ -810,10 +867,16 @@ message Tool {
     CartesianPosition tcp = 2;
     // Identifier for this tool, matching keys in Robot.tool_dictionary.
     string tool_id = 3;
-    // Tool state index, used to switch between different tool configurations.
-    int32 tool_state = 4;
+    // Field number 4 is reserved (previously tool_state, an unused int32).
+    reserved 4;
+    reserved "tool_state";
     // Geometry of the tool for visualisation and collision checking.
     PolyMesh tool_geometry = 5;
+    // Identifier of the physical tool as known to the robot controller (the tool number
+    // written into generated code, e.g. "6" → KUKA Tool Nr.6). Several Tool entries may share
+    // a tool_robot_variable (and the same TCP) while differing only in geometry; tool_id
+    // remains the unique dictionary key / display name. Defaults to tool_id when unset.
+    string tool_robot_variable = 6;
 }
 
 // [Primitives] TransformationArray is a list of transformation matrices.

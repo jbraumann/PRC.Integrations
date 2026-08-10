@@ -1,18 +1,39 @@
-﻿using Grpc.Core;
+﻿// Parametric Robot Control - C# Sample (raw gRPC).
+//
+// Talks to a running PRC server directly through the generated gRPC client,
+// without referencing any further PRC libraries. CsharpLibrary.cs shows the
+// same sequence using the PRC.GRPC.Client wrapper instead.
+//
+// Connects to the server, sets up a KUKA robot, sends it a small task, and
+// scrubs through the resulting simulation - the same lifecycle every other
+// PRC integration follows:
+//   1. SetupRobot              defines the robot model, driver, tool and base.
+//   2. SubscribeRobotFeedback  opens the persistent feedback stream.
+//   3. AddRobotTask            sends motion commands, returns the simulation and code.
+//   4. GetSimulatedRobotState  queries the robot state anywhere along the toolpath.
+//
+// Requires the PRC.GRPC project (or its compiled protos) and the
+// Grpc.Net.Client NuGet package. The PRC server's certificate must be trusted
+// by the system - the server installs it on its first start.
+
+using Grpc.Core;
 using Grpc.Net.Client.Configuration;
 using Grpc.Net.Client;
 using Grpc.Net.Compression;
 using PRC.GRPC;
 using System.Globalization;
+using Task = System.Threading.Tasks.Task;
 
 namespace PRC.Integration
 {
     public class Program
     {
-        static async System.Threading.Tasks.Task Main()
+        static async Task Main()
         {
             Console.WriteLine("Starting...");
 
+            // Numbers sent to robot controllers must be formatted independently
+            // of the machine's regional settings.
             CultureInfo ci = new CultureInfo("en-US");
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
@@ -22,8 +43,8 @@ namespace PRC.Integration
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             AsyncServerStreamingCall<RobotFeedback> dataStreamingCall;
 
-            PRC.GRPC.ParametricRobotControlService.ParametricRobotControlServiceClient client = new PRC.GRPC.ParametricRobotControlService.ParametricRobotControlServiceClient(GrpcChannel.ForAddress(ip));
-
+            // The channel retries dropped connections, lifts the default message
+            // size limits - simulation results can get large - and enables compression.
             var defaultMethodConfig = new MethodConfig
             {
                 Names = { MethodName.Default },
@@ -45,8 +66,9 @@ namespace PRC.Integration
                 CompressionProviders = new List<ICompressionProvider>() { new Grpc.Net.Compression.GzipCompressionProvider(System.IO.Compression.CompressionLevel.Fastest) }
             });
 
-            client = new PRC.GRPC.ParametricRobotControlService.ParametricRobotControlServiceClient(grpcChannel);
+            var client = new ParametricRobotControlService.ParametricRobotControlServiceClient(grpcChannel);
 
+            // A ping confirms that the server is reachable before setting up the robot.
             var pingData = await client.SendPingAsync(new Ping
             {
                 Payload = "",
@@ -58,9 +80,13 @@ namespace PRC.Integration
                 Console.WriteLine("Did not connect successfully...");
             }
 
+            // UpdateVariable without a variable name simply queries the current
+            // variables of all connected robots.
             var returndata = await client.UpdateVariableAsync(new UpdateVariableRequest { Id = "", Var = new Variable() });
 
-
+            // Step 1: Set up a preset KUKA robot with its driver, plus a default
+            // tool "0" and base "0" at the world origin. The classes for other
+            // robots and drivers are listed in the PRC server's interface.
             var setupData = await client.SetupRobotAsync(new SetupRobotRequest
             {
                 ClientId = robotID,
@@ -104,11 +130,14 @@ namespace PRC.Integration
                 }
             });
 
+            // Step 2: Subscribe to the feedback stream. The server continuously
+            // sends heartbeats, robot states and settings updates through it,
+            // handled in a background task until the token is cancelled.
             try
             {
                 dataStreamingCall = client.SubscribeRobotFeedback(new SubscribeRobotFeedbackRequest { Id = robotID }, null, null, cancellationTokenSource.Token);
 
-                var readTask = System.Threading.Tasks.Task.Run(async () =>
+                var readTask = Task.Run(async () =>
                 {
                     await foreach (var response in dataStreamingCall.ResponseStream.ReadAllAsync(cancellationTokenSource.Token))
                     {
@@ -120,7 +149,7 @@ namespace PRC.Integration
                                     break;
                                 case RobotFeedback.DataPackageOneofCase.HeartbeatData:
                                     //received heartbeat event
-                                    Console.WriteLine("Received hearbeat: " + response.HeartbeatData.Beat);
+                                    Console.WriteLine("Received heartbeat: " + response.HeartbeatData.Beat);
                                     break;
                                 case RobotFeedback.DataPackageOneofCase.RobotStateData:
                                     //new robot state event
@@ -129,7 +158,7 @@ namespace PRC.Integration
                                     break;
                                 case RobotFeedback.DataPackageOneofCase.SettingsData:
                                     //Settings updated event
-                                    Console.WriteLine("Received " + response.SettingsData.SettingsDictionary.Count + "settings objects.");
+                                    Console.WriteLine("Received " + response.SettingsData.SettingsDictionary.Count + " settings objects.");
                                     break;
                                 case RobotFeedback.DataPackageOneofCase.PingData:
                                     //Ping event
@@ -141,13 +170,14 @@ namespace PRC.Integration
                         }
                     }
                 }, cancellationTokenSource.Token);
-
             }
             catch (Exception e)
             {
-                Console.WriteLine("Failed to subscribe to robot updates: " + e.Message, robotID);
+                Console.WriteLine("Failed to subscribe to robot updates: " + e.Message);
             }
 
+            // Step 3: Build a task from two PTP motions defined in joint space
+            // and send it to the robot. The speed is a single value for all axes.
             var ptpMotion1 = new MotionCommand()
             {
                 AxisMotion = new AxisMotion()
@@ -159,7 +189,6 @@ namespace PRC.Integration
                     }
                 }
             };
-
 
             var ptpMotion2 = new MotionCommand()
             {
@@ -173,7 +202,6 @@ namespace PRC.Integration
                 }
             };
 
-
             var ptpMotionGroup = new MotionGroup()
             {
                 Commands = { ptpMotion1, ptpMotion2 },
@@ -181,7 +209,8 @@ namespace PRC.Integration
                 MotionGroupType = MotionGroupType.Ptp,
             };
 
-
+            // The robot settings returned by SetupRobot are passed back with the
+            // task. They can be modified here, e.g. to change driver options.
             var req = new AddRobotTaskRequest
             {
                 Id = robotID,
@@ -199,28 +228,27 @@ namespace PRC.Integration
 
             var toolpath = await client.AddRobotTaskAsync(req);
 
-            Console.WriteLine("KRL Code: " + Environment.NewLine + (toolpath.SimulationResultData.Code ?? toolpath.SimulationResultData.Code) + Environment.NewLine);
+            Console.WriteLine("KRL Code: " + Environment.NewLine + toolpath.SimulationResultData.Code + Environment.NewLine);
 
+            // Step 4: Scrub through the simulated toolpath from start (0.0) to
+            // end (1.0), similar to the simulation slider in the PRC interface.
+            // With StreamUpdate = true the resulting states arrive through the
+            // feedback stream above instead of the direct reply.
             int i = 0;
             while (i < 100)
             {
-                await System.Threading.Tasks.Task.Delay(400);
-                i += 3;
-                if (i <= 100)
-                {
-                    Console.WriteLine("Getting simulated state at factor " + (float)i / 100);
-                    var robotState = await client.GetSimulatedRobotStateAsync(new GetSimulatedRobotStateRequest { Id = robotID, NormalizedState = (float)i / 100, AsyncStreamUpdate = true });
-                }
+                await Task.Delay(400);
+                i += 4;
+                Console.WriteLine("Getting simulated state at factor " + (float)i / 100);
+                await client.GetSimulatedRobotStateAsync(new GetSimulatedRobotStateRequest { Id = robotID, NormalizedState = (float)i / 100, StreamUpdate = true });
             }
 
-
-
             Console.WriteLine("Raw GRPC simulation done.");
+
+            // Cancelling the token ends the feedback task, then the stream is
+            // given a moment to close down.
             cancellationTokenSource.Cancel();
-
-            await System.Threading.Tasks.Task.Delay(1000);
-
-
+            await Task.Delay(1000);
         }
     }
 }

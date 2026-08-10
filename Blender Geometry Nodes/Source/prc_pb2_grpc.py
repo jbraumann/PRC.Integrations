@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import prc_pb2 as prc__pb2
+import prc_pb2 as prc__pb2
 
 GRPC_GENERATED_VERSION = '1.72.0'
 GRPC_VERSION = grpc.__version__
@@ -32,7 +32,7 @@ class ParametricRobotControlServiceStub(object):
 
     ParametricRobotControlService provides an interface for simulating and
     controlling supported industrial robots through gRPC.
-    
+
     Typical integration lifecycle:
     1. SetupRobot   — define the robot model, driver, tools, and base.
     2. AddRobotTask — send motion commands; receive simulation results and code.
@@ -90,7 +90,7 @@ class ParametricRobotControlServiceServicer(object):
 
     ParametricRobotControlService provides an interface for simulating and
     controlling supported industrial robots through gRPC.
-    
+
     Typical integration lifecycle:
     1. SetupRobot   — define the robot model, driver, tools, and base.
     2. AddRobotTask — send motion commands; receive simulation results and code.
@@ -212,7 +212,7 @@ class ParametricRobotControlService(object):
 
     ParametricRobotControlService provides an interface for simulating and
     controlling supported industrial robots through gRPC.
-    
+
     Typical integration lifecycle:
     1. SetupRobot   — define the robot model, driver, tools, and base.
     2. AddRobotTask — send motion commands; receive simulation results and code.

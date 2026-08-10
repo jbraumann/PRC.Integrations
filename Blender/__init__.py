@@ -204,7 +204,7 @@ class PRC_OT_core(bpy.types.Operator):
                     task_reply.simulation_result_data.code)
 
                 time.sleep(0.5)
-                viewport_area.header_text_set("Now simulating the robot's movement, similar to the simulation slider. If async_stream_update is true, the feedback stream will be utilized.")
+                viewport_area.header_text_set("Now simulating the robot's movement, similar to the simulation slider. If stream_update is true, the feedback stream will be utilized.")
 
                 #the core thread waits until the feedback thread is finished
                 feedback_thread.join()
