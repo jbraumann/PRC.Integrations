@@ -287,10 +287,11 @@ The `PRC.GRPC.Client.Client` class exposes the following methods and properties:
 | Method | Signature | Description |
 |---|---|---|
 | `Connect` | `async Task<TaskFeedback> Connect(string ip, bool grpcWeb = false)` | Establish connection to PRC server. Handles TLS certificates automatically. |
-| `SetupRobot` | `async Task<SetupFeedback> SetupRobot(string clientId, IRobotProperties robot, string robotDriver)` | Initialize robot environment. Automatically subscribes to the feedback stream. Returns settings dictionary. For a robot-less monitoring connection, pass `new PRC.Library.Robots.Supervisor.Supervisor_Device()` as the robot with `"Supervisor.Supervisor_Driver"` as the driver. |
+| `SetupRobot` | `async Task<SetupFeedback> SetupRobot(string clientId, IRobotProperties robot, string robotDriver, PRC.GRPC.Robot? bufferedSetup = null)` | Initialize robot environment. Automatically subscribes to the feedback stream. Returns settings dictionary. For a robot-less monitoring connection, pass `new PRC.Library.Robots.Supervisor.Supervisor_Device()` as the robot with `"Supervisor.Supervisor_Driver"` as the driver. The optional `bufferedSetup` sends an already-serialized `PRC.GRPC.Robot` message verbatim instead of serializing `robot` — used e.g. when replaying a stored robot package. |
 | `AddTask` | `async Task<SimulationFeedback> AddTask(Task task, Dictionary<string, string> settings, CancellationToken cancellationToken = default)` | Send motion commands. Returns simulation result with code, axis data, reachability. Pass a `CancellationToken` to abandon a task that has been superseded by a newer request — a cancelled call returns an error feedback (`"Task superseded by a newer request."`) instead of throwing. |
 | `UpdateRobot` | `async Task<RobotState> UpdateRobot(float simulationState, bool streamFeedback = false)` | Query robot state at a normalized position (0.0–1.0). |
 | `UpdateVariable` | `async Task<Dictionary<string, List<Variable>>> UpdateVariable(Variable variable)` | Set/update a robot variable. Returns all variables of all connected robots. |
+| `UpdateVariableChecked` | `async Task<VariableUpdateResult> UpdateVariableChecked(Variable variable)` | Variable update with an explicit acknowledgement: returns `VariableUpdateResult { Success, Message, Variables }`. Use for edge-triggered control transitions (`Run`, `MoveEnable`, `Reset`, `Send`, `Online` — see [Well-Known Moderation Variables](#well-known-moderation-variables-realtime-drivers)) so a failed request surfaces to the caller instead of being silently dropped. `Success` means the server accepted the request — it says nothing about the physical robot, whose state arrives via the feedback stream. |
 | `QueryVariables` | `async Task<Dictionary<string, List<Variable>>> QueryVariables()` | Read the variables of all connected robots without modifying anything (sends an `UpdateVariableRequest` without a variable). |
 | `GetRobotData` | `async Task<PRC.GRPC.Robot?> GetRobotData()` | Retrieve the resolved robot definition (per-joint geometry, kinematics, tools, base, collision geometry, external axes) for the robot already set up on this client. Returns `null` if `SetupRobot` has not been called successfully, or if the server returns an error. |
 | `GetMachineData` | `async Task<GetRobotDataReply?> GetMachineData(string id, bool excludeGeometry = true)` | Retrieve the full `GetRobotDataReply` for **any connected machine** by its server-assigned ID — not just the robot set up on this client: the resolved definition plus its **live state** (current driver settings, variables, axis position, tool/flange frames, and visualization transformations). With `excludeGeometry` (the default) all mesh data is omitted, making the call cheap enough for high-frequency polling (30–60 Hz) — e.g. by a Supervisor client monitoring the other connected machines. Returns `null` on error. |
@@ -322,6 +323,7 @@ The Client library automatically subscribes to the `SubscribeRobotFeedback` stre
 | `RobotSettingsUpdatedEventHandler` | `RobotSettingsUpdatedEventArgs` (`.RobotSettings`) | Settings are updated by the server. |
 | `PingEventHandler` | `RobotPingEventArgs` (`.PingPayload`) | A ping response is received. |
 | `SimulationProgressEventHandler` | `SimulationProgressEventArgs` (`.Progress`) | A heartbeat is received. `Progress` is the simulation progress in percent (0–100) as reported by the server. |
+| `FeedbackStreamClosedEventHandler` | `FeedbackStreamClosedEventArgs` (`.Reason`) | The feedback stream ended **unexpectedly** (server gone, network drop). Deliberate teardown via `Disconnect`/`Reconnect` stays silent. The heartbeat watchdog (`LastFeedbackUtc`) remains the fallback for silent hangs that never close the stream. |
 
 Call `client.ClearEvents()` to unsubscribe all handlers.
 
@@ -1012,7 +1014,7 @@ Defines an external axis (linear rail, rotary positioner, AGV, etc.):
 |---|---|---|
 | `motion_group_type` | `MotionGroupType` | `CP` (Continuous Path / Linear), `PTP` (Point-to-Point), or `SPLINE` |
 | `commands` | `repeated MotionCommand` | The list of motion commands. Must be compatible with the group type. |
-| `interpolation` | `string` | Interpolation mode string output in generated code (e.g., `"C_PTP"`, `"C_DIS"`). Not currently simulated. |
+| `interpolation` | `string` | Interpolation/blending mode string (e.g., `"C_PTP"`, `"C_DIS"`, `"C_VEL"`). Written into generated code, and honored live by the realtime drivers (e.g. the mxA driver maps `C_PTP`/`C_VEL` for PTP-type motions and `C_DIS`/`C_VEL` for CP motions onto the KRC's approximation parameters). Blending is not reflected in the simulation. |
 | `tool_id` | `string` | The `tool_id` (dictionary key) of a tool in `Robot.tool_dictionary`. May be a number (`"0"`) or a name (`"gripper_open"`). Switching to a different key that resolves to the **same** `tool_robot_variable` swaps geometry only — no tool-change is emitted in the generated code (see the [Tool](#tool) message). |
 | `robot_base` | `Base` | Base frame for this motion group |
 | `data` | `MetaData` | Additional data |
@@ -1277,6 +1279,7 @@ One row of simulation data at a specific interpolated position:
 | `interpolation_factor` | `float` | Indicates if this is an interpolated point (0.0) or an original command point (1.0) |
 | `id` | `string` | Matches the `MetaData.id` of the original motion command |
 | `alarm` | `bool` | Aggregated flag — `true` if **any** collision or out-of-reach condition exists |
+| `motion_type` | `string` | Type of the originating motion command, as the PRC.Core `CommandType` name (`"LIN"`, `"PTP"`, `"Circular"`, `"Spline"`, `"Axis"`). Empty when unknown. |
 
 **Pseudocode:**
 ```
@@ -1291,6 +1294,7 @@ SimulationResultUnit:
     interpolation_factor = 1.0   // 1.0 = original point, 0.0 = interpolated
     id                   = "cmd_0"
     alarm                = true  // any issue detected
+    motion_type          = "LIN" // originating command type ("" if unknown)
 ```
 
 #### `RobotState`
@@ -1309,12 +1313,12 @@ Used for real-time visualization. Returned by `GetSimulatedRobotState` and strea
 | `axis_alarm` | `repeated bool` | One per axis — visual alert for unreachable/collision states |
 | `external_axis_alarm` | `repeated bool` | Same for external axes |
 | `variables` | `map<string, VariableArray>` | Current variables per robot ID |
-| `data` | `map<string, string>` | Additional key-value data |
+| `data` | `map<string, string>` | Additional key-value data. The live drivers (mxA, UR RT, NEURA RT, ABB RWS) publish a shared status contract here: `State` (driver/program state string, e.g. `"Idle"`, `"Streaming <task>"`, `"Running"`), `Moving` (`"True"`/`"False"`), `Error` (last driver error, sticky until the next error — includes e.g. the mxA version-mismatch diagnosis), and `Axis Position A1…A6`, plus driver-specific diagnostic keys. |
 | `connection_feedback` | `string` | Connection status text |
 | `task_id` | `string` | Current task being executed |
 | `command_id` | `string` | Current command within the task |
 | `robot_id` | `string` | Robot this state refers to |
-| `status` | `RobotStatus` | `IDLE`, `ACTIVE`, or `ERROR` |
+| `status` | `RobotStatus` | `IDLE`, `ACTIVE`, or `ERROR`. `ACTIVE` is set on every state published by a connected live driver and on simulation scrub states; `IDLE` only appears before any state has been published. |
 
 **Pseudocode:**
 ```
@@ -1486,10 +1490,12 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 |---|---|---|
 | `KUKA.KSS_KRL_Driver` | **Preview** | Driver for KUKA robots running KSS (KRC1-5). Outputs KRL code. Can optionally emit spline motion commands (SLIN/SPTP/SCIRC) instead of LIN/PTP/CIRC via the `UseSplineMotions` setting (see [Section 8](#8-settings-dictionary)). |
 | `KUKA.KSS_IOB_Driver` | Experimental | KUKA driver for the IO Builder integration, derived from KSS_KRL. Two interaction modes (chosen via the `Interaction` setting): **Servoing** streams the robot's current axis position as JSON over UDP to an external system whenever the simulation updates, and visualizes positions received back live; **Path-Table** takes each motion's absolute time from the metadata key `TimeStamp` (seconds, on `MetaData.data`) instead of computing timing from speed, and generates a time-stamped axis_recorder take file (JSON) as its `code` output instead of KRL. |
-| `KUKA.KSS_MXA_Driver` | Experimental | KUKA mxAutomation real-time interface. Requires matching mxAutomation.dll. |
+| `KUKA.KSS_MXA_Driver` | Experimental | KUKA mxAutomation **realtime** interface: streams motion commands cyclically over UDP to a KRC running the mxA option package. The bundled `KUKA.MxAutomation.dll` speaks mxA **interface 6.0** (a `KUKA.MxAutomation_3_3.dll` for interface-3.3 controllers ships alongside; the assembly version is *not* the interface version). The handshake fails with error 503 on an interface mismatch — the diagnosis, including both version numbers, is surfaced in `RobotState.data["Error"]` / the `mxA Last Error` variable. PRC sends to UDP 1336 and receives on 1336 (interface 5+) or 1337 (interface 3), selected automatically from the referenced DLL. Honors `C_PTP`/`C_VEL` blending on PTP groups and `C_DIS`/`C_VEL` on CP groups at runtime. **A new task cancels the running one by default** — its first order is sent in aborting mode, stopping the current motion and flushing the KRC-side queue. Honors the moderation variables (see below); without any `OV` the override defaults to 10 %. |
 | `UR.UR_Driver` | Experimental | Universal Robots offline code generation (UR5e/7e, UR10e, UR20). Outputs URScript. Supports Polyscope 5 and Polyscope X. |
 | `UR.UR_RT_Driver` | Experimental | Universal Robots **realtime** driver: simulates PRC tasks with the UR solver, streams them as URScript programs over the controller's secondary interface (port 30002), and displays the actual robot position live via RTDE (port 30004). Both channels are officially supported on Polyscope 5 and PolyScope X. |
-| `ABB.ABB_RAPID_Driver` | Experimental | ABB robots using RAPID language. |
+| `ABB.ABB_RAPID_Driver` | Experimental | ABB robots using RAPID language (offline code generation). |
+| `ABB.ABB_RWS_Driver` | Experimental | ABB **online** driver via Robot Web Services (HTTPS + Digest auth, OmniCore): on an execute-type task it uploads the generated RAPID module, loads it, resets the program pointer to `main`, turns motors on and starts execution; live joint/Cartesian position and RAPID execution state stream back via a subscription and are published as `RobotState` updates (`data["State"]` = `Running`/`Stopped`, `data["Moving"]`, `data["Error"]`) plus `ABB …` variables. Honors the moderation variables: `Run` (missing = true) gates connect/execute — an **empty task re-executes the previous task only when `Run` is explicitly true** (a simulate-only buffered task is escalated to an execute on such a rerun), so a plain re-simulation can never fire a RAPID run by itself; `OV` maps to the controller speed ratio; a `Reset` rising edge resets the program pointer. `Run` also gates live following (missing = on; the legacy `Online` variable is still honored alongside it). |
+| `FANUC.FANUC_LS_Driver` | Experimental | FANUC offline code generation: outputs an **LS** program source (TP format) with XYZWPR frame data; CP speeds are interpreted in m/s in the simulation. Save `SimulationResult.code` as `.ls`. |
 | `IGUS.IGUS_Driver` | Proof of Concept | IGUS ReBel robot support. |
 | `NEURA.NEURA_SIM_Driver` | Proof of Concept | NEURA robots (MAiRA 7-DOF and LARA 6-DOF). Generates NeuraPy v5 Python code — `move_joint` blocks for PTP groups and one `move_composite` per CP group (linear/circular children with per-child velocities, each child's `target_pose` seeded with the pose the segment starts from) — or a neutral JSON toolpath format, selected via the `OutputFormat` setting. Oversized CP groups are split into several `move_composite` calls (`CPTargetsPerCall` setting) because the NeuraPy socket server rejects requests beyond its read buffer. |
 | `NEURA.NEURA_RT_Driver` | Experimental | NEURA **realtime** driver: connects to the NeuraPy socket server on the robot control box (default `192.168.2.13:65432`) and executes/streams motions live, with configurable blending and feedback interval; oversized CP groups are split into several `move_composite` calls (`CPTargetsPerCall` setting). In **Follow Target Mode** the task's last **Cartesian PTP** target is chased via the servo interface (`movelinear_online`), with a real PTP to the solver's joint solution priming the commanded posture at session start and on posture changes — see [Section 8](#8-settings-dictionary). |
@@ -1503,6 +1509,8 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 **Universal Robots:** `UR.UR_57e` (UR5e/7e), `UR.UR_10e`, `UR.UR_20`
 
 **ABB:** `ABB.ABB_IRB6620`, `ABB.ABB_IRB6700_150_320`
+
+**FANUC:** `FANUC.FANUC_R2000iC_165F`, `FANUC.FANUC_LRMate200iD`, `FANUC.FANUC_M2000iA_2300`
 
 **IGUS:** `IGUS.IGUS_ReBel`
 
@@ -1519,6 +1527,20 @@ External axes travel over GRPC as full `ExternalAxis` definitions (type, kinemat
 **KUKA:** `KUKA_KL4000` (linear axis), `KUKA_KP1V` (KP1V500 single rotary axis), `KUKA_DKP400` (2-axis positioner), `KUKA_DKP500` (DKP500-2 HW 2-axis positioner), `KUKA_KP2HV500` (KP2 HV500 2-axis positioner)
 
 **NEURA:** `MAV500` (MAV-500 AGV)
+
+### Well-Known Moderation Variables (Realtime Drivers)
+
+The four live drivers (`KUKA.KSS_MXA_Driver`, `UR.UR_RT_Driver`, `NEURA.NEURA_RT_Driver`, `ABB.ABB_RWS_Driver`) continuously read a set of well-known variables from the robot's variable directory. Any client can set them via `UpdateVariable` (use `UpdateVariableChecked` in the .NET library for acknowledged transitions) — the PRC Server's own Run console uses exactly the same variables.
+
+| Variable | Type | Honored by | Effect |
+|---|---|---|---|
+| `Run` | bool — **missing counts as `true`** | all four | Gates the driver's live connection and execution. `false` stops the drive — mxA shuts its cyclic core down; RWS stops RAPID execution, skips connecting, and still generates code for execute-type tasks without sending it. An **empty task re-runs the previously sent task only while `Run` is `true`** — the server UI loads robot packages with `Run = false` so nothing moves on load. |
+| `OV` | int 0–100 | all four | Speed override: mxA KRC override, UR speed slider (clamped to 1–100 there), NEURA `set_override`, ABB RWS panel speed ratio. When no `OV` has ever been set, the server UI seeds **10 %** on opening the Run console, and the mxA driver additionally defaults to 10 % internally — an unset override used to read as 0 % on mxA, which silently prevents all motion. |
+| `MoveEnable` | bool | mxA only | The KRC MOVE_ENABLE gate. Dropping it decelerates the robot; queued commands stay buffered, but the drive needs a reset to run again. |
+| `Reset` | bool, rising edge | mxA, NEURA, RWS | Error recovery: mxA `EXECUTERESET`, NEURA `reset_errors`, ABB RWS program-pointer reset to `main`. Pulse it `true` → `false` like a physical reset button. |
+| `Online` | bool — missing counts as `true` | RWS only (legacy) | Pre-rework name for the RWS live-following gate; still honored alongside `Run`, which now gates following as well. Explicit `false` on either mutes live state updates while keeping the connection. New clients should use `Run`. |
+
+Driver status flows back through the same channels: the live `RobotState.data` carries the shared `State` / `Moving` / `Error` keys (see [Section 6.6](#66-feedback)), and each driver publishes prefixed diagnostic variables (`mxA …`, `UR …`, `NEURA …`, `ABB …`) readable via `UpdateVariable` (query form), `QueryVariables`, or `GetRobotData`.
 
 ---
 
@@ -1605,6 +1627,8 @@ SimulationResultUnit:
     interpolation_factor: float    // 1.0 = original point, 0.0 = interpolated
     id:                   string   // matches input command MetaData.id
     alarm:                bool     // true if ANY issue detected
+    motion_type:          string   // originating command type: "LIN", "PTP",
+                                   // "Circular", "Spline", "Axis" ("" if unknown)
 ```
 
 ### Processing Example
