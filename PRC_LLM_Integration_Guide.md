@@ -1530,12 +1530,12 @@ External axes travel over GRPC as full `ExternalAxis` definitions (type, kinemat
 
 ### Well-Known Moderation Variables (Realtime Drivers)
 
-The four live drivers (`KUKA.KSS_MXA_Driver`, `UR.UR_RT_Driver`, `NEURA.NEURA_RT_Driver`, `ABB.ABB_RWS_Driver`) continuously read a set of well-known variables from the robot's variable directory. Any client can set them via `UpdateVariable` (use `UpdateVariableChecked` in the .NET library for acknowledged transitions) — the PRC Server's own Run console uses exactly the same variables.
+The four live drivers (`KUKA.KSS_MXA_Driver`, `UR.UR_RT_Driver`, `NEURA.NEURA_RT_Driver`, `ABB.ABB_RWS_Driver`) continuously read a set of well-known variables from the robot's variable directory. Any client can set them via `UpdateVariable` (use `UpdateVariableChecked` in the .NET library for acknowledged transitions) — the PRC Server's own Run panel uses exactly the same variables.
 
 | Variable | Type | Honored by | Effect |
 |---|---|---|---|
 | `Run` | bool — **missing counts as `true`** | all four | Gates the driver's live connection and execution. `false` stops the drive — mxA shuts its cyclic core down; RWS stops RAPID execution, skips connecting, and still generates code for execute-type tasks without sending it. An **empty task re-runs the previously sent task only while `Run` is `true`** — the server UI loads robot packages with `Run = false` so nothing moves on load. |
-| `OV` | int 0–100 | all four | Speed override: mxA KRC override, UR speed slider (clamped to 1–100 there), NEURA `set_override`, ABB RWS panel speed ratio. When no `OV` has ever been set, the server UI seeds **10 %** on opening the Run console, and the mxA driver additionally defaults to 10 % internally — an unset override used to read as 0 % on mxA, which silently prevents all motion. |
+| `OV` | int 0–100 | all four | Speed override: mxA KRC override, UR speed slider (clamped to 1–100 there), NEURA `set_override`, ABB RWS panel speed ratio. When no `OV` has ever been set, the server UI seeds **10 %** on opening the Run panel, and the mxA driver additionally defaults to 10 % internally — an unset override used to read as 0 % on mxA, which silently prevents all motion. |
 | `MoveEnable` | bool | mxA only | The KRC MOVE_ENABLE gate. Dropping it decelerates the robot; queued commands stay buffered, but the drive needs a reset to run again. |
 | `Reset` | bool, rising edge | mxA, NEURA, RWS | Error recovery: mxA `EXECUTERESET`, NEURA `reset_errors`, ABB RWS program-pointer reset to `main`. Pulse it `true` → `false` like a physical reset button. |
 | `Online` | bool — missing counts as `true` | RWS only (legacy) | Pre-rework name for the RWS live-following gate; still honored alongside `Run`, which now gates following as well. Explicit `false` on either mutes live state updates while keeping the connection. New clients should use `Run`. |
