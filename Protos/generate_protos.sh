@@ -29,6 +29,15 @@ gen 1.67.1 --python_out=../Fusion360/ParametricRobotControl/commands/prcUI \
            --pyi_out=../Fusion360/ParametricRobotControl/commands/prcUI \
            --grpc_python_out=../Fusion360/ParametricRobotControl/commands/prcUI
 
+# The Geometry Nodes add-on is a Blender *extension* (a proper Python package,
+# bl_ext.user_default.prc_blender) and deliberately does not touch sys.path,
+# so protoc's absolute "import prc_pb2" cannot resolve there — it only fails
+# at enable time with ModuleNotFoundError. Rewrite it to a relative import.
+# The other integrations sys.path.append their folder and keep the generated
+# absolute import as is.
+sed -i 's/^import prc_pb2 as prc__pb2$/from . import prc_pb2 as prc__pb2/' \
+    "../Blender Geometry Nodes/Source/prc_pb2_grpc.py"
+
 # After regenerating the Blender Geometry Nodes source, repack prc_blender.zip
 # from the Source folder (contents at the zip root, without __pycache__).
 
