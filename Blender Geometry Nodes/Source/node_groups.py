@@ -45,14 +45,42 @@ _RANDOM_SEED_GROUP_NAMES = frozenset({
 })
 
 
+_STRING_ATTRS_SUPPORTED: "bool | None" = None
+
+
 def _supports_string_attrs() -> bool:
-    """STRING-typed attributes via Store Named Attribute land in Blender 5.2.
-    Older Blender versions silently drop string writes, so the Insert Code
-    node group is only emitted when this returns True."""
-    return bpy.app.version >= (5, 2, 0)
+    """Whether Store Named Attribute can store STRING attributes. Blender 5.2
+    shipped string *fields* only; the node filters its data_type enum at
+    assignment time while the static bl_rna enum still lists STRING, so
+    neither a version check nor an enum inspection is reliable — the only
+    honest probe is attempting the assignment on a throwaway node. That
+    touches bpy.data, which is disallowed at registration/draw time; those
+    callers get a conservative False (uncached) and the probe retries from
+    the next safe context. The Insert Code node group is only emitted when
+    this returns True."""
+    global _STRING_ATTRS_SUPPORTED
+    if _STRING_ATTRS_SUPPORTED is None:
+        try:
+            tree = bpy.data.node_groups.new("PRC_string_attr_probe", "GeometryNodeTree")
+        except Exception:  # noqa: BLE001 — restricted context, retry later
+            return False
+        try:
+            node = tree.nodes.new("GeometryNodeStoreNamedAttribute")
+            try:
+                node.data_type = "STRING"
+            except TypeError:
+                _STRING_ATTRS_SUPPORTED = False
+            else:
+                _STRING_ATTRS_SUPPORTED = True
+        finally:
+            bpy.data.node_groups.remove(tree)
+    return _STRING_ATTRS_SUPPORTED
 
 
 def _all_group_names() -> tuple[str, ...]:
+    # Called per use rather than cached at import: whether Insert Code is
+    # included depends on _supports_string_attrs(), which cannot probe in
+    # the restricted import/registration context.
     base = (
         NG_AXIS, NG_PTP, NG_LIN,
         NG_PTP_GROUP, NG_CP_GROUP, NG_ACTION_GROUP,
@@ -66,13 +94,10 @@ def _all_group_names() -> tuple[str, ...]:
     )
     if _supports_string_attrs():
         base = base + (NG_INSERT_CODE,)
+    # Order matters: helper builders that reference other PRC node groups
+    # (Curve Helper uses PTP / Cartesian Motion Groups) must come AFTER the
+    # groups they reference.
     return base
-
-
-# Order matters: helper builders that reference other PRC node groups
-# (Curve Helper uses PTP / Cartesian Motion Groups) must come AFTER the
-# groups they reference.
-ALL_GROUP_NAMES = _all_group_names()
 
 
 # ---------------------------------------------------------------------------
@@ -1662,8 +1687,9 @@ def _build_orient_to_point(ng: bpy.types.NodeTree) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Insert Code (9) — Blender 5.2+ only. Emits a single action waypoint that
-# the reader translates into TaskPayload(action_task=Action(insert_code...)).
+# Insert Code (9) — only built when _supports_string_attrs() (no shipped
+# Blender yet). Emits a single action waypoint that the reader translates
+# into TaskPayload(action_task=Action(insert_code...)).
 # ---------------------------------------------------------------------------
 
 def _build_insert_code(ng: bpy.types.NodeTree) -> None:
@@ -1809,7 +1835,7 @@ def ensure_node_groups() -> tuple[int, int, int]:
     references to them (e.g. inside the carrier tree) stay valid.
     Returns (created, upgraded, kept)."""
     created = upgraded = kept = 0
-    for name in ALL_GROUP_NAMES:
+    for name in _all_group_names():
         existing = bpy.data.node_groups.get(name)
         if existing is not None and _is_ours(existing):
             if _is_current_version(existing):
@@ -1865,7 +1891,12 @@ def _menu_sections() -> tuple[tuple[str, tuple[str, ...]], ...]:
         NG_GREASE_PENCIL_HELPER,
     )
     modifiers = (NG_APPROACH_RETRACT, NG_ORIENT_TO_POINT)
-    actions = (NG_INSERT_CODE,) if _supports_string_attrs() else ()
+    # Read the cached probe result only — this runs from the menu's draw
+    # callback, where creating/removing datablocks (what the probe does) is
+    # not safe. Until ensure_node_groups() has run the probe once, actions
+    # are conservatively hidden; the Insert Code group wouldn't exist yet
+    # anyway before the first Generate.
+    actions = (NG_INSERT_CODE,) if _STRING_ATTRS_SUPPORTED else ()
     groups = (NG_PTP_GROUP, NG_CP_GROUP)
     if actions:
         groups = groups + (NG_ACTION_GROUP,)
@@ -1879,9 +1910,6 @@ def _menu_sections() -> tuple[tuple[str, tuple[str, ...]], ...]:
         sections.append(("Actions", actions))
     sections.append(("Task", (NG_TASK,)))
     return tuple(sections)
-
-
-_ADD_MENU_SECTIONS = _menu_sections()
 
 
 class NODE_OT_add_prc_group(bpy.types.Operator):
@@ -1954,8 +1982,12 @@ class NODE_MT_prc_groups(bpy.types.Menu):
     bl_label = "PRC"
 
     def draw(self, context):
+        # Sections are computed per draw: the Actions entry depends on
+        # _supports_string_attrs(), whose probe cannot run at import time.
+        # The probe result is cached, so this is a tuple rebuild per open —
+        # negligible for a menu.
         layout = self.layout
-        for section_idx, (section_label, names) in enumerate(_ADD_MENU_SECTIONS):
+        for section_idx, (section_label, names) in enumerate(_menu_sections()):
             if section_idx > 0:
                 layout.separator()
             layout.label(text=section_label)

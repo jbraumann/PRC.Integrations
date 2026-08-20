@@ -5,7 +5,7 @@
 ### Version requirements
 
 - **Blender 5.0.0 or later.** Earlier versions (4.3 and below) are not supported — the add-on uses Blender 4.4+ Geometry Nodes APIs (typed sockets, `capture_items` collection on Capture Attribute, slotted Action data, etc.) and won't load on older builds. The minimum is enforced by `blender_manifest.toml`.
-- **Blender 5.2.0+** is required for the **Insert Code** action node, which depends on string-typed Geometry Nodes attributes that landed in 5.2. On 5.0 / 5.1 every other feature works; the Insert Code entry simply doesn't appear in the Add menu.
+- The **Insert Code** action node depends on string-typed Geometry Nodes *attributes* (STRING on Store Named Attribute), which no shipped Blender release supports yet — 5.2 added string *fields* only. The add-on feature-detects this at load time; until a Blender release ships string attributes, the Insert Code entry simply doesn't appear in the Add menu. Every other feature works on 5.0+.
 - **Platforms**: Windows x64, Linux x64, macOS arm64, macOS x64. The bundled gRPC / protobuf wheels target CPython 3.13 (the interpreter shipped with Blender 5.x).
 
 ### Other requirements
@@ -65,10 +65,10 @@ Inside the `PRC_Program` Geometry Nodes tree, press **Shift + A** and find the *
 | Section | What's in it |
 |---|---|
 | **Motion Commands** | `PRC AXIS Move`, `PRC PTP Move`, `PRC LIN Move` |
-| **Motion Groups** | `PRC PTP Motion Group`, `PRC Cartesian Motion Group`, `PRC Action Group` (5.2+) |
+| **Motion Groups** | `PRC PTP Motion Group`, `PRC Cartesian Motion Group`, `PRC Action Group` (when string attributes are available — see below) |
 | **Helpers** | `PRC Curve Helper`, `PRC Mesh Path Helper`, `PRC Animation Helper`, `PRC Grease Pencil Helper` |
 | **Modifiers** | `PRC Approach Retract`, `PRC Orient to Point` |
-| **Actions** *(5.2+ only)* | `PRC Insert Code` |
+| **Actions** *(needs string-attribute support, not yet in any shipped Blender)* | `PRC Insert Code` |
 | **Task** | `PRC Task` |
 
 **The pipeline shape** is always the same:
@@ -167,7 +167,7 @@ Place after motion groups; the helper preserves all other attributes.
 
 ---
 
-## 7. Actions (Blender 5.2+)
+## 7. Actions (requires Geometry Nodes string-attribute support)
 
 ### Insert Code
 Inputs: `Code` (String), `Is Comment` (Bool).
