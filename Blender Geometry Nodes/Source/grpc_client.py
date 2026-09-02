@@ -1409,7 +1409,11 @@ def add_task(task: prc_pb2.Task) -> tuple[bool, str]:
         _build_toolpath_request_main_thread(verts, alarms)
         snippet = (result.code or "").strip().splitlines()
         first_line = snippet[0] if snippet else "(no code)"
-        info = f"valid={result.is_valid}, t={result.time:.2f}s, code: {first_line[:60]}"
+        # Every generated file with its name, primary program first (a KRL
+        # module on iiQKA.OS 2 is a .src + .dat pair); empty on older servers.
+        file_names = ", ".join(f.name for f in result.files)
+        files_info = f", files: {file_names}" if file_names else ""
+        info = f"valid={result.is_valid}, t={result.time:.2f}s{files_info}, code: {first_line[:60]}"
         return result.is_valid, info
     except Exception as e:  # noqa: BLE001
         return False, f"AddRobotTask failed: {e!r}"

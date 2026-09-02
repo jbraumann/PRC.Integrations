@@ -288,7 +288,7 @@ The `PRC.GRPC.Client.Client` class exposes the following methods and properties:
 |---|---|---|
 | `Connect` | `async Task<TaskFeedback> Connect(string ip, bool grpcWeb = false)` | Establish connection to PRC server. Handles TLS certificates automatically. |
 | `SetupRobot` | `async Task<SetupFeedback> SetupRobot(string clientId, IRobotProperties robot, string robotDriver, PRC.GRPC.Robot? bufferedSetup = null)` | Initialize robot environment. Automatically subscribes to the feedback stream. Returns settings dictionary. For a robot-less monitoring connection, pass `new PRC.Library.Robots.Supervisor.Supervisor_Device()` as the robot with `"Supervisor.Supervisor_Driver"` as the driver. The optional `bufferedSetup` sends an already-serialized `PRC.GRPC.Robot` message verbatim instead of serializing `robot` — used e.g. when replaying a stored robot package. |
-| `AddTask` | `async Task<SimulationFeedback> AddTask(Task task, Dictionary<string, string> settings, CancellationToken cancellationToken = default)` | Send motion commands. Returns simulation result with code, axis data, reachability. Pass a `CancellationToken` to abandon a task that has been superseded by a newer request — a cancelled call returns an error feedback (`"Task superseded by a newer request."`) instead of throwing. |
+| `AddTask` | `async Task<SimulationFeedback> AddTask(Task task, Dictionary<string, string> settings, CancellationToken cancellationToken = default)` | Send motion commands. Returns the simulation result with the generated program files (`Result.Files`, plus `Result.Code` for the primary one), axis data, reachability. Pass a `CancellationToken` to abandon a task that has been superseded by a newer request — a cancelled call returns an error feedback (`"Task superseded by a newer request."`) instead of throwing. |
 | `UpdateRobot` | `async Task<RobotState> UpdateRobot(float simulationState, bool streamFeedback = false)` | Query robot state at a normalized position (0.0–1.0). |
 | `UpdateVariable` | `async Task<Dictionary<string, List<Variable>>> UpdateVariable(Variable variable)` | Set/update a robot variable. Returns all variables of all connected robots. |
 | `UpdateVariableChecked` | `async Task<VariableUpdateResult> UpdateVariableChecked(Variable variable)` | Variable update with an explicit acknowledgement: returns `VariableUpdateResult { Success, Message, Variables }`. Use for edge-triggered control transitions (`Run`, `MoveEnable`, `Reset`, `Send`, `Online` — see [Well-Known Moderation Variables](#well-known-moderation-variables-realtime-drivers)) so a failed request surfaces to the caller instead of being silently dropped. `Success` means the server accepted the request — it says nothing about the physical robot, whose state arrives via the feedback stream. |
@@ -362,7 +362,8 @@ task.Commands.Add(motionGroup)
 
 // 6. Send task
 simFeedback = client.AddTask(task, settings)
-// simFeedback.Result.Code → generated KRL
+// simFeedback.Result.Files → every generated file (Name, Content), primary program first
+// simFeedback.Result.Code → the primary file's content (always populated)
 // simFeedback.Result.IsValid → true if no issues
 // simFeedback.Result.Time → estimated seconds
 
@@ -452,7 +453,13 @@ if (connectFeedback.Status == Status.Success)
     var simFeedback = await client.AddTask(robotTask, settings);
     Console.WriteLine($"Valid: {simFeedback.Result.IsValid}");
     Console.WriteLine($"Time: {simFeedback.Result.Time:F2}s");
-    Console.WriteLine($"KRL Code:\n{simFeedback.Result.Code}");
+    // Every generated file with its name, the primary program first (a KRL
+    // module on iiQKA.OS 2 is a .src + .dat pair). Code repeats the primary
+    // file's content and is all an older server delivers.
+    foreach (var programFile in simFeedback.Result.Files)
+        File.WriteAllText(programFile.Name, programFile.Content);
+    if (simFeedback.Result.Files.Count == 0)
+        File.WriteAllText("robot_program.src", simFeedback.Result.Code);
 
     // 7. Animate simulation (0% → 100%)
     for (int i = 0; i <= 100; i += 3)
@@ -504,7 +511,7 @@ service ParametricRobotControlService {
 | Method | Type | Purpose |
 |---|---|---|
 | `SetupRobot` | Unary | Initialize robot model, driver, tools, base, collision geometry. Returns settings dictionary. |
-| `AddRobotTask` | Unary | Send motion commands. Returns `SimulationResult` with axis data, reachability, generated code. |
+| `AddRobotTask` | Unary | Send motion commands. Returns `SimulationResult` with axis data, reachability and the generated program files. |
 | `SubscribeRobotFeedback` | Server streaming | Real-time stream of heartbeats, robot state, settings updates, pings. |
 | `GetSimulatedRobotState` | Unary | Query robot state at a normalized position (0.0–1.0) along the toolpath. |
 | `UpdateVariable` | Unary | Set a variable on the robot. Returns all variables of all connected robots. The variable may be omitted to query without modifying anything. |
@@ -1259,8 +1266,18 @@ Returned in `AddRobotTaskReply.simulation_result_data`. Contains the complete si
 | `simulation_results` | `repeated SimulationResultUnit` | One entry per interpolated position along the toolpath |
 | `is_valid` | `bool` | `true` if no reachability or collision problems were detected |
 | `time` | `float` | Total estimated execution time in **seconds** |
-| `code` | `string` | Generated robot control code (KRL for KUKA, URScript for UR, RAPID for ABB, NeuraPy Python for NEURA, etc.). Write this to a file with the appropriate extension (e.g. `.src` for KUKA KRL, `.script` for UR; for ABB RAPID, `.mod` or `.modx` depending on the `IRCVersion` setting; for NEURA, `.py` — or `.json` when the `OutputFormat` setting selects `NeuraPy [JSON]` — see [Section 8](#8-settings-dictionary)). Exception: `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON axis_recorder take file here instead of KRL. |
+| `code` | `string` | Content of the **primary** generated program file (KRL for KUKA, URScript for UR, RAPID for ABB, NeuraPy Python for NEURA, etc.) — always populated, for consumers that only know one string. When `files` is empty (older servers), write this to a file with the appropriate extension yourself (e.g. `.src` for KUKA KRL, `.script` for UR; for ABB RAPID, `.mod` or `.modx` depending on the `IRCVersion` setting; for NEURA, `.py` — or `.json` when the `OutputFormat` setting selects `NeuraPy [JSON]` — see [Section 8](#8-settings-dictionary)). Exception: `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON axis_recorder take file here instead of KRL. |
 | `data` | `MetaData` | Additional information |
+| `files` | `repeated ProgramFile` | Every generated file with its file name, the **primary program first**. A driver whose controller expects several files per program lists them all — a KRL module on iiQKA.OS 2 is a `<ProgramName>.src` + `<ProgramName>.dat` pair. Empty when the driver only delivers `code` (the realtime drivers, which have no program file; older servers) — then the client names the file itself. Write every entry as-is: `name` already carries the extension. |
+
+#### `ProgramFile`
+
+One generated program file, as listed in `SimulationResult.files`:
+
+| Field | Type | Description |
+|---|---|---|
+| `name` | `string` | File name including the extension, e.g. `kukaprc_project.src`. Derived from the driver's `ProgramName` setting, sanitised to a valid program identifier for the controller, so the file name always matches the program name inside (a KRC refuses a `.src` whose file name differs from its `DEF` name). |
+| `content` | `string` | File content, with the line endings the controller expects. Write it out unchanged (e.g. Python `open(name, "w", newline="")`). |
 
 #### `SimulationResultUnit`
 
@@ -1372,7 +1389,7 @@ RobotState:
 | Field | Type | Description |
 |---|---|---|
 | `status` | `string` | Processing feedback. **Exactly `"Processed."` on success** — treat any other value as an error (e.g. `"Error: …"` for processing failures, `"Environment ID not found"` for an unknown/expired robot ID, or an empty string from very old servers). |
-| `simulation_result_data` | `SimulationResult` | Full simulation result including axis values, reachability, collision data, and generated code. |
+| `simulation_result_data` | `SimulationResult` | Full simulation result including axis values, reachability, collision data, and the generated program files (`files`, with `code` repeating the primary one). |
 
 #### `GetSimulatedRobotStateRequest`
 
@@ -1495,7 +1512,7 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 | `UR.UR_RT_Driver` | Experimental | Universal Robots **realtime** driver: simulates PRC tasks with the UR solver, streams them as URScript programs over the controller's secondary interface (port 30002), and displays the actual robot position live via RTDE (port 30004). Both channels are officially supported on Polyscope 5 and PolyScope X. |
 | `ABB.ABB_RAPID_Driver` | Experimental | ABB robots using RAPID language (offline code generation). |
 | `ABB.ABB_RWS_Driver` | Experimental | ABB **online** driver via Robot Web Services (HTTPS + Digest auth, OmniCore): on an execute-type task it uploads the generated RAPID module, loads it, resets the program pointer to `main`, turns motors on and starts execution; live joint/Cartesian position and RAPID execution state stream back via a subscription and are published as `RobotState` updates (`data["State"]` = `Running`/`Stopped`, `data["Moving"]`, `data["Error"]`) plus `ABB …` variables. Honors the moderation variables: `Run` (missing = true) gates connect/execute — an **empty task re-executes the previous task only when `Run` is explicitly true** (a simulate-only buffered task is escalated to an execute on such a rerun), so a plain re-simulation can never fire a RAPID run by itself; `OV` maps to the controller speed ratio; a `Reset` rising edge resets the program pointer. `Run` also gates live following (missing = on; the legacy `Online` variable is still honored alongside it). |
-| `FANUC.FANUC_LS_Driver` | Experimental | FANUC offline code generation: outputs an **LS** program source (TP format) with XYZWPR frame data; CP speeds are interpreted in m/s in the simulation. Save `SimulationResult.code` as `.ls`. |
+| `FANUC.FANUC_LS_Driver` | Experimental | FANUC offline code generation: outputs an **LS** program source (TP format) with XYZWPR frame data; CP speeds are interpreted in m/s in the simulation. The program arrives named `<ProgramName>.LS` in `SimulationResult.files` (`code` repeats its content). |
 | `IGUS.IGUS_Driver` | Proof of Concept | IGUS ReBel robot support. |
 | `NEURA.NEURA_SIM_Driver` | Proof of Concept | NEURA robots (MAiRA 7-DOF and LARA 6-DOF). Generates NeuraPy v5 Python code — `move_joint` blocks for PTP groups and one `move_composite` per CP group (linear/circular children with per-child velocities, each child's `target_pose` seeded with the pose the segment starts from) — or a neutral JSON toolpath format, selected via the `OutputFormat` setting. Oversized CP groups are split into several `move_composite` calls (`CPTargetsPerCall` setting) because the NeuraPy socket server rejects requests beyond its read buffer. |
 | `NEURA.NEURA_RT_Driver` | Experimental | NEURA **realtime** driver: connects to the NeuraPy socket server on the robot control box (default `192.168.2.13:65432`) and executes/streams motions live, with configurable blending and feedback interval; oversized CP groups are split into several `move_composite` calls (`CPTargetsPerCall` setting). In **Follow Target Mode** the task's last **Cartesian PTP** target is chased via the servo interface (`movelinear_online`), with a real PTP to the solver's joint solution priming the commanded posture at session start and on posture changes — see [Section 8](#8-settings-dictionary). |
@@ -1583,16 +1600,16 @@ Setting keys vary by driver — always inspect the dictionary returned from `Set
 
 | Driver | Key | Values | Effect |
 |---|---|---|---|
-| `ABB.ABB_RAPID_Driver` | `IRCVersion` | `"IRC5"` or `"IRC7/OmniCore"` (**default**) | Targets the controller generation. **`IRC5`** → save the generated module as a **`.mod`** file; **`IRC7/OmniCore`** → save it as a **`.modx`** file. A missing or unrecognised value falls back to `.modx`, so older projects keep producing OmniCore-compatible files. |
+| `ABB.ABB_RAPID_Driver` | `IRCVersion` | `"IRC5"` or `"IRC7/OmniCore"` (**default**) | Targets the controller generation. **`IRC5`** → save the generated module as a **`.mod`** file; **`IRC7/OmniCore`** → save it as a **`.modx`** file. A missing or unrecognised value falls back to `.modx`, so older projects keep producing OmniCore-compatible files. The module arrives already named with the matching extension in `SimulationResult.files`, so a client reading `files` needs no extension logic of its own. |
 | `KUKA.KSS_KRL_Driver` (and derived `KUKA.KSS_IOB_Driver`) | `UseSplineMotions` | `"True"` or `"False"` (**default**) | If enabled, spline motion commands (**SLIN**, **SPTP**, **SCIRC**) are generated instead of LIN, PTP, and CIRC. Approximated motions use the `C_SPL` criterion instead of `C_DIS`/`C_PTP`. Requires KUKA KSS 8.3 or higher. |
 | `KUKA.KSS_IOB_Driver` | `Interaction` | `"Path-Table"` (**default**) or `"Servoing"` | Selects the IO Builder interaction mode. In **Path-Table** mode every motion must carry an absolute time stamp in seconds under the metadata key `TimeStamp` (`MetaData.data["TimeStamp"]`, invariant culture); the solver uses those times instead of speed-derived timing, and the `code` output is a time-stamped axis_recorder take file (JSON) rather than KRL. In **Servoing** mode the current axis position is streamed as JSON over UDP (`ExternalIP`/`ExternalPort`), and positions received on `LocalPort` are visualized live. |
 | `KUKA.KSS_IOB_Driver` | `PathSmoothing` | `"Spline"` (**default**) or `"Linear"` | With `"Spline"`, the simulation is smoothed with cubic splines through the programmed targets — every target is still reached at its exact time, but velocity stays continuous across targets instead of cornering. |
-| `NEURA.NEURA_SIM_Driver` | `OutputFormat` | `"NeuraPy"` (**default**) or `"NeuraPy [JSON]"` | Selects the `code` output: a runnable NeuraPy v5 Python script (save as **`.py`** and run it with the NeuraPy wheel installed, connected to the robot's socket server) or a neutral JSON toolpath representation (save as **`.json`**) for custom postprocessors. |
+| `NEURA.NEURA_SIM_Driver` | `OutputFormat` | `"NeuraPy"` (**default**) or `"NeuraPy [JSON]"` | Selects the `code` output: a runnable NeuraPy v5 Python script (save as **`.py`** and run it with the NeuraPy wheel installed, connected to the robot's socket server) or a neutral JSON toolpath representation (save as **`.json`**) for custom postprocessors. `SimulationResult.files` carries the file already named with the matching extension. |
 | `NEURA.NEURA_SIM_Driver`, `NEURA.NEURA_RT_Driver` | `CPTargetsPerCall` | Number of poses, `"250"` (**default**); `"0"` = one call per group | Splits large CP groups into several `move_composite` calls of at most this many poses (seed poses included), each follow-up call seeded with the previous chunk's end pose so the path stays gapless. The stock NeuraPy socket server reads each request with an 8 KB buffer and resets the connection on requests beyond ~48 KB, so one oversized call would die at runtime. The robot pauses briefly at each seam — blending cannot span separate calls. |
 | `NEURA.NEURA_SIM_Driver`, `NEURA.NEURA_RT_Driver` | `CPRotationSpeed` | rad/s, `"0.5"` (**default**); `"0"` = leave to the controller | Composite-level rotational speed for CP motions: segments that mostly reorient the tool are paced by this limit rather than the translational CP speed. PRC has no per-target rotational speed, so one value applies to the whole group; NeuraPy's own default is 0.5 rad/s. |
 | `NEURA.NEURA_RT_Driver` | `FollowTargetMode` | `"True"` or `"False"` (**default**) | Streams the task's **last Cartesian PTP target** via the servo interface (`movelinear_online`): the robot continuously chases the most recent target and re-plans on the fly when it changes — ideal for live target following. The first target of a session, and any change of the commanded posture, first runs a real PTP to the solver's joint solution so servoing starts in the commanded posture rather than whatever configuration the controller's own IK drifts into. The target's PTP speed percentage scales the servo speed (100 % = 2 m/s); rotation is paced by `CPRotationSpeed`. Joint-space, LIN and circular targets are not executed in this mode, and an out-of-reach target is refused while the previous reachable target is kept. |
 
-When writing `SimulationResult.code` to disk, choose the file extension based on the driver (and, for ABB, the `IRCVersion` setting; for NEURA, the `OutputFormat` setting). Note that `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON take file, not KRL. See [Section 6.6](#66-feedback) and [Section 9](#9-simulationresult-addtaskreply-data).
+Prefer `SimulationResult.files` when writing programs to disk: every generated file arrives with its file name — extension included — derived from the driver's `ProgramName` setting, and a driver whose controller expects several files per program (a KRL module on iiQKA.OS 2 is a `.src` + `.dat` pair) lists them all. Only when `files` is empty (an older server) fall back to `SimulationResult.code` and choose the file extension yourself based on the driver (and, for ABB, the `IRCVersion` setting; for NEURA, the `OutputFormat` setting). Note that `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON take file, not KRL. See [Section 6.6](#66-feedback) and [Section 9](#9-simulationresult-addtaskreply-data).
 
 ---
 
@@ -1606,7 +1623,8 @@ The `SimulationResult` returned from `AddRobotTask` provides complete simulation
 |---|---|---|
 | `is_valid` | `bool` | `true` if the entire toolpath is reachable and collision-free |
 | `time` | `float` | Total estimated execution time in seconds |
-| `code` | `string` | Generated robot code (KRL, URScript, RAPID, etc.) |
+| `code` | `string` | Content of the primary generated program file (KRL, URScript, RAPID, etc.) — always populated |
+| `files` | `list<ProgramFile>` | Every generated file with its `name` (extension included) and `content`, primary program first; empty on older servers — see [Section 6.6](#66-feedback) |
 | `simulation_results` | `list` | Per-position simulation data |
 
 ### Per-Position Data (`SimulationResultUnit`)
@@ -1651,11 +1669,20 @@ for i, unit in enumerate(result.simulation_results):
         print(f"Position {i} (t={unit.time:.2f}s): {', '.join(issues)}")
         print(f"  Axes: {list(unit.axis_values)}")
 
-# Save generated code to file
-# .src for KUKA KRL, .script for UR, .mod/.modx for ABB RAPID (see IRCVersion
-# in Section 8), .py for NEURA NeuraPy (.json with the NeuraPy [JSON] format)
-with open("robot_program.src", "w") as f:
-    f.write(result.code)
+# Save the generated program files. Every file arrives named (extension
+# included), the primary program first — a KRL module on iiQKA.OS 2 is a
+# .src + .dat pair, so write all of them. newline="" keeps the line endings
+# the controller expects. Only an older server leaves the list empty; then
+# fall back to `code` and pick the extension yourself: .src for KUKA KRL,
+# .script for UR, .mod/.modx for ABB RAPID (see IRCVersion in Section 8),
+# .py for NEURA NeuraPy (.json with the NeuraPy [JSON] format)
+if result.files:
+    for program_file in result.files:
+        with open(program_file.name, "w", newline="") as f:
+            f.write(program_file.content)
+else:
+    with open("robot_program.src", "w") as f:
+        f.write(result.code)
 ```
 
 ---
@@ -2186,7 +2213,13 @@ if (connectFeedback.Status == Status.Success)
     var simFeedback = await client.AddTask(robotTask, settings);
     Console.WriteLine($"Valid: {simFeedback.Result.IsValid}");
     Console.WriteLine($"Time: {simFeedback.Result.Time:F2}s");
-    Console.WriteLine($"KRL Code:\n{simFeedback.Result.Code}");
+    // Every generated file with its name, the primary program first (a KRL
+    // module on iiQKA.OS 2 is a .src + .dat pair). Code repeats the primary
+    // file's content and is all an older server delivers.
+    foreach (var programFile in simFeedback.Result.Files)
+        File.WriteAllText(programFile.Name, programFile.Content);
+    if (simFeedback.Result.Files.Count == 0)
+        File.WriteAllText("robot_program.src", simFeedback.Result.Code);
 
     // 7. Animate simulation (0% → 100%)
     //    With streamFeedback=true, results arrive via RobotStateUpdatedEventHandler
@@ -2297,7 +2330,10 @@ var taskReply = await client.AddRobotTaskAsync(new AddRobotTaskRequest
 });
 
 Console.WriteLine($"Valid: {taskReply.SimulationResultData.IsValid}");
-Console.WriteLine($"Code:\n{taskReply.SimulationResultData.Code}");
+// Every generated file with its name, primary program first. Files is empty
+// on older servers — SimulationResultData.Code always carries the primary program.
+foreach (var programFile in taskReply.SimulationResultData.Files)
+    Console.WriteLine($"Generated file {programFile.Name}:\n{programFile.Content}");
 
 // 4. Iterate simulation
 for (int i = 0; i <= 100; i += 5)
@@ -2429,8 +2465,12 @@ task_reply = stub.AddRobotTask(prc_pb2.AddRobotTaskRequest(
 result = task_reply.simulation_result_data
 print(f"Valid: {result.is_valid}, Time: {result.time:.2f}s")
 
-# Save generated code
-if result.code:
+# Save the generated program files (named by the server, primary first;
+# empty on older servers, which only deliver `code`)
+for program_file in result.files:
+    with open(program_file.name, "w", newline="") as f:
+        f.write(program_file.content)
+if not result.files and result.code:
     with open("output.src", "w") as f:
         f.write(result.code)
 
@@ -2511,6 +2551,12 @@ const addTaskReply = await client.addRobotTask(
             ])
         )
         .setRobotSettings(settings), {});
+
+// Every generated file with its name, primary program first. getCode()
+// repeats the primary file's content and is all an older server delivers.
+addTaskReply.getSimulationResultData().getFilesList().forEach(function(programFile) {
+    console.log(programFile.getName(), programFile.getContent());
+});
 
 // 5. Simulation slider
 async function updateSimulation(normalizedValue) {

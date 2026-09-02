@@ -100,7 +100,22 @@ namespace PRC.Integration
                 // task. They can be modified here, e.g. to change driver options.
                 var simFeedback = await client.AddTask(robotTask, setupFeedback.Settings);
 
-                Console.WriteLine("KRL Code: " + Environment.NewLine + simFeedback.Result.Code + Environment.NewLine);
+                // Result.Files lists every generated file with its name, the
+                // primary program first (a KRL module on iiQKA.OS 2 is a
+                // .src + .dat pair). Result.Code always repeats the primary
+                // file's content; an older server leaves the list empty, then
+                // the client names the file itself.
+                if (simFeedback.Result.Files.Count > 0)
+                {
+                    foreach (var programFile in simFeedback.Result.Files)
+                    {
+                        Console.WriteLine("Generated file " + programFile.Name + ":" + Environment.NewLine + programFile.Content + Environment.NewLine);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("KRL Code: " + Environment.NewLine + simFeedback.Result.Code + Environment.NewLine);
+                }
 
                 Console.WriteLine("Process will take approximately " + simFeedback.Result.Time + " seconds.");
 

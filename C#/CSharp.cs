@@ -228,7 +228,21 @@ namespace PRC.Integration
 
             var toolpath = await client.AddRobotTaskAsync(req);
 
-            Console.WriteLine("KRL Code: " + Environment.NewLine + toolpath.SimulationResultData.Code + Environment.NewLine);
+            // Files lists every generated file with its name, the primary
+            // program first (a KRL module on iiQKA.OS 2 is a .src + .dat pair).
+            // Code always repeats the primary file's content; an older server
+            // leaves the list empty, then the client names the file itself.
+            if (toolpath.SimulationResultData.Files.Count > 0)
+            {
+                foreach (var programFile in toolpath.SimulationResultData.Files)
+                {
+                    Console.WriteLine("Generated file " + programFile.Name + ":" + Environment.NewLine + programFile.Content + Environment.NewLine);
+                }
+            }
+            else
+            {
+                Console.WriteLine("KRL Code: " + Environment.NewLine + toolpath.SimulationResultData.Code + Environment.NewLine);
+            }
 
             // Step 4: Scrub through the simulated toolpath from start (0.0) to
             // end (1.0), similar to the simulation slider in the PRC interface.

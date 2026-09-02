@@ -165,6 +165,20 @@ var addTask = new prc.AddRobotTaskRequest()
 
 var addTaskReply = await client.addRobotTask(addTask, {});
 
+// The result lists every generated file with its name (getFilesList(), the
+// primary program first - a KRL module on iiQKA.OS 2 is a .src + .dat pair).
+// getCode() always repeats the primary file's content; an older server leaves
+// the list empty, then the client names the file itself.
+var simulationResult = addTaskReply.getSimulationResultData();
+var programFiles = simulationResult.getFilesList();
+if (programFiles.length > 0) {
+	programFiles.forEach(function(programFile) {
+		console.log('Generated file ' + programFile.getName() + ':\n' + programFile.getContent());
+	});
+} else {
+	console.log('Generated code:\n' + simulationResult.getCode());
+}
+
 output.innerHTML = 'Task has been added...';
 
 // Step 4: Scrub through the simulated toolpath from start (0.0) to end (1.0),

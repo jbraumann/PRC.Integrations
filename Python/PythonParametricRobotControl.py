@@ -144,9 +144,16 @@ def run():
             )
         )
 
-        print("Resulting KRL code: " + \
-              task_reply.simulation_result_data.code
-              )
+        # The result lists every generated file with its name in `files`, the
+        # primary program first (a KRL module on iiQKA.OS 2 is a .src + .dat
+        # pair). `code` always repeats the primary file's content; an older
+        # server leaves `files` empty, then the client names the file itself.
+        result = task_reply.simulation_result_data
+        if result.files:
+            for program_file in result.files:
+                print("Generated file " + program_file.name + ":\n" + program_file.content)
+        else:
+            print("Resulting KRL code: " + result.code)
         time.sleep(4)
 
         # Step 4: Scrub through the simulated toolpath from start (0.0) to end

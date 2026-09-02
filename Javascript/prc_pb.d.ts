@@ -1590,6 +1590,28 @@ export namespace SetVariable {
   }
 }
 
+export class ProgramFile extends jspb.Message {
+  getName(): string;
+  setName(value: string): ProgramFile;
+
+  getContent(): string;
+  setContent(value: string): ProgramFile;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ProgramFile.AsObject;
+  static toObject(includeInstance: boolean, msg: ProgramFile): ProgramFile.AsObject;
+  static serializeBinaryToWriter(message: ProgramFile, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ProgramFile;
+  static deserializeBinaryFromReader(message: ProgramFile, reader: jspb.BinaryReader): ProgramFile;
+}
+
+export namespace ProgramFile {
+  export type AsObject = {
+    name: string,
+    content: string,
+  }
+}
+
 export class SimulationResult extends jspb.Message {
   getSimulationResultsList(): Array<SimulationResultUnit>;
   setSimulationResultsList(value: Array<SimulationResultUnit>): SimulationResult;
@@ -1610,6 +1632,11 @@ export class SimulationResult extends jspb.Message {
   hasData(): boolean;
   clearData(): SimulationResult;
 
+  getFilesList(): Array<ProgramFile>;
+  setFilesList(value: Array<ProgramFile>): SimulationResult;
+  clearFilesList(): SimulationResult;
+  addFiles(value?: ProgramFile, index?: number): ProgramFile;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SimulationResult.AsObject;
   static toObject(includeInstance: boolean, msg: SimulationResult): SimulationResult.AsObject;
@@ -1625,6 +1652,7 @@ export namespace SimulationResult {
     time: number,
     code: string,
     data?: MetaData.AsObject,
+    filesList: Array<ProgramFile.AsObject>,
   }
 }
 

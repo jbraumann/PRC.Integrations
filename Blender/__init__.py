@@ -200,8 +200,13 @@ class PRC_OT_core(bpy.types.Operator):
                     )
                 )
 
-                viewport_area.header_text_set("Resulting KRL code: " + \
-                    task_reply.simulation_result_data.code)
+                # `files` lists every generated file with its name, the primary
+                # program first; `code` repeats the primary file's content and
+                # is all an older server delivers.
+                result = task_reply.simulation_result_data
+                file_names = ", ".join(f.name for f in result.files) or "KRL code"
+                viewport_area.header_text_set("Resulting " + file_names + ": " + \
+                    result.code)
 
                 time.sleep(0.5)
                 viewport_area.header_text_set("Now simulating the robot's movement, similar to the simulation slider. If stream_update is true, the feedback stream will be utilized.")

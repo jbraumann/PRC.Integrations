@@ -241,10 +241,20 @@ yu8bjTT/AtFEbHMv7oIOQg==
 
         var toolpath = await client.AddRobotTaskAsync(req);
 
-        Console.WriteLine("KRL Code: " + Environment.NewLine + (toolpath.SimulationResultData.Code ?? toolpath.SimulationResultData.Code) + Environment.NewLine);
+        // Files lists every generated file with its name, the primary program
+        // first (a KRL module on iiQKA.OS 2 is a .src + .dat pair). Code always
+        // repeats the primary file's content; an older server leaves the list
+        // empty, then the client names the file itself.
+        foreach (var programFile in toolpath.SimulationResultData.Files)
+        {
+            Console.WriteLine("Generated file " + programFile.Name + ":" + Environment.NewLine + programFile.Content + Environment.NewLine);
+        }
+        if (toolpath.SimulationResultData.Files.Count == 0)
+        {
+            Console.WriteLine("KRL Code: " + Environment.NewLine + toolpath.SimulationResultData.Code + Environment.NewLine);
+        }
 
-
-        return toolpath.SimulationResultData.Code ?? toolpath.SimulationResultData.Code;
+        return toolpath.SimulationResultData.Code;
     }
 
     public async System.Threading.Tasks.Task<RobotState> UpdateSimulation(float simslider)

@@ -11,6 +11,14 @@
 set -e
 cd "$(dirname "$0")"
 
+# prc.proto is kept with CRLF line endings here. The Python gRPC generator copies
+# the service comments into docstrings verbatim, carriage returns included, which
+# would leave the stubs with mixed line endings - so every generator reads an LF
+# copy instead. It must keep the name prc.proto: the name is baked into the stubs.
+LFDIR=$(mktemp -d)
+trap 'rm -rf "$LFDIR"' EXIT
+tr -d '\r' < prc.proto > "$LFDIR/prc.proto"
+
 # One venv per pinned generator version, created on first run.
 gen () {
     VERSION=$1; shift
@@ -19,7 +27,7 @@ gen () {
         python3 -m venv "$VENV"
         "$VENV/bin/pip" install --quiet grpcio-tools==$VERSION
     fi
-    "$VENV/bin/python" -m grpc_tools.protoc -I. "$@" prc.proto
+    "$VENV/bin/python" -m grpc_tools.protoc -I"$LFDIR" "$@" prc.proto
 }
 
 gen 1.69.0 --python_out=../Python  --pyi_out=../Python  --grpc_python_out=../Python

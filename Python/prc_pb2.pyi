@@ -663,19 +663,29 @@ class SetVariable(_message.Message):
     new_state: Variable
     def __init__(self, new_state: _Optional[_Union[Variable, _Mapping]] = ...) -> None: ...
 
+class ProgramFile(_message.Message):
+    __slots__ = ("name", "content")
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    CONTENT_FIELD_NUMBER: _ClassVar[int]
+    name: str
+    content: str
+    def __init__(self, name: _Optional[str] = ..., content: _Optional[str] = ...) -> None: ...
+
 class SimulationResult(_message.Message):
-    __slots__ = ("simulation_results", "is_valid", "time", "code", "data")
+    __slots__ = ("simulation_results", "is_valid", "time", "code", "data", "files")
     SIMULATION_RESULTS_FIELD_NUMBER: _ClassVar[int]
     IS_VALID_FIELD_NUMBER: _ClassVar[int]
     TIME_FIELD_NUMBER: _ClassVar[int]
     CODE_FIELD_NUMBER: _ClassVar[int]
     DATA_FIELD_NUMBER: _ClassVar[int]
+    FILES_FIELD_NUMBER: _ClassVar[int]
     simulation_results: _containers.RepeatedCompositeFieldContainer[SimulationResultUnit]
     is_valid: bool
     time: float
     code: str
     data: MetaData
-    def __init__(self, simulation_results: _Optional[_Iterable[_Union[SimulationResultUnit, _Mapping]]] = ..., is_valid: bool = ..., time: _Optional[float] = ..., code: _Optional[str] = ..., data: _Optional[_Union[MetaData, _Mapping]] = ...) -> None: ...
+    files: _containers.RepeatedCompositeFieldContainer[ProgramFile]
+    def __init__(self, simulation_results: _Optional[_Iterable[_Union[SimulationResultUnit, _Mapping]]] = ..., is_valid: bool = ..., time: _Optional[float] = ..., code: _Optional[str] = ..., data: _Optional[_Union[MetaData, _Mapping]] = ..., files: _Optional[_Iterable[_Union[ProgramFile, _Mapping]]] = ...) -> None: ...
 
 class SimulationResultUnit(_message.Message):
     __slots__ = ("axis_values", "position", "time", "collision", "singularity", "outofreach", "external_axis_values", "external_axis_outofreach", "interpolation_factor", "id", "alarm", "motion_type")

@@ -772,6 +772,14 @@ message SetVariable {
     Variable new_state = 1;
 }
 
+// [Feedback] ProgramFile is one generated program file, named with its extension.
+message ProgramFile {
+    // File name including the extension, e.g. "kukaprc_project.src".
+    string name = 1;
+    // File content, with the line endings the controller expects.
+    string content = 2;
+}
+
 // [Feedback] SimulationResult contains the complete result of simulating a Task.
 message SimulationResult {
     // One SimulationResultUnit per interpolated step along the toolpath.
@@ -780,11 +788,18 @@ message SimulationResult {
     bool is_valid = 2;
     // Total estimated execution time in seconds.
     float time = 3;
-    // Generated robot program code. Write to a file with the driver-appropriate
-    // extension (e.g., .src for KUKA KRL, .mod for ABB RAPID).
+    // Generated robot program code — always the content of the primary file.
+    // Write to a file with the driver-appropriate extension (e.g., .src for
+    // KUKA KRL, .mod for ABB RAPID) when `files` is empty.
     string code = 4;
     // Optional additional data.
     MetaData data = 5;
+    // Every generated file with its file name, the primary program first. A
+    // driver whose controller expects several files per program (a KRL module's
+    // .src + .dat on iiQKA.OS 2) lists them all here. Empty when the driver only
+    // delivers `code` (some drivers, older servers) — then the client names the
+    // file itself.
+    repeated ProgramFile files = 6;
 }
 
 // [Feedback] SimulationResultUnit holds the simulated robot state at a single interpolated
