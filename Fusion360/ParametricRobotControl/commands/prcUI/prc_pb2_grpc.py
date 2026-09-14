@@ -81,6 +81,11 @@ class ParametricRobotControlServiceStub(object):
                 request_serializer=prc__pb2.Ping.SerializeToString,
                 response_deserializer=prc__pb2.Ping.FromString,
                 _registered_method=True)
+        self.DescribeLibrary = channel.unary_unary(
+                '/ParametricRobotControlService/DescribeLibrary',
+                request_serializer=prc__pb2.DescribeLibraryRequest.SerializeToString,
+                response_deserializer=prc__pb2.DescribeLibraryReply.FromString,
+                _registered_method=True)
 
 
 class ParametricRobotControlServiceServicer(object):
@@ -159,6 +164,18 @@ class ParametricRobotControlServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def DescribeLibrary(self, request, context):
+        """Optional: Describe what this PRC installation can set up — every preset robot of
+        PRC.Library.Robots, every driver of PRC.Library.Drivers with its settings schema
+        (labels, tooltips, types, defaults, options — what the Settings page renders), and
+        every preset external axis — so a client can offer a robot setup wizard without a
+        copy of the library. The catalog is built once per server process; later calls are
+        cheap. Nothing is set up by this call.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ParametricRobotControlServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -196,6 +213,11 @@ def add_ParametricRobotControlServiceServicer_to_server(servicer, server):
                     servicer.SendPing,
                     request_deserializer=prc__pb2.Ping.FromString,
                     response_serializer=prc__pb2.Ping.SerializeToString,
+            ),
+            'DescribeLibrary': grpc.unary_unary_rpc_method_handler(
+                    servicer.DescribeLibrary,
+                    request_deserializer=prc__pb2.DescribeLibraryRequest.FromString,
+                    response_serializer=prc__pb2.DescribeLibraryReply.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -399,6 +421,33 @@ class ParametricRobotControlService(object):
             '/ParametricRobotControlService/SendPing',
             prc__pb2.Ping.SerializeToString,
             prc__pb2.Ping.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DescribeLibrary(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ParametricRobotControlService/DescribeLibrary',
+            prc__pb2.DescribeLibraryRequest.SerializeToString,
+            prc__pb2.DescribeLibraryReply.FromString,
             options,
             channel_credentials,
             insecure,

@@ -495,5 +495,66 @@ proto.ParametricRobotControlServicePromiseClient.prototype.sendPing =
 };
 
 
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.DescribeLibraryRequest,
+ *   !proto.DescribeLibraryReply>}
+ */
+const methodDescriptor_ParametricRobotControlService_DescribeLibrary = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/DescribeLibrary',
+  grpc.web.MethodType.UNARY,
+  proto.DescribeLibraryRequest,
+  proto.DescribeLibraryReply,
+  /**
+   * @param {!proto.DescribeLibraryRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.DescribeLibraryReply.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.DescribeLibraryRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.DescribeLibraryReply)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.DescribeLibraryReply>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.describeLibrary =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/DescribeLibrary',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_DescribeLibrary,
+      callback);
+};
+
+
+/**
+ * @param {!proto.DescribeLibraryRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.DescribeLibraryReply>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.describeLibrary =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/DescribeLibrary',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_DescribeLibrary);
+};
+
+
 module.exports = proto;
 

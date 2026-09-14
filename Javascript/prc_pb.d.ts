@@ -56,6 +56,68 @@ export namespace AddRobotTaskRequest {
   }
 }
 
+export class DescribeLibraryRequest extends jspb.Message {
+  getDriverClass(): string;
+  setDriverClass(value: string): DescribeLibraryRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): DescribeLibraryRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: DescribeLibraryRequest): DescribeLibraryRequest.AsObject;
+  static serializeBinaryToWriter(message: DescribeLibraryRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): DescribeLibraryRequest;
+  static deserializeBinaryFromReader(message: DescribeLibraryRequest, reader: jspb.BinaryReader): DescribeLibraryRequest;
+}
+
+export namespace DescribeLibraryRequest {
+  export type AsObject = {
+    driverClass: string,
+  }
+}
+
+export class DescribeLibraryReply extends jspb.Message {
+  getStatus(): string;
+  setStatus(value: string): DescribeLibraryReply;
+
+  getLibraryVersion(): string;
+  setLibraryVersion(value: string): DescribeLibraryReply;
+
+  getLicenseState(): string;
+  setLicenseState(value: string): DescribeLibraryReply;
+
+  getRobotsList(): Array<RobotPreset>;
+  setRobotsList(value: Array<RobotPreset>): DescribeLibraryReply;
+  clearRobotsList(): DescribeLibraryReply;
+  addRobots(value?: RobotPreset, index?: number): RobotPreset;
+
+  getDriversList(): Array<DriverPreset>;
+  setDriversList(value: Array<DriverPreset>): DescribeLibraryReply;
+  clearDriversList(): DescribeLibraryReply;
+  addDrivers(value?: DriverPreset, index?: number): DriverPreset;
+
+  getExternalAxesList(): Array<ExternalAxisPreset>;
+  setExternalAxesList(value: Array<ExternalAxisPreset>): DescribeLibraryReply;
+  clearExternalAxesList(): DescribeLibraryReply;
+  addExternalAxes(value?: ExternalAxisPreset, index?: number): ExternalAxisPreset;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): DescribeLibraryReply.AsObject;
+  static toObject(includeInstance: boolean, msg: DescribeLibraryReply): DescribeLibraryReply.AsObject;
+  static serializeBinaryToWriter(message: DescribeLibraryReply, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): DescribeLibraryReply;
+  static deserializeBinaryFromReader(message: DescribeLibraryReply, reader: jspb.BinaryReader): DescribeLibraryReply;
+}
+
+export namespace DescribeLibraryReply {
+  export type AsObject = {
+    status: string,
+    libraryVersion: string,
+    licenseState: string,
+    robotsList: Array<RobotPreset.AsObject>,
+    driversList: Array<DriverPreset.AsObject>,
+    externalAxesList: Array<ExternalAxisPreset.AsObject>,
+  }
+}
+
 export class GetRobotDataRequest extends jspb.Message {
   getId(): string;
   setId(value: string): GetRobotDataRequest;
@@ -672,6 +734,11 @@ export class CustomRobot extends jspb.Message {
   hasPresetRobotClass(): boolean;
   clearPresetRobotClass(): CustomRobot;
 
+  getKinematicsSolverClass(): string;
+  setKinematicsSolverClass(value: string): CustomRobot;
+  hasKinematicsSolverClass(): boolean;
+  clearKinematicsSolverClass(): CustomRobot;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): CustomRobot.AsObject;
   static toObject(includeInstance: boolean, msg: CustomRobot): CustomRobot.AsObject;
@@ -693,6 +760,7 @@ export namespace CustomRobot {
     rootCs?: Matrix4x4.AsObject,
     flangeCs?: Matrix4x4.AsObject,
     presetRobotClass?: string,
+    kinematicsSolverClass?: string,
   }
 
   export enum NameCase { 
@@ -718,6 +786,11 @@ export namespace CustomRobot {
   export enum PresetRobotClassCase { 
     _PRESET_ROBOT_CLASS_NOT_SET = 0,
     PRESET_ROBOT_CLASS = 11,
+  }
+
+  export enum KinematicsSolverClassCase { 
+    _KINEMATICS_SOLVER_CLASS_NOT_SET = 0,
+    KINEMATICS_SOLVER_CLASS = 12,
   }
 }
 
@@ -777,6 +850,224 @@ export namespace Euler {
   }
 }
 
+export class DriverPreset extends jspb.Message {
+  getRobotDriverClass(): string;
+  setRobotDriverClass(value: string): DriverPreset;
+
+  getVendor(): string;
+  setVendor(value: string): DriverPreset;
+
+  getName(): string;
+  setName(value: string): DriverPreset;
+
+  getRequiresLicense(): boolean;
+  setRequiresLicense(value: boolean): DriverPreset;
+
+  getOnline(): boolean;
+  setOnline(value: boolean): DriverPreset;
+
+  getRunStateVariable(): string;
+  setRunStateVariable(value: string): DriverPreset;
+
+  getBusyValuesList(): Array<string>;
+  setBusyValuesList(value: Array<string>): DriverPreset;
+  clearBusyValuesList(): DriverPreset;
+  addBusyValues(value: string, index?: number): DriverPreset;
+
+  getSettingsList(): Array<SettingItem>;
+  setSettingsList(value: Array<SettingItem>): DriverPreset;
+  clearSettingsList(): DriverPreset;
+  addSettings(value?: SettingItem, index?: number): SettingItem;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): DriverPreset.AsObject;
+  static toObject(includeInstance: boolean, msg: DriverPreset): DriverPreset.AsObject;
+  static serializeBinaryToWriter(message: DriverPreset, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): DriverPreset;
+  static deserializeBinaryFromReader(message: DriverPreset, reader: jspb.BinaryReader): DriverPreset;
+}
+
+export namespace DriverPreset {
+  export type AsObject = {
+    robotDriverClass: string,
+    vendor: string,
+    name: string,
+    requiresLicense: boolean,
+    online: boolean,
+    runStateVariable: string,
+    busyValuesList: Array<string>,
+    settingsList: Array<SettingItem.AsObject>,
+  }
+}
+
+export class SettingItem extends jspb.Message {
+  getField(): string;
+  setField(value: string): SettingItem;
+
+  getLabel(): string;
+  setLabel(value: string): SettingItem;
+
+  getTooltip(): string;
+  setTooltip(value: string): SettingItem;
+
+  getKind(): SettingKind;
+  setKind(value: SettingKind): SettingItem;
+
+  getDefaultValue(): string;
+  setDefaultValue(value: string): SettingItem;
+
+  getOptionsList(): Array<string>;
+  setOptionsList(value: Array<string>): SettingItem;
+  clearOptionsList(): SettingItem;
+  addOptions(value: string, index?: number): SettingItem;
+
+  getUnit(): string;
+  setUnit(value: string): SettingItem;
+
+  getTab(): string;
+  setTab(value: string): SettingItem;
+
+  getGroup(): string;
+  setGroup(value: string): SettingItem;
+
+  getVisibleWhenField(): string;
+  setVisibleWhenField(value: string): SettingItem;
+
+  getVisibleWhenValue(): string;
+  setVisibleWhenValue(value: string): SettingItem;
+
+  getSelectFolder(): boolean;
+  setSelectFolder(value: boolean): SettingItem;
+
+  getDropdown(): boolean;
+  setDropdown(value: boolean): SettingItem;
+
+  getGroupRequiresLicense(): boolean;
+  setGroupRequiresLicense(value: boolean): SettingItem;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SettingItem.AsObject;
+  static toObject(includeInstance: boolean, msg: SettingItem): SettingItem.AsObject;
+  static serializeBinaryToWriter(message: SettingItem, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SettingItem;
+  static deserializeBinaryFromReader(message: SettingItem, reader: jspb.BinaryReader): SettingItem;
+}
+
+export namespace SettingItem {
+  export type AsObject = {
+    field: string,
+    label: string,
+    tooltip: string,
+    kind: SettingKind,
+    defaultValue: string,
+    optionsList: Array<string>,
+    unit: string,
+    tab: string,
+    group: string,
+    visibleWhenField: string,
+    visibleWhenValue: string,
+    selectFolder: boolean,
+    dropdown: boolean,
+    groupRequiresLicense: boolean,
+  }
+}
+
+export class RobotPreset extends jspb.Message {
+  getPresetRobotClass(): string;
+  setPresetRobotClass(value: string): RobotPreset;
+
+  getVendor(): string;
+  setVendor(value: string): RobotPreset;
+
+  getName(): string;
+  setName(value: string): RobotPreset;
+
+  getShortName(): string;
+  setShortName(value: string): RobotPreset;
+
+  getAxisCount(): number;
+  setAxisCount(value: number): RobotPreset;
+
+  getSolver(): string;
+  setSolver(value: string): RobotPreset;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): RobotPreset.AsObject;
+  static toObject(includeInstance: boolean, msg: RobotPreset): RobotPreset.AsObject;
+  static serializeBinaryToWriter(message: RobotPreset, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): RobotPreset;
+  static deserializeBinaryFromReader(message: RobotPreset, reader: jspb.BinaryReader): RobotPreset;
+}
+
+export namespace RobotPreset {
+  export type AsObject = {
+    presetRobotClass: string,
+    vendor: string,
+    name: string,
+    shortName: string,
+    axisCount: number,
+    solver: string,
+  }
+}
+
+export class ExternalAxisPreset extends jspb.Message {
+  getPresetExternalAxisClass(): string;
+  setPresetExternalAxisClass(value: string): ExternalAxisPreset;
+
+  getVendor(): string;
+  setVendor(value: string): ExternalAxisPreset;
+
+  getName(): string;
+  setName(value: string): ExternalAxisPreset;
+
+  getShortName(): string;
+  setShortName(value: string): ExternalAxisPreset;
+
+  getExternalAxisType(): ExternalAxisType;
+  setExternalAxisType(value: ExternalAxisType): ExternalAxisPreset;
+
+  getRangeMinList(): Array<number>;
+  setRangeMinList(value: Array<number>): ExternalAxisPreset;
+  clearRangeMinList(): ExternalAxisPreset;
+  addRangeMin(value: number, index?: number): ExternalAxisPreset;
+
+  getRangeMaxList(): Array<number>;
+  setRangeMaxList(value: Array<number>): ExternalAxisPreset;
+  clearRangeMaxList(): ExternalAxisPreset;
+  addRangeMax(value: number, index?: number): ExternalAxisPreset;
+
+  getSpeedList(): Array<number>;
+  setSpeedList(value: Array<number>): ExternalAxisPreset;
+  clearSpeedList(): ExternalAxisPreset;
+  addSpeed(value: number, index?: number): ExternalAxisPreset;
+
+  getDefaultPosition(): CartesianPosition | undefined;
+  setDefaultPosition(value?: CartesianPosition): ExternalAxisPreset;
+  hasDefaultPosition(): boolean;
+  clearDefaultPosition(): ExternalAxisPreset;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ExternalAxisPreset.AsObject;
+  static toObject(includeInstance: boolean, msg: ExternalAxisPreset): ExternalAxisPreset.AsObject;
+  static serializeBinaryToWriter(message: ExternalAxisPreset, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ExternalAxisPreset;
+  static deserializeBinaryFromReader(message: ExternalAxisPreset, reader: jspb.BinaryReader): ExternalAxisPreset;
+}
+
+export namespace ExternalAxisPreset {
+  export type AsObject = {
+    presetExternalAxisClass: string,
+    vendor: string,
+    name: string,
+    shortName: string,
+    externalAxisType: ExternalAxisType,
+    rangeMinList: Array<number>,
+    rangeMaxList: Array<number>,
+    speedList: Array<number>,
+    defaultPosition?: CartesianPosition.AsObject,
+  }
+}
+
 export class ExternalAxis extends jspb.Message {
   getExternalAxisType(): ExternalAxisType;
   setExternalAxisType(value: ExternalAxisType): ExternalAxis;
@@ -822,6 +1113,11 @@ export class ExternalAxis extends jspb.Message {
   hasData(): boolean;
   clearData(): ExternalAxis;
 
+  getPresetExternalAxisClass(): string;
+  setPresetExternalAxisClass(value: string): ExternalAxis;
+  hasPresetExternalAxisClass(): boolean;
+  clearPresetExternalAxisClass(): ExternalAxis;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ExternalAxis.AsObject;
   static toObject(includeInstance: boolean, msg: ExternalAxis): ExternalAxis.AsObject;
@@ -842,6 +1138,12 @@ export namespace ExternalAxis {
     position?: CartesianPosition.AsObject,
     geometryList: Array<PolyMesh.AsObject>,
     data?: MetaData.AsObject,
+    presetExternalAxisClass?: string,
+  }
+
+  export enum PresetExternalAxisClassCase { 
+    _PRESET_EXTERNAL_AXIS_CLASS_NOT_SET = 0,
+    PRESET_EXTERNAL_AXIS_CLASS = 11,
   }
 }
 
@@ -1590,6 +1892,28 @@ export namespace SetVariable {
   }
 }
 
+export class ProgramFile extends jspb.Message {
+  getName(): string;
+  setName(value: string): ProgramFile;
+
+  getContent(): string;
+  setContent(value: string): ProgramFile;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ProgramFile.AsObject;
+  static toObject(includeInstance: boolean, msg: ProgramFile): ProgramFile.AsObject;
+  static serializeBinaryToWriter(message: ProgramFile, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ProgramFile;
+  static deserializeBinaryFromReader(message: ProgramFile, reader: jspb.BinaryReader): ProgramFile;
+}
+
+export namespace ProgramFile {
+  export type AsObject = {
+    name: string,
+    content: string,
+  }
+}
+
 export class SimulationResult extends jspb.Message {
   getSimulationResultsList(): Array<SimulationResultUnit>;
   setSimulationResultsList(value: Array<SimulationResultUnit>): SimulationResult;
@@ -1610,6 +1934,11 @@ export class SimulationResult extends jspb.Message {
   hasData(): boolean;
   clearData(): SimulationResult;
 
+  getFilesList(): Array<ProgramFile>;
+  setFilesList(value: Array<ProgramFile>): SimulationResult;
+  clearFilesList(): SimulationResult;
+  addFiles(value?: ProgramFile, index?: number): ProgramFile;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SimulationResult.AsObject;
   static toObject(includeInstance: boolean, msg: SimulationResult): SimulationResult.AsObject;
@@ -1625,6 +1954,7 @@ export namespace SimulationResult {
     time: number,
     code: string,
     data?: MetaData.AsObject,
+    filesList: Array<ProgramFile.AsObject>,
   }
 }
 
@@ -1995,6 +2325,15 @@ export enum EulerFormat {
   ZYX = 0,
   AXISANGLE = 1,
   RPY = 2,
+}
+export enum SettingKind { 
+  SETTING_TEXT = 0,
+  SETTING_NUMBER = 1,
+  SETTING_OPTION = 2,
+  SETTING_TOGGLE = 3,
+  SETTING_FILE = 4,
+  SETTING_TEXT_AREA = 5,
+  SETTING_IMAGE = 6,
 }
 export enum ExternalAxisType { 
   LINEAR_RAIL = 0,

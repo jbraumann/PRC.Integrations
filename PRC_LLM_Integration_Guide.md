@@ -4,6 +4,8 @@
 
 > **Purpose:** This document provides a thorough, structured reference for developers and LLMs building new integrations with PRC. It covers every protobuf message, the complete GRPC service API, data flows, coordinate conventions, unit systems, visualization patterns, and concrete code examples across C#, Python, and JavaScript.
 
+> **Scope:** Updated for PRC Server **1.727** (2026-09-14). New since the previous revision: the `DescribeLibrary` setup catalog ([Section 6.8](#68-library-catalog-describelibrary)), `SimulationResult.files`, external-axis presets by reference, custom-robot solvers by name, the KUKA Sunrise driver for the seven-axis LBR iiwa, iiQKA.OS 2 program upload, and gRPC server reflection.
+
 ---
 
 ## Table of Contents
@@ -21,6 +23,7 @@
    - 6.5 [Flow Control](#65-flow-control)
    - 6.6 [Feedback](#66-feedback)
    - 6.7 [Request/Reply](#67-requestreply)
+   - 6.8 [Library Catalog (DescribeLibrary)](#68-library-catalog-describelibrary)
 7. [Available Robots & Drivers](#7-available-robots--drivers)
 8. [Settings Dictionary](#8-settings-dictionary)
 9. [SimulationResult (AddTaskReply Data)](#9-simulationresult-addtaskreply-data)
@@ -47,7 +50,9 @@ Parametric Robot Control (PRC) is a client–server system for simulating and co
 │   Python, JS, …)    │    SubscribeRobotFeedback      │  Kinematics      │
 │                     │    GetSimulatedRobotState      │  Code Generation │
 │                     │    UpdateVariable              │  Collision Check │
-│                     │    SendPing                    │  Real-time Ctrl  │
+│                     │    GetRobotData                │  Real-time Ctrl  │
+│                     │    DescribeLibrary             │  Setup Catalog   │
+│                     │    SendPing                    │                  │
 └─────────────────────┘                               └──────────────────┘
 ```
 
@@ -56,6 +61,7 @@ Parametric Robot Control (PRC) is a client–server system for simulating and co
 - **Coordinate system:** Right-handed, **Z+ = up**. All transformation matrices are expressed relative to WorldXY in this convention.
 - **Communication:** GRPC over HTTPS with TLS. Supports gzip compression and unlimited message sizes.
 - **Protobuf definition:** The PRC API is defined in a single `.proto` file that contains all messages, enums, and the service contract. Code can be generated for any language using the standard `protoc` compiler.
+- **Discovery:** `DescribeLibrary` returns the setup catalog — every preset robot, every driver with its settings schema, every external-axis preset — so a client can offer a robot setup wizard without a copy of the library (see [Section 6.8](#68-library-catalog-describelibrary)). gRPC server reflection is enabled, so `grpcurl` and similar tools work without the `.proto` file.
 
 ---
 
@@ -254,6 +260,15 @@ Always verify connectivity with a Ping before proceeding:
 response = stub.SendPing(prc_pb2.Ping(payload="", time_ms=10))
 # If no exception, the server is reachable
 ```
+
+The server also exposes **gRPC server reflection** (v1 and v1alpha, since 1.727), so generic tools can inspect the service without `prc.proto`:
+
+```bash
+grpcurl -cacert PRCServerCertificate.pem 127.0.0.1:5001 list
+grpcurl -cacert PRCServerCertificate.pem 127.0.0.1:5001 describe ParametricRobotControlService
+```
+
+`PRCServerCertificate.pem` is the certificate shipped with the samples (`-insecure` also works). The service is registered under its bare name `ParametricRobotControlService` — the proto has no `package`. The endpoint is HTTP/2 + TLS only, so `-plaintext` cannot connect, and gRPC-Web clients cannot use reflection (it is a bidirectional stream).
 
 ---
 
@@ -467,11 +482,22 @@ if (connectFeedback.Status == Status.Success)
 }
 ```
 
+### Generated Program Files
+
+`SimulationFeedback.Result` (a `PRC.Core.Classes.SimulationResult`) carries the generated program twice: `Code` is the text of the primary file, and `Files` is a `List<ProgramFile>` — `Name` (with extension) and `Content` — with the primary program first. Drivers whose controller expects several files per program list them all, so write every entry of `Files` and fall back to `Code` plus your own extension only against an older server that leaves the list empty (the client aliases `Code` to `Files[0].Content`, so no text is duplicated in memory). The names come from the driver's `ProgramName` setting, sanitised the way the generator requires — a KRC, for example, refuses a `.src` whose file name differs from its `DEF` name.
+
+```csharp
+foreach (var file in simFeedback.Result.Files)
+    File.WriteAllText(Path.Combine(folder, file.Name), file.Content);
+```
+
+The .NET client does not wrap `DescribeLibrary` ([Section 6.8](#68-library-catalog-describelibrary)) yet — call it on the generated `ParametricRobotControlService.ParametricRobotControlServiceClient` when you need the catalog. With `PRC.Library` referenced you can also enumerate the `PRC.Library.Robots`, `PRC.Library.Drivers` and `PRC.Library.ExternalAxes` namespaces directly.
+
 ---
 
 ## 5. GRPC Service Definition
 
-The PRC protobuf definition exposes **7 RPC methods** in the `ParametricRobotControlService`:
+The PRC protobuf definition exposes **8 RPC methods** in the `ParametricRobotControlService`:
 
 ```protobuf
 service ParametricRobotControlService {
@@ -498,6 +524,12 @@ service ParametricRobotControlService {
 
   // Optional: Ping the controller.
   rpc SendPing (Ping) returns (Ping);
+
+  // Optional: Describe what this PRC installation can set up — every preset robot,
+  // every driver with its settings schema, every preset external axis — so a
+  // client can offer a robot setup wizard without a copy of the library.
+  // Built once per server process; nothing is set up by this call.
+  rpc DescribeLibrary (DescribeLibraryRequest) returns (DescribeLibraryReply);
 }
 ```
 
@@ -510,6 +542,7 @@ service ParametricRobotControlService {
 | `UpdateVariable` | Unary | Set a variable on the robot. Returns all variables of all connected robots. The variable may be omitted to query without modifying anything. |
 | `GetRobotData` | Unary | Retrieve the resolved robot definition **and live state** (current settings, variables, axis position, tool/flange frames, visualization transformations) for any machine already set up via `SetupRobot` — any connected machine's ID may be queried, e.g. by a Supervisor client monitoring the other machines. Set `exclude_geometry` to skip all mesh data for high-frequency polling. Returns an error status before setup completes. |
 | `SendPing` | Unary | Connection health check. |
+| `DescribeLibrary` | Unary | The **setup catalog**: every preset robot (class, names, axis count, solver), every driver (class, display name, license requirement, online/offline, run-state variable, and the full **settings schema** the Settings page renders) and every preset external axis. Optionally filtered to one driver class. No license needed, nothing is set up. See [Section 6.8](#68-library-catalog-describelibrary). |
 
 ---
 
@@ -986,6 +1019,9 @@ For defining a robot that is not in the PRC library (or modifying an existing on
 | `root_cs` | `Matrix4x4` | Root coordinate system of the robot |
 | `flange_cs` | `Matrix4x4` | Flange coordinate system |
 | `preset_robot_class` | `string` | Optional: base on an existing robot class, then override specific fields |
+| `kinematics_solver_class` | `string` (optional, field 12) | The kinematics solver from `PRC.Library.Solvers`, relative to that namespace: `"KUKA.KUKA_6DOF"`, `"KUKA.KUKA_6DOF_Offset"`, `"ABB.ABB_6DOF"`, `"FANUC.FANUC_6DOF"`, `"UR.UR_6DOF"`, `"NEURA.NEURA_6DOF"`, `"IGUS.IGUS_6DOF"`. **Required for a custom robot with axes that names no `preset_robot_class`** — the server refuses the setup otherwise (older servers accepted it and failed on the first task). When both are given, the solver named here replaces the preset's. `RobotPreset.solver` from `DescribeLibrary` carries exactly these values, and `GetRobotData` echoes the resolved solver for preset robots too. |
+
+**Building a custom robot:** each solver derives its arm dimensions from `axis_center`, so the axis lines must follow the vendor layout and sign conventions of the chosen family — compare a library preset of the same family (fetch one with `GetRobotData`). Only the six-axis families can be named; the seven-axis solvers (`NEURA.NEURA_7DOF`, `KUKA.KUKA_7DOF`) need a redundancy definition and are reached through their presets. `geometry` is one `PolyMesh` per link (static base plus six links), shipped with the request — a custom robot never references server-side meshes. The vendor derived from the solver's namespace decides which drivers accept the robot (a custom KUKA-kinematics robot runs on the KSS drivers) and which vendor positioners it may carry.
 
 #### `ExternalAxis`
 
@@ -1001,6 +1037,9 @@ Defines an external axis (linear rail, rotary positioner, AGV, etc.):
 | `position` | `CartesianPosition` | Position of the axis relative to the robot |
 | `geometry` | `repeated PolyMesh` | Visual and collision meshes |
 | `data` | `MetaData` | Additional data |
+| `preset_external_axis_class` | `string` (optional, field 11) | Reference a library preset instead of shipping the full definition: `"KUKA.KUKA_KL4000"`, `"KUKA.KUKA_KP1V"`, `"KUKA.KUKA_DKP400"`, `"KUKA.KUKA_DKP500"`, `"KUKA.KUKA_KP2HV500"`, `"NEURA.NEURA_MAV500"` (the current list comes from `DescribeLibrary`). The server constructs the preset — geometry, ranges, speed and orientation included — and every other field set in this message overrides the preset's value; `position` places the unit (the preset's default placement otherwise). External axes need a full license. |
+
+**Geometry index conventions** (when shipping your own definition): the solver, the collision check and every visualizer address `geometry` by position — linear rail `[0]` carriage (moves with the robot), `[1]` static rail; single rotary `[0]` table, `[1]` base; two-axis positioner `[0]` base, `[1]` tilting part, `[2]` table. Only the moving piece is collision-checked (against the tool and the wrist link). `orientation[i]` uses **Z+** as the rail direction or the rotation axis, `position` is the robot-relative mounting frame, and the meshes are modelled in the unit's own coordinates at zero, where the kinematics place the unit with an identity base. A workpiece on a positioner is simply appended to the moving piece's geometry (meshes and collision hulls), so it is transformed, drawn and collision-checked together with the table.
 
 ---
 
@@ -1259,8 +1298,11 @@ Returned in `AddRobotTaskReply.simulation_result_data`. Contains the complete si
 | `simulation_results` | `repeated SimulationResultUnit` | One entry per interpolated position along the toolpath |
 | `is_valid` | `bool` | `true` if no reachability or collision problems were detected |
 | `time` | `float` | Total estimated execution time in **seconds** |
-| `code` | `string` | Generated robot control code (KRL for KUKA, URScript for UR, RAPID for ABB, NeuraPy Python for NEURA, etc.). Write this to a file with the appropriate extension (e.g. `.src` for KUKA KRL, `.script` for UR; for ABB RAPID, `.mod` or `.modx` depending on the `IRCVersion` setting; for NEURA, `.py` — or `.json` when the `OutputFormat` setting selects `NeuraPy [JSON]` — see [Section 8](#8-settings-dictionary)). Exception: `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON axis_recorder take file here instead of KRL. |
+| `code` | `string` | Generated robot control code — **always the text of the primary file** (KRL for KUKA KSS, Sunrise XML for the LBR iiwa, URScript for UR, RAPID for ABB, LS for FANUC, igus XML, NeuraPy Python for NEURA, …). Use it only when `files` is empty (older servers); then choose the extension yourself: `.src` (KUKA KRL), `.xml` (KUKA Sunrise, igus), `.urp`/`.urpx`/`.script` (UR, per the Polyscope setting), `.mod`/`.modx` (ABB, per `IRCVersion`), `.ls` (FANUC), `.py` or `.json` (NEURA, per `OutputFormat`), `.json` (`KUKA.KSS_IOB_Driver` Path-Table take file) — see [Section 8](#8-settings-dictionary). |
+| `files` | `repeated ProgramFile` (field 6, since 1.716) | **Every generated file with its file name, the primary program first.** A driver whose controller expects several files per program lists them all (a program plus the data files that belong to it). Empty when the driver only delivers `code` (the realtime drivers have no program file; older servers) — then the client names the file itself. Names derive from the `ProgramName` setting, sanitised as the controller requires. |
 | `data` | `MetaData` | Additional information |
+
+`ProgramFile` has two fields: `name` — the file name including its extension, e.g. `kukaprc_project.src` — and `content`, the file text with the line endings the controller expects (write it without newline translation).
 
 #### `SimulationResultUnit`
 
@@ -1435,7 +1477,7 @@ Request sets a `Variable` on the robot; the `var` field may be omitted to query 
 | Field | Type | Description |
 |---|---|---|
 | `status` | `string` | `"OK"` on success, or a human-readable error description (e.g. `"Environment ID not found"`). When set to an error, `robot_data` is unset. |
-| `robot_data` | `Robot` | The resolved robot definition. Always populates the `custom_robot` side of the `Robot.robot_data` oneof — even when the robot was set up via a preset — so that per-joint geometry and kinematic parameters (`axis_center`, `axis_direction`, `axis_speed`, `axis_range_min`, `axis_range_max`, `root_cs`, `flange_cs`) are always present. The original preset class (if any) is echoed in `custom_robot.preset_robot_class`. The enclosing `Robot` message also carries `tool_dictionary`, `initial_base`, `collision_geometry`, `cell_geometry`, `external_axes`, `robot_driver_class`, `friendly_id` (echoing the name the client chose at setup), and `data`. With `exclude_geometry = true`, all geometry fields are left empty. |
+| `robot_data` | `Robot` | The resolved robot definition. Always populates the `custom_robot` side of the `Robot.robot_data` oneof — even when the robot was set up via a preset — so that per-joint geometry and kinematic parameters (`axis_center`, `axis_direction`, `axis_speed`, `axis_range_min`, `axis_range_max`, `root_cs`, `flange_cs`) are always present. The original preset class (if any) is echoed in `custom_robot.preset_robot_class`. The enclosing `Robot` message also carries `tool_dictionary`, `initial_base`, `collision_geometry`, `cell_geometry`, `external_axes`, `robot_driver_class` (**note:** this carries the driver's *display name* — `DriverPreset.name`, e.g. `KSS_KRL` — not the class string, so map it back through `DescribeLibrary` before re-sending it to `SetupRobot`), `friendly_id` (echoing the name the client chose at setup), and `data`. With `exclude_geometry = true`, all geometry fields are left empty. |
 | `robot_settings` | `Settings` | Current driver settings of the machine, as also returned by `SetupRobot`. |
 | `variables` | `VariableArray` | Current variables of the machine. |
 | `axis_position` | `JointTarget` | Current axis position (including external axes), from the machine's last simulated or streamed state. |
@@ -1478,6 +1520,104 @@ if reply.status == "OK":
     transforms = reply.robot_transformations            // apply to meshes as in Section 10
 ```
 
+### 6.8 Library Catalog (`DescribeLibrary`)
+
+`DescribeLibrary` (since PRC 1.727) returns what a PRC installation can set up, so an external client can offer a robot setup wizard without a copy of `PRC.Library`: every preset robot, every driver with its **settings schema**, and every preset external axis. The catalog is built once per server process; later calls are cheap. Nothing is set up by the call and no license is needed for it.
+
+#### `DescribeLibraryRequest`
+
+| Field | Type | Description |
+|---|---|---|
+| `driver_class` | `string` | Optional. Restricts the driver list (and its settings schemas) to one class, e.g. `"KUKA.KSS_KRL_Driver"`. Empty returns every driver. |
+
+#### `DescribeLibraryReply`
+
+| Field | Type | Description |
+|---|---|---|
+| `status` | `string` | `"OK"` on success, else a human-readable error description. |
+| `library_version` | `string` | Version of the `PRC.Library` assembly the catalog was read from. |
+| `license_state` | `string` | License state of the server (serialized `LicenseData`, as in `SetupRobotReply`). A Community license refuses external axes and licensed drivers at `SetupRobot` — use it to grey those options out. |
+| `robots` | `repeated RobotPreset` | Every preset robot, sorted by vendor and class. |
+| `drivers` | `repeated DriverPreset` | Every driver with its settings schema (filtered by `driver_class` when set). |
+| `external_axes` | `repeated ExternalAxisPreset` | Every preset external axis, without geometry. |
+
+#### `RobotPreset`
+
+| Field | Type | Description |
+|---|---|---|
+| `preset_robot_class` | `string` | The value for `Robot.preset_robot_class`, e.g. `"KUKA.KUKA_KR6R700"`. |
+| `vendor` | `string` | Vendor folder of the class: `KUKA`, `ABB`, `UR`, `NEURA`, `FANUC`, `IGUS`, `Supervisor`. |
+| `name` / `short_name` | `string` | Full (`"KUKA Agilus KR6 R700"`) and short (`"KR6 R700"`) display names. |
+| `axis_count` | `int32` | Number of main axes: 6 or 7 (0 for `Supervisor.Supervisor_Device`). |
+| `solver` | `string` | Kinematics solver relative to `PRC.Library.Solvers` (`"KUKA.KUKA_6DOF"`, `"KUKA.KUKA_6DOF_Offset"`, `"KUKA.KUKA_7DOF"`, `"UR.UR_6DOF"`, …) — the value `CustomRobot.kinematics_solver_class` takes, so a client can build a custom robot with a preset's kinematics. |
+
+#### `DriverPreset`
+
+| Field | Type | Description |
+|---|---|---|
+| `robot_driver_class` | `string` | The value for `Robot.robot_driver_class`, e.g. `"KUKA.KSS_KRL_Driver"`. |
+| `vendor` | `string` | Vendor folder of the class (`KUKA`, `ABB`, `UR`, `NEURA`, `FANUC`, `IGUS`, `Supervisor`). |
+| `name` | `string` | The driver's display name (`IRobotDriver.Name`, e.g. `"KSS_KRL"`, `"KUKA_SUNRISE"`) — also what `GetRobotData` echoes in `robot_driver_class`. |
+| `requires_license` | `bool` | `true` when `SetupRobot` refuses the driver without a full license. |
+| `online` | `bool` | `true` when the driver executes tasks on a connected controller (`ABB.ABB_RWS_Driver`, `KUKA.KSS_MXA_Driver`, `KUKA.KSS_IOB_Driver`, `UR.UR_RT_Driver`, `NEURA.NEURA_RT_Driver`); `false` for drivers that only generate a program file. |
+| `run_state_variable` | `string` | Name of the driver variable (`UpdateVariable` / `GetRobotData`) that carries the controller's execution state while a task runs: `"ABB RWS State"`, `"mxA State"`, `"UR State"`, `"NEURA State"`. Empty when the driver cannot report execution. |
+| `busy_values` | `repeated string` | Values (or prefixes) of `run_state_variable` that mean *a program is running* — `["Running"]` for ABB RWS, `["Streaming"]` for mxA and UR, `["Streaming", "Following target"]` for NEURA. Any other value means the controller is idle. With `run_state_variable` this lets a client wait for a task to finish without vendor knowledge. |
+| `settings` | `repeated SettingItem` | The settings schema, in the order the Settings page shows it. |
+
+#### `SettingItem` / `SettingKind`
+
+One driver setting: its dictionary key, how the Settings page renders it, and its default. Values travel as strings in `Settings.settings_dictionary` — numbers in invariant culture, toggles as `"True"` / `"False"`.
+
+| Field | Type | Description |
+|---|---|---|
+| `field` | `string` | The key in `Settings.settings_dictionary`. |
+| `label` / `tooltip` | `string` | Display texts. |
+| `kind` | `SettingKind` | `SETTING_TEXT` (0), `SETTING_NUMBER` (1, invariant-culture float), `SETTING_OPTION` (2, one of `options`), `SETTING_TOGGLE` (3, `"True"`/`"False"`), `SETTING_FILE` (4, a file or folder path), `SETTING_TEXT_AREA` (5, multi-line), `SETTING_IMAGE` (6, presentation only — round-trips in the dictionary, never edited). |
+| `default_value` | `string` | The driver's default, as it round-trips in the dictionary. Six drivers default their output folder to the running user's Desktop, so this value is machine-specific. |
+| `options` | `repeated string` | Choices for `SETTING_OPTION` items. |
+| `unit` | `string` | Unit shown next to the value (`mm`, `%`, `°`), when any. |
+| `tab` / `group` | `string` | Where the item sits on the Settings page (`group` is empty for items directly in the tab). |
+| `visible_when_field` / `visible_when_value` | `string` | Group visibility: shown only while the item named holds that value (empty = always visible). The KSS driver's *iiQKA.OS 2 Controller* group, for example, is visible only while `KSSVersion` is `iiQKA.OS 2 (KSS >= 9.0)`. |
+| `select_folder` | `bool` | `SETTING_FILE` items: `true` selects a folder, `false` a file. |
+| `dropdown` | `bool` | `SETTING_OPTION` items: `true` renders a dropdown, `false` radio chips. |
+| `group_requires_license` | `bool` | The item's group needs a full license. |
+
+Items without a value — such as the *Download* button in the Sunrise driver's *Controller Software* group — are neither part of the schema nor of the settings dictionary.
+
+#### `ExternalAxisPreset`
+
+| Field | Type | Description |
+|---|---|---|
+| `preset_external_axis_class` | `string` | The value for `ExternalAxis.preset_external_axis_class`, e.g. `"KUKA.KUKA_KL4000"`. |
+| `vendor` | `string` | Vendor folder of the class. |
+| `name` / `short_name` | `string` | Display names (`"KUKA KL4000 Linear Axis"` / `"KL4000"`). |
+| `external_axis_type` | `ExternalAxisType` | Mechanical configuration: `LINEAR_RAIL`, `LINEAR_DOUBLE`, `LINEAR_TRIPLE`, `ROTARY_SINGLE`, `ROTARY_DOUBLE`, `AGV`. |
+| `range_min` / `range_max` / `speed` | `repeated float` | Range and speed per sub-axis (mm / degrees). |
+| `default_position` | `CartesianPosition` | Where the preset places itself relative to the robot when no `position` is given. |
+
+**Pseudocode — a setup wizard driven by the catalog:**
+```
+catalog = DescribeLibrary(driver_class = "")
+if catalog.status != "OK": abort
+
+// 1. Driver first: it fixes the vendor and the settings the user may edit
+driver = pick(catalog.drivers)                 // hide requires_license ones on a Community license
+// 2. Robots of that vendor (a vendor driver accepts the robots of its own kinematics family)
+robot  = pick([r for r in catalog.robots if r.vendor == driver.vendor])
+// 3. Optional external axes by reference
+axes   = pick_many(catalog.external_axes)      // needs a full license
+// 4. Build the setup request and a settings form from the schema
+setup  = Robot(preset_robot_class = robot.preset_robot_class,
+               robot_driver_class = driver.robot_driver_class,
+               external_axes      = [ExternalAxis(preset_external_axis_class = a.preset_external_axis_class) for a in axes])
+form   = [(item.label, item.kind, item.default_value, item.options, item.tab, item.group) for item in driver.settings]
+reply  = SetupRobot(client_id, setup)          // returns the live settings dictionary to edit
+// 5. After AddRobotTask on an online driver: wait until the controller is idle
+while driver.run_state_variable != "" and
+      starts_with_any(variables[driver.run_state_variable], driver.busy_values):
+    sleep(100 ms); variables = QueryVariables()
+```
+
 ---
 
 ## 7. Available Robots & Drivers
@@ -1488,10 +1628,11 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 
 | Driver Class | Status | Description |
 |---|---|---|
-| `KUKA.KSS_KRL_Driver` | **Preview** | Driver for KUKA robots running KSS (KRC1-5). Outputs KRL code. Can optionally emit spline motion commands (SLIN/SPTP/SCIRC) instead of LIN/PTP/CIRC via the `UseSplineMotions` setting (see [Section 8](#8-settings-dictionary)). |
+| `KUKA.KSS_KRL_Driver` | **Preview** | Driver for KUKA robots running KSS (KRC1-5) and **iiQKA.OS 2**. Outputs KRL code. `KSSVersion` targets the controller generation (`KRC1-KRC2 Legacy`, `KRC2-KRC5 (KSS <= 8.7)` — default, `iiQKA.OS 2 (KSS >= 9.0)`); with the iiQKA target the driver can **upload the program directly to the controller** (DeviceManager gRPC on port 443 — `ControllerAddress`, `ControllerInstance`, `ControllerUsername`, `ControllerPassword`, `ControllerFolder`; `AutoUpload` pushes every program regenerated by an execute-type task, see [Section 8](#8-settings-dictionary)). Can optionally emit spline motion commands (SLIN/SPTP/SCIRC) instead of LIN/PTP/CIRC via the `UseSplineMotions` setting. Six-axis KUKA kinematics only (`KUKA_6DOF` / `KUKA_6DOF_Offset`) — the seven-axis LBR iiwa is refused in `AddRobotTask` with a message naming the Sunrise driver. |
 | `KUKA.KSS_IOB_Driver` | Experimental | KUKA driver for the IO Builder integration, derived from KSS_KRL. Two interaction modes (chosen via the `Interaction` setting): **Servoing** streams the robot's current axis position as JSON over UDP to an external system whenever the simulation updates, and visualizes positions received back live; **Path-Table** takes each motion's absolute time from the metadata key `TimeStamp` (seconds, on `MetaData.data`) instead of computing timing from speed, and generates a time-stamped axis_recorder take file (JSON) as its `code` output instead of KRL. |
 | `KUKA.KSS_MXA_Driver` | Experimental | KUKA mxAutomation **realtime** interface: streams motion commands cyclically over UDP to a KRC running the mxA option package. The bundled `KUKA.MxAutomation.dll` speaks mxA **interface 6.0** (a `KUKA.MxAutomation_3_3.dll` for interface-3.3 controllers ships alongside; the assembly version is *not* the interface version). The handshake fails with error 503 on an interface mismatch — the diagnosis, including both version numbers, is surfaced in `RobotState.data["Error"]` / the `mxA Last Error` variable. PRC sends to UDP 1336 and receives on 1336 (interface 5+) or 1337 (interface 3), selected automatically from the referenced DLL. Honors `C_PTP`/`C_VEL` blending on PTP groups and `C_DIS`/`C_VEL` on CP groups at runtime. **A new task cancels the running one by default** — its first order is sent in aborting mode, stopping the current motion and flushing the KRC-side queue. Honors the moderation variables (see below); without any `OV` the override defaults to 10 %. |
-| `UR.UR_Driver` | Experimental | Universal Robots offline code generation (UR5e/7e, UR10e, UR20). Outputs URScript. Supports Polyscope 5 and Polyscope X. |
+| `KUKA.KUKA_Sunrise_Driver` | Experimental | **KUKA LBR iiwa** (7 R800 / 14 R820 — seven axes, `KUKA.KUKA_7DOF` solver) on **Sunrise.OS**. Licensed, offline (display name `KUKA_SUNRISE`). `OutputFormat` selects `Sunrise XML (PRC Java library)` — a `<PRCProgram version="2">` file (mm, degrees, mm/s, %; one element per command: `Axis a1..a7`, `Lin`/`Ptp`/`Circ` with `e1` = A3 redundancy, `Ptp` also with `status`/`turn`, `Wait`, `DigitalOutput`/`AnalogOutput`, `ChangeTool`, optional `Compliance` child) executed by the **PRC Sunrise Java library**, downloadable from the driver's Settings page (*Controller Software* group; Java 6 sources for Sunrise Workbench) — or `Sunrise Workbench Frames`, a `RoboticsAPIData` frame file to import into Workbench. The optional **Sunrise Communicator** (`Communicator`, `RobotIP`, `RobotPort` 30000, `LocalPort` 49152, `ReplaceQueue`) streams every executed task as UDP datagrams to the Java application and turns its `STATE`/`LOG` replies into the live robot state (`Sunrise State`, `Buffered Commands`, `TCP X..C`, `Force X..Z`, `Sunrise Message` variables). LIN/PTP targets may carry `SunriseStiffness` / `SunriseAdditionalForce` metadata (`"x,y,z"`) for compliant motion. An unset redundancy is A3 = 0 on the wire. **Unsupported commands are refused in `AddRobotTask`**: IF/ELSE, WHILE, wait-for-variable, custom code (spline groups are not generated by any offline driver yet). Not yet run against a physical controller. |
+| `UR.UR_Driver` | Experimental | Universal Robots offline code generation (UR5, UR5e/7e, UR10e, UR20). Outputs URScript. Supports Polyscope 5 and Polyscope X. |
 | `UR.UR_RT_Driver` | Experimental | Universal Robots **realtime** driver: simulates PRC tasks with the UR solver, streams them as URScript programs over the controller's secondary interface (port 30002), and displays the actual robot position live via RTDE (port 30004). Both channels are officially supported on Polyscope 5 and PolyScope X. |
 | `ABB.ABB_RAPID_Driver` | Experimental | ABB robots using RAPID language (offline code generation). |
 | `ABB.ABB_RWS_Driver` | Experimental | ABB **online** driver via Robot Web Services (HTTPS + Digest auth, OmniCore): on an execute-type task it uploads the generated RAPID module, loads it, resets the program pointer to `main`, turns motors on and starts execution; live joint/Cartesian position and RAPID execution state stream back via a subscription and are published as `RobotState` updates (`data["State"]` = `Running`/`Stopped`, `data["Moving"]`, `data["Error"]`) plus `ABB …` variables. Honors the moderation variables: `Run` (missing = true) gates connect/execute — an **empty task re-executes the previous task only when `Run` is explicitly true** (a simulate-only buffered task is escalated to an execute on such a rerun), so a plain re-simulation can never fire a RAPID run by itself; `OV` maps to the controller speed ratio; a `Reset` rising edge resets the program pointer. `Run` also gates live following (missing = on; the legacy `Online` variable is still honored alongside it). |
@@ -1503,10 +1644,10 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 
 ### Robot Models (Selection)
 
-**KUKA** (50+ models):
-`KUKA.KUKA_KR610R11002`, `KUKA.KUKA_KR610R9002`, `KUKA.KUKA_KR10R1420`, `KUKA.KUKA_KR120R1800`, `KUKA.KUKA_KR210R31002`, `KUKA.KUKA_KR3060`, `KUKA.KUKA_KR6R18402`, `KUKA.KUKA_KR8R1620`, `KUKA.KUKA_KR50R2500`, `KUKA.KUKA_KR1000`, `KUKA.KUKA_LBR3R760`, `KUKA.KUKA_KR120R3900K`, `KUKA.KUKA_KR210KR240R2700`, `KUKA.KUKA_KR3R540`, `KUKA.KUKA_KR4R600`, `KUKA.KUKA_KR5arcHW`, `KUKA.KUKA_KR600R2830`, `KUKA.KUKA_KR480R3330`, `KUKA.KUKA_KR3605002`, `KUKA.KUKA_KR100120P2`, and many more.
+**KUKA** (61 models):
+`KUKA.KUKA_KR610R11002`, `KUKA.KUKA_KR610R9002`, `KUKA.KUKA_KR10R1420`, `KUKA.KUKA_KR120R1800`, `KUKA.KUKA_KR210R31002`, `KUKA.KUKA_KR3060`, `KUKA.KUKA_KR6R18402`, `KUKA.KUKA_KR8R1620`, `KUKA.KUKA_KR50R2500`, `KUKA.KUKA_KR1000`, `KUKA.KUKA_KR120R3900K`, `KUKA.KUKA_KR210KR240R2700`, `KUKA.KUKA_KR3R540`, `KUKA.KUKA_KR4R600`, `KUKA.KUKA_KR5arcHW`, `KUKA.KUKA_KR600R2830`, `KUKA.KUKA_KR480R3330`, `KUKA.KUKA_KR3605002`, `KUKA.KUKA_KR100120P2`, and many more — including the Agilus-3 ultra `KUKA.KUKA_KR10R11003` / `KUKA.KUKA_KR13R9003` (new in 1.727), the LBR iisy `KUKA.KUKA_LBR3R760`, the LBR iico `KUKA.KUKA_LBR12R1260` (offset wrist, `KUKA_6DOF_Offset` solver), and the seven-axis **LBR iiwa** `KUKA.KUKA_LBR7R800` / `KUKA.KUKA_LBR14R820` (`KUKA_7DOF` solver, Sunrise driver only).
 
-**Universal Robots:** `UR.UR_57e` (UR5e/7e), `UR.UR_10e`, `UR.UR_20`
+**Universal Robots:** `UR.UR_5` (UR5), `UR.UR_57e` (UR5e/7e), `UR.UR_10e`, `UR.UR_20`
 
 **ABB:** `ABB.ABB_IRB6620`, `ABB.ABB_IRB6700_150_320`
 
@@ -1518,15 +1659,17 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 
 **Supervisor:** `Supervisor.Supervisor_Device` — robot-less placeholder (no kinematics, no geometry) for variable-exchange clients such as IoT devices or monitoring dashboards. Used automatically when a setup request contains no robot definition.
 
-The class strings map to `PRC.Library.Robots.<class>()` constructors internally. For example, `"KUKA.KUKA_KR610R11002"` constructs a robot with pre-configured kinematic data, axis limits, speeds, and 3D geometry.
+The class strings map to `PRC.Library.Robots.<class>()` constructors internally. For example, `"KUKA.KUKA_KR610R11002"` constructs a robot with pre-configured kinematic data, axis limits, speeds, and 3D geometry. **The complete, current list — with display names, axis counts and solvers — is returned by `DescribeLibrary`** ([Section 6.8](#68-library-catalog-describelibrary)); prefer it over hard-coding class strings.
 
-### External Axis Presets (.NET Library)
+### External Axis Presets
 
-External axes travel over GRPC as full `ExternalAxis` definitions (type, kinematics, geometry) — there is no preset class string on the wire. .NET Client Library users can instead instantiate ready-made presets from `PRC.Library.ExternalAxes`:
+Since 1.727 an external axis can be **referenced by class over GRPC** (`ExternalAxis.preset_external_axis_class`, [Section 6.2](#62-robot-data)) — the server adds geometry, ranges, speed and orientation — or shipped as a full `ExternalAxis` definition. .NET Client Library users can instantiate the same presets from `PRC.Library.ExternalAxes`:
 
-**KUKA:** `KUKA_KL4000` (linear axis), `KUKA_KP1V` (KP1V500 single rotary axis), `KUKA_DKP400` (2-axis positioner), `KUKA_DKP500` (DKP500-2 HW 2-axis positioner), `KUKA_KP2HV500` (KP2 HV500 2-axis positioner)
+**KUKA:** `KUKA.KUKA_KL4000` (linear axis), `KUKA.KUKA_KP1V` (KP1V500 single rotary axis), `KUKA.KUKA_DKP400` (2-axis positioner), `KUKA.KUKA_DKP500` (DKP500-2 HW 2-axis positioner), `KUKA.KUKA_KP2HV500` (KP2 HV500 2-axis positioner)
 
-**NEURA:** `MAV500` (MAV-500 AGV)
+**NEURA:** `NEURA.NEURA_MAV500` (MAV-500 AGV)
+
+External axes need a full license — a Community license refuses them at `SetupRobot`. `DescribeLibrary` lists the presets with their type, ranges, speeds and default placement.
 
 ### Well-Known Moderation Variables (Realtime Drivers)
 
@@ -1540,13 +1683,13 @@ The four live drivers (`KUKA.KSS_MXA_Driver`, `UR.UR_RT_Driver`, `NEURA.NEURA_RT
 | `Reset` | bool, rising edge | mxA, NEURA, RWS | Error recovery: mxA `EXECUTERESET`, NEURA `reset_errors`, ABB RWS program-pointer reset to `main`. Pulse it `true` → `false` like a physical reset button. |
 | `Online` | bool — missing counts as `true` | RWS only (legacy) | Pre-rework name for the RWS live-following gate; still honored alongside `Run`, which now gates following as well. Explicit `false` on either mutes live state updates while keeping the connection. New clients should use `Run`. |
 
-Driver status flows back through the same channels: the live `RobotState.data` carries the shared `State` / `Moving` / `Error` keys (see [Section 6.6](#66-feedback)), and each driver publishes prefixed diagnostic variables (`mxA …`, `UR …`, `NEURA …`, `ABB …`) readable via `UpdateVariable` (query form), `QueryVariables`, or `GetRobotData`.
+Driver status flows back through the same channels: the live `RobotState.data` carries the shared `State` / `Moving` / `Error` keys (see [Section 6.6](#66-feedback)), and each driver publishes prefixed diagnostic variables (`mxA …`, `UR …`, `NEURA …`, `ABB …`) readable via `UpdateVariable` (query form), `QueryVariables`, or `GetRobotData`. `DescribeLibrary` exposes the same facts machine-readably: `DriverPreset.online`, `run_state_variable` and `busy_values` name, per driver, the state variable and the values that mean *running* ([Section 6.8](#68-library-catalog-describelibrary)).
 
 ---
 
 ## 8. Settings Dictionary
 
-The `Settings` message is a `map<string, string>` dictionary returned from `SetupRobotReply`. Settings are **driver-specific** — different drivers return different keys.
+The `Settings` message is a `map<string, string>` dictionary returned from `SetupRobotReply`. Settings are **driver-specific** — different drivers return different keys. The schema behind the keys — label, tooltip, kind, default, options, unit, tab/group and visibility — is available from `DescribeLibrary` ([Section 6.8](#68-library-catalog-describelibrary)), so a client can render a settings form without hard-coding a single key. Since 1.727 the dictionary no longer contains an empty `""` key (it was an artefact of the layout items).
 
 ### Workflow
 
@@ -1585,6 +1728,10 @@ Setting keys vary by driver — always inspect the dictionary returned from `Set
 |---|---|---|---|
 | `ABB.ABB_RAPID_Driver` | `IRCVersion` | `"IRC5"` or `"IRC7/OmniCore"` (**default**) | Targets the controller generation. **`IRC5`** → save the generated module as a **`.mod`** file; **`IRC7/OmniCore`** → save it as a **`.modx`** file. A missing or unrecognised value falls back to `.modx`, so older projects keep producing OmniCore-compatible files. |
 | `KUKA.KSS_KRL_Driver` (and derived `KUKA.KSS_IOB_Driver`) | `UseSplineMotions` | `"True"` or `"False"` (**default**) | If enabled, spline motion commands (**SLIN**, **SPTP**, **SCIRC**) are generated instead of LIN, PTP, and CIRC. Approximated motions use the `C_SPL` criterion instead of `C_DIS`/`C_PTP`. Requires KUKA KSS 8.3 or higher. |
+| `KUKA.KSS_KRL_Driver` | `KSSVersion` | `"KRC1-KRC2 Legacy"`, `"KRC2-KRC5 (KSS <= 8.7)"` (**default**), `"iiQKA.OS 2 (KSS >= 9.0)"` | Targets the controller generation (minor code-generation differences; *Legacy* primes the motion parameters through the older `BAS(#PTP_DAT)` / `BAS(#FRAMES)` / `BAS(#VEL_PTP)` calls). The iiQKA value also enables the **iiQKA.OS 2 Controller** group below. |
+| `KUKA.KSS_KRL_Driver` | `ControllerAddress`, `ControllerInstance`, `ControllerUsername`, `ControllerPassword`, `ControllerFolder`, `AutoUpload` | address (port optional, default 443); instance id or name (empty = the controller's only instance); login (defaults `administrator` / `kuka`); instance-relative folder (default `ROBOTER/KRC/R1/Program`); `"True"` / `"False"` (**default**) | Direct upload of the generated program to an **iiQKA.OS 2** controller (DeviceManager gRPC). With `AutoUpload` every program regenerated by an execute-type task is pushed — single-flight, latest wins, 30 s deadline per attempt because taking control (SPOC) may need a confirmation on the pendant; the outcome lands in the driver's status, never in the `AddRobotTask` reply, which returns immediately. The password travels in clear text, like the ABB RWS credentials. Only used while `KSSVersion` is the iiQKA value. |
+| `KUKA.KUKA_Sunrise_Driver` | `OutputFormat` | `"Sunrise XML (PRC Java library)"` (**default**) or `"Sunrise Workbench Frames"` | Selects the program file: the version-2 XML the PRC Sunrise Java library executes (save as **`.xml`**), or a Sunrise Workbench `RoboticsAPIData` frame file (LIN and PTP targets with their redundancy data) to import into Workbench. |
+| `KUKA.KUKA_Sunrise_Driver` | `Communicator`, `ReplaceQueue`, `RobotIP`, `RobotPort`, `LocalPort` | `"False"` (**default**) / `"True"`; `"True"` (**default**); controller IP; `30000`; `49152` | Sunrise Communicator (UDP): streams every executed task to the Java application on the controller as datagrams — `ReplaceQueue` clears the controller's not-yet-started queue first — and turns its `STATE`/`LOG` replies into the live robot state. While it streams, `GetSimulatedRobotState` does not move the live robot (the realtime-driver rule). |
 | `KUKA.KSS_IOB_Driver` | `Interaction` | `"Path-Table"` (**default**) or `"Servoing"` | Selects the IO Builder interaction mode. In **Path-Table** mode every motion must carry an absolute time stamp in seconds under the metadata key `TimeStamp` (`MetaData.data["TimeStamp"]`, invariant culture); the solver uses those times instead of speed-derived timing, and the `code` output is a time-stamped axis_recorder take file (JSON) rather than KRL. In **Servoing** mode the current axis position is streamed as JSON over UDP (`ExternalIP`/`ExternalPort`), and positions received on `LocalPort` are visualized live. |
 | `KUKA.KSS_IOB_Driver` | `PathSmoothing` | `"Spline"` (**default**) or `"Linear"` | With `"Spline"`, the simulation is smoothed with cubic splines through the programmed targets — every target is still reached at its exact time, but velocity stays continuous across targets instead of cornering. |
 | `NEURA.NEURA_SIM_Driver` | `OutputFormat` | `"NeuraPy"` (**default**) or `"NeuraPy [JSON]"` | Selects the `code` output: a runnable NeuraPy v5 Python script (save as **`.py`** and run it with the NeuraPy wheel installed, connected to the robot's socket server) or a neutral JSON toolpath representation (save as **`.json`**) for custom postprocessors. |
@@ -1592,7 +1739,7 @@ Setting keys vary by driver — always inspect the dictionary returned from `Set
 | `NEURA.NEURA_SIM_Driver`, `NEURA.NEURA_RT_Driver` | `CPRotationSpeed` | rad/s, `"0.5"` (**default**); `"0"` = leave to the controller | Composite-level rotational speed for CP motions: segments that mostly reorient the tool are paced by this limit rather than the translational CP speed. PRC has no per-target rotational speed, so one value applies to the whole group; NeuraPy's own default is 0.5 rad/s. |
 | `NEURA.NEURA_RT_Driver` | `FollowTargetMode` | `"True"` or `"False"` (**default**) | Streams the task's **last Cartesian PTP target** via the servo interface (`movelinear_online`): the robot continuously chases the most recent target and re-plans on the fly when it changes — ideal for live target following. The first target of a session, and any change of the commanded posture, first runs a real PTP to the solver's joint solution so servoing starts in the commanded posture rather than whatever configuration the controller's own IK drifts into. The target's PTP speed percentage scales the servo speed (100 % = 2 m/s); rotation is paced by `CPRotationSpeed`. Joint-space, LIN and circular targets are not executed in this mode, and an out-of-reach target is refused while the previous reachable target is kept. |
 
-When writing `SimulationResult.code` to disk, choose the file extension based on the driver (and, for ABB, the `IRCVersion` setting; for NEURA, the `OutputFormat` setting). Note that `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON take file, not KRL. See [Section 6.6](#66-feedback) and [Section 9](#9-simulationresult-addtaskreply-data).
+When writing the program to disk, prefer `SimulationResult.files` — every file already carries its name and extension. Fall back to `code` plus a driver-chosen extension only when `files` is empty (older servers): for ABB the `IRCVersion` setting decides between `.mod` and `.modx`, for NEURA the `OutputFormat` setting between `.py` and `.json`, and `KUKA.KSS_IOB_Driver` in Path-Table mode outputs a JSON take file, not KRL. See [Section 6.6](#66-feedback) and [Section 9](#9-simulationresult-addtaskreply-data).
 
 ---
 
@@ -1606,7 +1753,8 @@ The `SimulationResult` returned from `AddRobotTask` provides complete simulation
 |---|---|---|
 | `is_valid` | `bool` | `true` if the entire toolpath is reachable and collision-free |
 | `time` | `float` | Total estimated execution time in seconds |
-| `code` | `string` | Generated robot code (KRL, URScript, RAPID, etc.) |
+| `code` | `string` | Generated robot code (KRL, URScript, RAPID, etc.) — the text of the primary file |
+| `files` | `list` of `ProgramFile` | Every generated file with its name and content, primary first (empty on older servers) |
 | `simulation_results` | `list` | Per-position simulation data |
 
 ### Per-Position Data (`SimulationResultUnit`)
@@ -1651,11 +1799,17 @@ for i, unit in enumerate(result.simulation_results):
         print(f"Position {i} (t={unit.time:.2f}s): {', '.join(issues)}")
         print(f"  Axes: {list(unit.axis_values)}")
 
-# Save generated code to file
-# .src for KUKA KRL, .script for UR, .mod/.modx for ABB RAPID (see IRCVersion
-# in Section 8), .py for NEURA NeuraPy (.json with the NeuraPy [JSON] format)
-with open("robot_program.src", "w") as f:
-    f.write(result.code)
+# Save the generated program: every file with its own name (primary first).
+# Older servers leave `files` empty — then name the file yourself: .src KUKA KRL,
+# .xml KUKA Sunrise, .script/.urp/.urpx UR, .mod/.modx ABB (IRCVersion, Section 8),
+# .ls FANUC, .py/.json NEURA (OutputFormat)
+if result.files:
+    for program_file in result.files:
+        with open(program_file.name, "w", newline="") as f:   # keep the controller's line endings
+            f.write(program_file.content)
+else:
+    with open("robot_program.src", "w") as f:
+        f.write(result.code)
 ```
 
 ---
@@ -2298,6 +2452,8 @@ var taskReply = await client.AddRobotTaskAsync(new AddRobotTaskRequest
 
 Console.WriteLine($"Valid: {taskReply.SimulationResultData.IsValid}");
 Console.WriteLine($"Code:\n{taskReply.SimulationResultData.Code}");
+foreach (var file in taskReply.SimulationResultData.Files)          // every generated file, primary first
+    File.WriteAllText(file.Name, file.Content);
 
 // 4. Iterate simulation
 for (int i = 0; i <= 100; i += 5)
@@ -2429,8 +2585,12 @@ task_reply = stub.AddRobotTask(prc_pb2.AddRobotTaskRequest(
 result = task_reply.simulation_result_data
 print(f"Valid: {result.is_valid}, Time: {result.time:.2f}s")
 
-# Save generated code
-if result.code:
+# Save the generated program (every file with its own name; `files` is empty on older servers)
+if result.files:
+    for program_file in result.files:
+        with open(program_file.name, "w", newline="") as f:
+            f.write(program_file.content)
+elif result.code:
     with open("output.src", "w") as f:
         f.write(result.code)
 

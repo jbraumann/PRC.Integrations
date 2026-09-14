@@ -59,6 +59,14 @@ service ParametricRobotControlService {
 
     // Optional: Ping the controller for connection health checks.
     rpc SendPing (Ping) returns (Ping);
+
+    // Optional: Describe what this PRC installation can set up — every preset robot of
+    // PRC.Library.Robots, every driver of PRC.Library.Drivers with its settings schema
+    // (labels, tooltips, types, defaults, options — what the Settings page renders), and
+    // every preset external axis — so a client can offer a robot setup wizard without a
+    // copy of the library. The catalog is built once per server process; later calls are
+    // cheap. Nothing is set up by this call.
+    rpc DescribeLibrary (DescribeLibraryRequest) returns (DescribeLibraryReply);
 }
 
 
@@ -85,6 +93,30 @@ message AddRobotTaskRequest {
     // Driver settings (use the dictionary from SetupRobotReply, optionally modified).
     // Can be updated between calls without requiring a new SetupRobot.
     Settings robot_settings = 3;
+}
+
+// DescribeLibraryRequest asks for the setup catalog (see DescribeLibrary).
+message DescribeLibraryRequest {
+    // Restrict the driver settings schemas to one driver class
+    // (e.g., "KUKA.KSS_KRL_Driver"); empty returns every driver with its schema.
+    string driver_class = 1;
+}
+
+// DescribeLibraryReply is the setup catalog: presets, drivers and external axes.
+message DescribeLibraryReply {
+    // "OK" on success, or a human-readable error description.
+    string status = 1;
+    // Version of the PRC.Library assembly the catalog was read from.
+    string library_version = 2;
+    // License state of PRC (serialized LicenseData, as in SetupRobotReply) — a
+    // Community license refuses external axes and licensed drivers at SetupRobot.
+    string license_state = 3;
+    // Every preset robot, sorted by vendor and class.
+    repeated RobotPreset robots = 4;
+    // Every driver with its settings schema (filtered by driver_class when set).
+    repeated DriverPreset drivers = 5;
+    // Every preset external axis (without geometry — the server adds it at SetupRobot).
+    repeated ExternalAxisPreset external_axes = 6;
 }
 
 // GetRobotDataRequest asks the server for the resolved robot definition of an
@@ -371,6 +403,12 @@ message CustomRobot {
     // Optional base preset from PRC.Library.Robots to extend
     // (e.g., "KUKA.KUKA_KR610R11002"). Fields set here override the preset.
     optional string preset_robot_class = 11;
+    // Kinematics solver class from PRC.Library.Solvers that drives this robot
+    // (e.g., "KUKA.KUKA_6DOF", "KUKA.KUKA_6DOF_Offset", "ABB.ABB_6DOF",
+    // "FANUC.FANUC_6DOF", "UR.UR_6DOF", "NEURA.NEURA_6DOF", "IGUS.IGUS_6DOF").
+    // Required for a custom robot with axes that names no preset_robot_class;
+    // when both are given, the solver named here replaces the preset's solver.
+    optional string kinematics_solver_class = 12;
 }
 
 // [Flow Control] End terminates the robot program.
@@ -407,6 +445,123 @@ enum EulerFormat {
     RPY = 2;
 }
 
+// [Library] DriverPreset is one robot driver of PRC.Library.Drivers as the setup catalog
+// lists it: the class string SetupRobot takes, and the settings schema behind the
+// Settings dictionary — the same items PRC's own Settings page renders.
+message DriverPreset {
+    // Driver class for Robot.robot_driver_class (e.g., "KUKA.KSS_KRL_Driver").
+    string robot_driver_class = 1;
+    // Vendor folder of the class ("KUKA", "ABB", "UR", "NEURA", "FANUC", "IGUS", "Supervisor").
+    string vendor = 2;
+    // The driver's display name (IRobotDriver.Name, e.g., "KSS_KRL").
+    string name = 3;
+    // True when SetupRobot refuses this driver without a full license.
+    bool requires_license = 4;
+    // True when the driver executes tasks on a connected controller (streams motion or
+    // starts programs online); false for drivers that only generate a program file.
+    bool online = 5;
+    // Name of the driver variable (UpdateVariable / GetRobotData) that carries the
+    // controller's execution state while a task runs — e.g. "ABB RWS State", "mxA State",
+    // "UR State", "NEURA State". Empty when the driver cannot report execution.
+    string run_state_variable = 6;
+    // Values (or prefixes) of run_state_variable that mean "a program is running", e.g.
+    // ["Running"] for ABB RWS, ["Streaming", "Following target"] for the realtime drivers.
+    // Any other value means the controller is idle.
+    repeated string busy_values = 7;
+    // The settings schema, in the order the Settings page shows it.
+    repeated SettingItem settings = 8;
+}
+
+// [Library] SettingItem is one driver setting: its dictionary key, how the Settings page
+// renders it, and its default. Values travel as strings in Settings.settings_dictionary —
+// numbers in invariant culture, toggles as "True"/"False".
+message SettingItem {
+    // The key in Settings.settings_dictionary.
+    string field = 1;
+    string label = 2;
+    string tooltip = 3;
+    SettingKind kind = 4;
+    // The driver's default, as it round-trips in the dictionary.
+    string default_value = 5;
+    // Choices for SETTING_OPTION items.
+    repeated string options = 6;
+    // Unit shown next to the value ("mm", "%"), when any.
+    string unit = 7;
+    // The tab the item sits in on the Settings page.
+    string tab = 8;
+    // The group inside the tab (empty for items directly in the tab).
+    string group = 9;
+    // Group visibility: shown only while the item named visible_when_field holds
+    // visible_when_value (empty = always visible).
+    string visible_when_field = 10;
+    string visible_when_value = 11;
+    // SETTING_FILE items: true selects a folder, false a file.
+    bool select_folder = 12;
+    // SETTING_OPTION items: true renders a dropdown, false radio chips.
+    bool dropdown = 13;
+    // The item's group needs a full license.
+    bool group_requires_license = 14;
+}
+
+// [Library] SettingKind is how a SettingItem is edited.
+enum SettingKind {
+    // Free text.
+    SETTING_TEXT = 0;
+    // A number (invariant-culture float in the dictionary).
+    SETTING_NUMBER = 1;
+    // One of the listed options.
+    SETTING_OPTION = 2;
+    // A boolean ("True"/"False" in the dictionary).
+    SETTING_TOGGLE = 3;
+    // A file or folder path.
+    SETTING_FILE = 4;
+    // Multi-line text.
+    SETTING_TEXT_AREA = 5;
+    // Presentation only (an image URL) — round-trips in the dictionary, never edited.
+    SETTING_IMAGE = 6;
+}
+
+// [Library] RobotPreset is one preset robot of PRC.Library.Robots as the setup catalog
+// lists it.
+message RobotPreset {
+    // Preset class for Robot.preset_robot_class (e.g., "KUKA.KUKA_KR6R700").
+    string preset_robot_class = 1;
+    // Vendor folder of the class ("KUKA", "ABB", "UR", "NEURA", "FANUC", "IGUS").
+    string vendor = 2;
+    // Full name ("KUKA Agilus KR6 R700").
+    string name = 3;
+    // Short name ("KR6 R700").
+    string short_name = 4;
+    // Number of main axes (6, 7).
+    int32 axis_count = 5;
+    // Kinematics solver class relative to PRC.Library.Solvers (e.g., "KUKA.KUKA_6DOF") —
+    // the value CustomRobot.kinematics_solver_class takes, so a client can build a custom
+    // robot with a preset's kinematics.
+    string solver = 6;
+}
+
+// [Library] ExternalAxisPreset is one preset external axis of PRC.Library.ExternalAxes,
+// without its geometry: reference it from ExternalAxis.preset_external_axis_class and the
+// server adds geometry, ranges and orientation at SetupRobot.
+message ExternalAxisPreset {
+    // Preset class for ExternalAxis.preset_external_axis_class (e.g., "KUKA.KUKA_KL4000").
+    string preset_external_axis_class = 1;
+    // Vendor folder of the class.
+    string vendor = 2;
+    // Full name ("KUKA KL4000 Linear Axis").
+    string name = 3;
+    // Short name ("KL4000").
+    string short_name = 4;
+    // Mechanical configuration.
+    ExternalAxisType external_axis_type = 5;
+    // Range and speed per sub-axis (mm / degrees).
+    repeated float range_min = 6;
+    repeated float range_max = 7;
+    repeated float speed = 8;
+    // Where the preset places itself relative to the robot when no position is given.
+    CartesianPosition default_position = 9;
+}
+
 // [Robot Data] ExternalAxis describes an external axis device attached to the robot system
 // (e.g., a linear rail, rotary positioner, or AGV).
 message ExternalAxis {
@@ -431,6 +586,11 @@ message ExternalAxis {
     repeated PolyMesh geometry = 9;
     // Optional additional data.
     MetaData data = 10;
+    // Optional preset from PRC.Library.ExternalAxes (e.g., "KUKA.KUKA_KL4000", see
+    // DescribeLibrary). The server constructs the preset — geometry, ranges, speed and
+    // orientation included — and every field set here overrides it; `position` places
+    // it (the preset's default placement otherwise).
+    optional string preset_external_axis_class = 11;
 }
 
 // [Robot Data] ExternalAxisType classifies the mechanical configuration of an external axis.
@@ -772,6 +932,14 @@ message SetVariable {
     Variable new_state = 1;
 }
 
+// [Feedback] ProgramFile is one generated program file, named with its extension.
+message ProgramFile {
+    // File name including the extension, e.g. "kukaprc_project.src".
+    string name = 1;
+    // File content, with the line endings the controller expects.
+    string content = 2;
+}
+
 // [Feedback] SimulationResult contains the complete result of simulating a Task.
 message SimulationResult {
     // One SimulationResultUnit per interpolated step along the toolpath.
@@ -780,11 +948,18 @@ message SimulationResult {
     bool is_valid = 2;
     // Total estimated execution time in seconds.
     float time = 3;
-    // Generated robot program code. Write to a file with the driver-appropriate
-    // extension (e.g., .src for KUKA KRL, .mod for ABB RAPID).
+    // Generated robot program code — always the content of the primary file.
+    // Write to a file with the driver-appropriate extension (e.g., .src for
+    // KUKA KRL, .mod for ABB RAPID) when `files` is empty.
     string code = 4;
     // Optional additional data.
     MetaData data = 5;
+    // Every generated file with its file name, the primary program first. A
+    // driver whose controller expects several files per program (a KRL module's
+    // .src + .dat on iiQKA.OS 2) lists them all here. Empty when the driver only
+    // delivers `code` (some drivers, older servers) — then the client names the
+    // file itself.
+    repeated ProgramFile files = 6;
 }
 
 // [Feedback] SimulationResultUnit holds the simulated robot state at a single interpolated

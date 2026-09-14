@@ -9,11 +9,15 @@ The communication is based on *.proto files, which can be translated into variou
 
 Currently, you can find code samples to integrate Parametric Robot Control into the following platforms/programming languages
 - Unity (Game engine, using C#)
-- Blender (3D modeling, using Python)
+- Blender (3D modeling, using Python) and Blender Geometry Nodes (a node-based add-on with bundled dependencies)
+- Autodesk Fusion 360 (CAD/CAM, using Python)
 - Javascript (does not require node.js)
 - Adobe Illustrator (graphic design, builds upon Javascript)
+- vvvv gamma (visual programming, contributed)
 - C# (both direct implementation and using our wrapper library)
-- Python (also used in Blender)
+- Python (also used in Blender and Fusion 360)
+
+The Protos folder holds the current `prc.proto` and `generate_protos.sh`, which regenerates the client code of every integration with the pinned generator versions.
 
 ##### The PRC_LLM_Integration_Guide.md file is automatically generated and serves as a starting point for the LLM-guided integration of PRC into custom software. It outlines most functions and how they are used, providing context to the LLM. #####
 

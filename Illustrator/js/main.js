@@ -93,21 +93,11 @@
 
         csInterface.evalScript('$._ext.getUnits()', function (result) {
             actualUnits = result;
-            if (result == "RulerUnits.Millimeters") {
-                scale_multiplier = 1.0;
-            }
-            else if (result == "RulerUnits.Centimeters") {
-                scale_multiplier = 10;
-            }
-            else if (result == "RulerUnits.Picas") {
-                scale_multiplier = 4.23333;
-            }
-            else if (result == "RulerUnits.Points") {
-                scale_multiplier = 0.352778;
-            }
-            else if (result == "RulerUnits.Pixels") {
-                scale_multiplier = 1.0;
-            }
+            // The scripting DOM reports path anchors in POINTS whatever the document's
+            // ruler unit is (the ruler unit only changes what the UI displays), so the
+            // conversion to millimetres is fixed: 25.4 / 72. Scaling by the ruler unit
+            // exported a millimetre document 2.8x too large.
+            scale_multiplier = 25.4 / 72;
         });
 
 
@@ -151,7 +141,9 @@
             );
 
         setupRobotRequest.getRobotSetup().getToolDictionaryMap()
-            .set('0', new prc.Tool()
+            // Keyed by the tool id the motion groups reference (the server resolves
+            // tools by dictionary key); a fixed '0' key only worked for tool id 0.
+            .set(tool_id, new prc.Tool()
                 .setToolId(tool_id)
                 .setToolType(prc.FrameType.FIXED)
                 .setTcp(new prc.CartesianPosition()
@@ -166,7 +158,8 @@
                 )
             );
 
-        var setupRobotReply = await client.setupRobot(setupRobotRequest, {});
+        var setupRobotReply = new prc.SetupRobotReply();
+        setupRobotReply = await client.setupRobot(setupRobotRequest, {});
         settings = setupRobotReply.getRobotSettings();
 
         alert('Robot is connected.', 'Parametric Robot Control');
@@ -228,18 +221,14 @@
             .setToolId(tool_id)
             .setMotionGroupType(prc.MotionGroupType.PTP);
 
-        // LIN motions run in a continuous-path (CP) motion group.
         var linMotionGroup = new prc.MotionGroup()
             .setInterpolation('C_DIS')
             .setToolId(tool_id)
-            .setMotionGroupType(prc.MotionGroupType.CP);
+            .setMotionGroupType(prc.MotionGroupType.LIN);
 
-        // Every subpath of the artwork is approached from above at z_height,
-        // drawn at Z = 0, and left upwards again.
         for (var i = 0; i < toolpath.length; i++) {
             for (var j = 0; j < toolpath[i].length; j++) {
                 if (j == 0) {
-                    // approach point above the first point of the subpath
                     var linMotion = new prc.MotionCommand()
                         .setLinMotion(new prc.LINMotion()
                             .setTarget(new prc.CartesianTarget()
@@ -268,7 +257,6 @@
                         );
                     linMotionGroup.getCommandsList().push(linMotion);
                 }
-                // the point itself at drawing height
                 var linMotion = new prc.MotionCommand()
                     .setLinMotion(new prc.LINMotion()
                         .setTarget(new prc.CartesianTarget()
@@ -295,9 +283,11 @@
                             .setPosture('010')
                         )
                     );
+                // The on-paper point of EVERY anchor. The last anchor used to be queued
+                // as its lifted copy twice while this point was built and discarded, so
+                // every path lost its final segment and lifted along a diagonal.
                 linMotionGroup.getCommandsList().push(linMotion);
                 if (j == toolpath[i].length - 1) {
-                    // retract point above the last point of the subpath
                     var linMotion = new prc.MotionCommand()
                         .setLinMotion(new prc.LINMotion()
                             .setTarget(new prc.CartesianTarget()

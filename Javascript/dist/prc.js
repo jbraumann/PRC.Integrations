@@ -33,6 +33,14 @@ const {
     CircularMotion,
     CoordinateSystem,
     CustomRobot,
+    DescribeLibraryReply,
+    DescribeLibraryRequest,
+    DriverPreset,
+    ExternalAxisPreset,
+    ProgramFile,
+    RobotPreset,
+    SettingItem,
+    SettingKind,
     End,
     Euler,
     EulerFormat,
@@ -100,6 +108,14 @@ exports = module.exports = {ParametricRobotControlServicePromiseClient,
     CircularMotion,
     CoordinateSystem,
     CustomRobot,
+    DescribeLibraryReply,
+    DescribeLibraryRequest,
+    DriverPreset,
+    ExternalAxisPreset,
+    ProgramFile,
+    RobotPreset,
+    SettingItem,
+    SettingKind,
     End,
     Euler,
     EulerFormat,
@@ -884,6 +900,67 @@ proto.ParametricRobotControlServicePromiseClient.prototype.sendPing =
 };
 
 
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.DescribeLibraryRequest,
+ *   !proto.DescribeLibraryReply>}
+ */
+const methodDescriptor_ParametricRobotControlService_DescribeLibrary = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/DescribeLibrary',
+  grpc.web.MethodType.UNARY,
+  proto.DescribeLibraryRequest,
+  proto.DescribeLibraryReply,
+  /**
+   * @param {!proto.DescribeLibraryRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.DescribeLibraryReply.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.DescribeLibraryRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.DescribeLibraryReply)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.DescribeLibraryReply>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.describeLibrary =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/DescribeLibrary',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_DescribeLibrary,
+      callback);
+};
+
+
+/**
+ * @param {!proto.DescribeLibraryRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.DescribeLibraryReply>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.describeLibrary =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/DescribeLibrary',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_DescribeLibrary);
+};
+
+
 module.exports = proto;
 
 
@@ -908,13 +985,7 @@ module.exports = proto;
 
 var jspb = __webpack_require__(339);
 var goog = jspb;
-var global =
-    (typeof globalThis !== 'undefined' && globalThis) ||
-    (typeof window !== 'undefined' && window) ||
-    (typeof global !== 'undefined' && global) ||
-    (typeof self !== 'undefined' && self) ||
-    (function () { return this; }).call(null) ||
-    Function('return this')();
+var global = globalThis;
 
 goog.exportSymbol('proto.Action', null, global);
 goog.exportSymbol('proto.Action.ActionNodeCase', null, global);
@@ -930,10 +1001,14 @@ goog.exportSymbol('proto.CartesianTarget', null, global);
 goog.exportSymbol('proto.CircularMotion', null, global);
 goog.exportSymbol('proto.CoordinateSystem', null, global);
 goog.exportSymbol('proto.CustomRobot', null, global);
+goog.exportSymbol('proto.DescribeLibraryReply', null, global);
+goog.exportSymbol('proto.DescribeLibraryRequest', null, global);
+goog.exportSymbol('proto.DriverPreset', null, global);
 goog.exportSymbol('proto.End', null, global);
 goog.exportSymbol('proto.Euler', null, global);
 goog.exportSymbol('proto.EulerFormat', null, global);
 goog.exportSymbol('proto.ExternalAxis', null, global);
+goog.exportSymbol('proto.ExternalAxisPreset', null, global);
 goog.exportSymbol('proto.ExternalAxisType', null, global);
 goog.exportSymbol('proto.Flow', null, global);
 goog.exportSymbol('proto.Flow.FlowNodeCase', null, global);
@@ -958,13 +1033,17 @@ goog.exportSymbol('proto.MotionGroupType', null, global);
 goog.exportSymbol('proto.PTPMotion', null, global);
 goog.exportSymbol('proto.Ping', null, global);
 goog.exportSymbol('proto.PolyMesh', null, global);
+goog.exportSymbol('proto.ProgramFile', null, global);
 goog.exportSymbol('proto.Robot', null, global);
 goog.exportSymbol('proto.Robot.RobotDataCase', null, global);
 goog.exportSymbol('proto.RobotFeedback', null, global);
 goog.exportSymbol('proto.RobotFeedback.DataPackageCase', null, global);
+goog.exportSymbol('proto.RobotPreset', null, global);
 goog.exportSymbol('proto.RobotState', null, global);
 goog.exportSymbol('proto.RobotStatus', null, global);
 goog.exportSymbol('proto.SetVariable', null, global);
+goog.exportSymbol('proto.SettingItem', null, global);
+goog.exportSymbol('proto.SettingKind', null, global);
 goog.exportSymbol('proto.Settings', null, global);
 goog.exportSymbol('proto.SetupRobotReply', null, global);
 goog.exportSymbol('proto.SetupRobotRequest', null, global);
@@ -1026,6 +1105,48 @@ if (goog.DEBUG && !COMPILED) {
    * @override
    */
   proto.AddRobotTaskRequest.displayName = 'proto.AddRobotTaskRequest';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.DescribeLibraryRequest = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.DescribeLibraryRequest, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.DescribeLibraryRequest.displayName = 'proto.DescribeLibraryRequest';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.DescribeLibraryReply = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.DescribeLibraryReply.repeatedFields_, null);
+};
+goog.inherits(proto.DescribeLibraryReply, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.DescribeLibraryReply.displayName = 'proto.DescribeLibraryReply';
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -1425,6 +1546,90 @@ if (goog.DEBUG && !COMPILED) {
    * @override
    */
   proto.Euler.displayName = 'proto.Euler';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.DriverPreset = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.DriverPreset.repeatedFields_, null);
+};
+goog.inherits(proto.DriverPreset, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.DriverPreset.displayName = 'proto.DriverPreset';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.SettingItem = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.SettingItem.repeatedFields_, null);
+};
+goog.inherits(proto.SettingItem, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.SettingItem.displayName = 'proto.SettingItem';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.RobotPreset = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.RobotPreset, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.RobotPreset.displayName = 'proto.RobotPreset';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.ExternalAxisPreset = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.ExternalAxisPreset.repeatedFields_, null);
+};
+goog.inherits(proto.ExternalAxisPreset, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.ExternalAxisPreset.displayName = 'proto.ExternalAxisPreset';
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -1877,6 +2082,27 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
+proto.ProgramFile = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.ProgramFile, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.ProgramFile.displayName = 'proto.ProgramFile';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
 proto.SimulationResult = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, proto.SimulationResult.repeatedFields_, null);
 };
@@ -2144,7 +2370,7 @@ simulationResultData: (f = msg.getSimulationResultData()) && proto.SimulationRes
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.AddRobotTaskReply}
  */
 proto.AddRobotTaskReply.deserializeBinary = function(bytes) {
@@ -2169,7 +2395,7 @@ proto.AddRobotTaskReply.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setStatus(value);
       break;
     case 2:
@@ -2326,7 +2552,7 @@ robotSettings: (f = msg.getRobotSettings()) && proto.Settings.toObject(includeIn
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.AddRobotTaskRequest}
  */
 proto.AddRobotTaskRequest.deserializeBinary = function(bytes) {
@@ -2351,7 +2577,7 @@ proto.AddRobotTaskRequest.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setId(value);
       break;
     case 2:
@@ -2527,6 +2753,492 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     http://goto/soy-param-migration
  * @return {!Object}
  */
+proto.DescribeLibraryRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.DescribeLibraryRequest.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.DescribeLibraryRequest} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.DescribeLibraryRequest.toObject = function(includeInstance, msg) {
+  var f, obj = {
+driverClass: jspb.Message.getFieldWithDefault(msg, 1, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.DescribeLibraryRequest}
+ */
+proto.DescribeLibraryRequest.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.DescribeLibraryRequest;
+  return proto.DescribeLibraryRequest.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.DescribeLibraryRequest} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.DescribeLibraryRequest}
+ */
+proto.DescribeLibraryRequest.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setDriverClass(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.DescribeLibraryRequest.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.DescribeLibraryRequest.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.DescribeLibraryRequest} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.DescribeLibraryRequest.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getDriverClass();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string driver_class = 1;
+ * @return {string}
+ */
+proto.DescribeLibraryRequest.prototype.getDriverClass = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.DescribeLibraryRequest} returns this
+ */
+proto.DescribeLibraryRequest.prototype.setDriverClass = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.DescribeLibraryReply.repeatedFields_ = [4,5,6];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.DescribeLibraryReply.prototype.toObject = function(opt_includeInstance) {
+  return proto.DescribeLibraryReply.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.DescribeLibraryReply} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.DescribeLibraryReply.toObject = function(includeInstance, msg) {
+  var f, obj = {
+status: jspb.Message.getFieldWithDefault(msg, 1, ""),
+libraryVersion: jspb.Message.getFieldWithDefault(msg, 2, ""),
+licenseState: jspb.Message.getFieldWithDefault(msg, 3, ""),
+robotsList: jspb.Message.toObjectList(msg.getRobotsList(),
+    proto.RobotPreset.toObject, includeInstance),
+driversList: jspb.Message.toObjectList(msg.getDriversList(),
+    proto.DriverPreset.toObject, includeInstance),
+externalAxesList: jspb.Message.toObjectList(msg.getExternalAxesList(),
+    proto.ExternalAxisPreset.toObject, includeInstance)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.DescribeLibraryReply}
+ */
+proto.DescribeLibraryReply.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.DescribeLibraryReply;
+  return proto.DescribeLibraryReply.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.DescribeLibraryReply} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.DescribeLibraryReply}
+ */
+proto.DescribeLibraryReply.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setStatus(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setLibraryVersion(value);
+      break;
+    case 3:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setLicenseState(value);
+      break;
+    case 4:
+      var value = new proto.RobotPreset;
+      reader.readMessage(value,proto.RobotPreset.deserializeBinaryFromReader);
+      msg.addRobots(value);
+      break;
+    case 5:
+      var value = new proto.DriverPreset;
+      reader.readMessage(value,proto.DriverPreset.deserializeBinaryFromReader);
+      msg.addDrivers(value);
+      break;
+    case 6:
+      var value = new proto.ExternalAxisPreset;
+      reader.readMessage(value,proto.ExternalAxisPreset.deserializeBinaryFromReader);
+      msg.addExternalAxes(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.DescribeLibraryReply.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.DescribeLibraryReply.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.DescribeLibraryReply} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.DescribeLibraryReply.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getStatus();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getLibraryVersion();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+  f = message.getLicenseState();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
+  f = message.getRobotsList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      4,
+      f,
+      proto.RobotPreset.serializeBinaryToWriter
+    );
+  }
+  f = message.getDriversList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      5,
+      f,
+      proto.DriverPreset.serializeBinaryToWriter
+    );
+  }
+  f = message.getExternalAxesList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      6,
+      f,
+      proto.ExternalAxisPreset.serializeBinaryToWriter
+    );
+  }
+};
+
+
+/**
+ * optional string status = 1;
+ * @return {string}
+ */
+proto.DescribeLibraryReply.prototype.getStatus = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.DescribeLibraryReply} returns this
+ */
+proto.DescribeLibraryReply.prototype.setStatus = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string library_version = 2;
+ * @return {string}
+ */
+proto.DescribeLibraryReply.prototype.getLibraryVersion = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.DescribeLibraryReply} returns this
+ */
+proto.DescribeLibraryReply.prototype.setLibraryVersion = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional string license_state = 3;
+ * @return {string}
+ */
+proto.DescribeLibraryReply.prototype.getLicenseState = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.DescribeLibraryReply} returns this
+ */
+proto.DescribeLibraryReply.prototype.setLicenseState = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * repeated RobotPreset robots = 4;
+ * @return {!Array<!proto.RobotPreset>}
+ */
+proto.DescribeLibraryReply.prototype.getRobotsList = function() {
+  return /** @type{!Array<!proto.RobotPreset>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.RobotPreset, 4));
+};
+
+
+/**
+ * @param {!Array<!proto.RobotPreset>} value
+ * @return {!proto.DescribeLibraryReply} returns this
+*/
+proto.DescribeLibraryReply.prototype.setRobotsList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 4, value);
+};
+
+
+/**
+ * @param {!proto.RobotPreset=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.RobotPreset}
+ */
+proto.DescribeLibraryReply.prototype.addRobots = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.RobotPreset, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.DescribeLibraryReply} returns this
+ */
+proto.DescribeLibraryReply.prototype.clearRobotsList = function() {
+  return this.setRobotsList([]);
+};
+
+
+/**
+ * repeated DriverPreset drivers = 5;
+ * @return {!Array<!proto.DriverPreset>}
+ */
+proto.DescribeLibraryReply.prototype.getDriversList = function() {
+  return /** @type{!Array<!proto.DriverPreset>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.DriverPreset, 5));
+};
+
+
+/**
+ * @param {!Array<!proto.DriverPreset>} value
+ * @return {!proto.DescribeLibraryReply} returns this
+*/
+proto.DescribeLibraryReply.prototype.setDriversList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 5, value);
+};
+
+
+/**
+ * @param {!proto.DriverPreset=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.DriverPreset}
+ */
+proto.DescribeLibraryReply.prototype.addDrivers = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 5, opt_value, proto.DriverPreset, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.DescribeLibraryReply} returns this
+ */
+proto.DescribeLibraryReply.prototype.clearDriversList = function() {
+  return this.setDriversList([]);
+};
+
+
+/**
+ * repeated ExternalAxisPreset external_axes = 6;
+ * @return {!Array<!proto.ExternalAxisPreset>}
+ */
+proto.DescribeLibraryReply.prototype.getExternalAxesList = function() {
+  return /** @type{!Array<!proto.ExternalAxisPreset>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.ExternalAxisPreset, 6));
+};
+
+
+/**
+ * @param {!Array<!proto.ExternalAxisPreset>} value
+ * @return {!proto.DescribeLibraryReply} returns this
+*/
+proto.DescribeLibraryReply.prototype.setExternalAxesList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 6, value);
+};
+
+
+/**
+ * @param {!proto.ExternalAxisPreset=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.ExternalAxisPreset}
+ */
+proto.DescribeLibraryReply.prototype.addExternalAxes = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 6, opt_value, proto.ExternalAxisPreset, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.DescribeLibraryReply} returns this
+ */
+proto.DescribeLibraryReply.prototype.clearExternalAxesList = function() {
+  return this.setExternalAxesList([]);
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
 proto.GetRobotDataRequest.prototype.toObject = function(opt_includeInstance) {
   return proto.GetRobotDataRequest.toObject(opt_includeInstance, this);
 };
@@ -2557,7 +3269,7 @@ excludeGeometry: jspb.Message.getBooleanFieldWithDefault(msg, 2, false)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.GetRobotDataRequest}
  */
 proto.GetRobotDataRequest.deserializeBinary = function(bytes) {
@@ -2582,7 +3294,7 @@ proto.GetRobotDataRequest.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setId(value);
       break;
     case 2:
@@ -2731,7 +3443,7 @@ robotTransformationsList: jspb.Message.toObjectList(msg.getRobotTransformationsL
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.GetRobotDataReply}
  */
 proto.GetRobotDataReply.deserializeBinary = function(bytes) {
@@ -2756,7 +3468,7 @@ proto.GetRobotDataReply.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setStatus(value);
       break;
     case 2:
@@ -3215,7 +3927,7 @@ omitVariables: jspb.Message.getBooleanFieldWithDefault(msg, 4, false)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.GetSimulatedRobotStateRequest}
  */
 proto.GetSimulatedRobotStateRequest.deserializeBinary = function(bytes) {
@@ -3240,7 +3952,7 @@ proto.GetSimulatedRobotStateRequest.deserializeBinaryFromReader = function(msg, 
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setId(value);
       break;
     case 2:
@@ -3464,7 +4176,7 @@ pingData: (f = msg.getPingData()) && proto.Ping.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.RobotFeedback}
  */
 proto.RobotFeedback.deserializeBinary = function(bytes) {
@@ -3489,7 +4201,7 @@ proto.RobotFeedback.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setStatus(value);
       break;
     case 2:
@@ -3797,7 +4509,7 @@ robotSettings: (f = msg.getRobotSettings()) && proto.Settings.toObject(includeIn
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.SetupRobotReply}
  */
 proto.SetupRobotReply.deserializeBinary = function(bytes) {
@@ -3822,15 +4534,15 @@ proto.SetupRobotReply.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setStatus(value);
       break;
     case 2:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setId(value);
       break;
     case 3:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setLicenseState(value);
       break;
     case 4:
@@ -4037,7 +4749,7 @@ robotSetup: (f = msg.getRobotSetup()) && proto.Robot.toObject(includeInstance, f
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.SetupRobotRequest}
  */
 proto.SetupRobotRequest.deserializeBinary = function(bytes) {
@@ -4062,11 +4774,11 @@ proto.SetupRobotRequest.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setClientId(value);
       break;
     case 2:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setSoftwareVersion(value);
       break;
     case 3:
@@ -4246,7 +4958,7 @@ id: jspb.Message.getFieldWithDefault(msg, 1, "")
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.SubscribeRobotFeedbackRequest}
  */
 proto.SubscribeRobotFeedbackRequest.deserializeBinary = function(bytes) {
@@ -4271,7 +4983,7 @@ proto.SubscribeRobotFeedbackRequest.deserializeBinaryFromReader = function(msg, 
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setId(value);
       break;
     default:
@@ -4385,7 +5097,7 @@ variablesList: jspb.Message.toObjectList(msg.getVariablesList(),
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.UpdateVariableReply}
  */
 proto.UpdateVariableReply.deserializeBinary = function(bytes) {
@@ -4410,7 +5122,7 @@ proto.UpdateVariableReply.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.addId(value);
       break;
     case 2:
@@ -4586,7 +5298,7 @@ pb_var: (f = msg.getVar()) && proto.Variable.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.UpdateVariableRequest}
  */
 proto.UpdateVariableRequest.deserializeBinary = function(bytes) {
@@ -4611,7 +5323,7 @@ proto.UpdateVariableRequest.deserializeBinaryFromReader = function(msg, reader) 
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setId(value);
       break;
     case 2:
@@ -4799,7 +5511,7 @@ insertCodeAction: (f = msg.getInsertCodeAction()) && proto.InsertCode.toObject(i
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Action}
  */
 proto.Action.deserializeBinary = function(bytes) {
@@ -5151,7 +5863,7 @@ target: (f = msg.getTarget()) && proto.JointTarget.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.AxisMotion}
  */
 proto.AxisMotion.deserializeBinary = function(bytes) {
@@ -5354,7 +6066,7 @@ baseId: jspb.Message.getFieldWithDefault(msg, 3, "")
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Base}
  */
 proto.Base.deserializeBinary = function(bytes) {
@@ -5388,7 +6100,7 @@ proto.Base.deserializeBinaryFromReader = function(msg, reader) {
       msg.setBaseFrame(value);
       break;
     case 3:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setBaseId(value);
       break;
     default:
@@ -5595,7 +6307,7 @@ id: jspb.Message.getFieldWithDefault(msg, 6, "")
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.CartesianPosition}
  */
 proto.CartesianPosition.deserializeBinary = function(bytes) {
@@ -5644,7 +6356,7 @@ proto.CartesianPosition.deserializeBinaryFromReader = function(msg, reader) {
       msg.setParent(value);
       break;
     case 6:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setId(value);
       break;
     default:
@@ -5966,7 +6678,7 @@ redundancy: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.CartesianTarget}
  */
 proto.CartesianTarget.deserializeBinary = function(bytes) {
@@ -5996,26 +6708,17 @@ proto.CartesianTarget.deserializeBinaryFromReader = function(msg, reader) {
       msg.setPosition(value);
       break;
     case 2:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setPosture(value);
       break;
     case 3:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addSpeed(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getSpeedList());
       break;
     case 4:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addAcceleration(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getAccelerationList());
       break;
     case 5:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addExternalAxisValues(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getExternalAxisValuesList());
       break;
     case 6:
       var value = /** @type {number} */ (reader.readFloat());
@@ -6334,7 +7037,7 @@ targetsList: jspb.Message.toObjectList(msg.getTargetsList(),
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.CircularMotion}
  */
 proto.CircularMotion.deserializeBinary = function(bytes) {
@@ -6538,7 +7241,7 @@ yAxis: (f = msg.getYAxis()) && proto.Vector3.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.CoordinateSystem}
  */
 proto.CoordinateSystem.deserializeBinary = function(bytes) {
@@ -6796,7 +7499,8 @@ geometryList: jspb.Message.toObjectList(msg.getGeometryList(),
     proto.PolyMesh.toObject, includeInstance),
 rootCs: (f = msg.getRootCs()) && proto.Matrix4x4.toObject(includeInstance, f),
 flangeCs: (f = msg.getFlangeCs()) && proto.Matrix4x4.toObject(includeInstance, f),
-presetRobotClass: (f = jspb.Message.getField(msg, 11)) == null ? undefined : f
+presetRobotClass: (f = jspb.Message.getField(msg, 11)) == null ? undefined : f,
+kinematicsSolverClass: (f = jspb.Message.getField(msg, 12)) == null ? undefined : f
   };
 
   if (includeInstance) {
@@ -6809,7 +7513,7 @@ presetRobotClass: (f = jspb.Message.getField(msg, 11)) == null ? undefined : f
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.CustomRobot}
  */
 proto.CustomRobot.deserializeBinary = function(bytes) {
@@ -6844,29 +7548,20 @@ proto.CustomRobot.deserializeBinaryFromReader = function(msg, reader) {
       msg.addAxisDirection(value);
       break;
     case 3:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addAxisSpeed(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getAxisSpeedList());
       break;
     case 4:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addAxisRangeMin(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getAxisRangeMinList());
       break;
     case 5:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addAxisRangeMax(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getAxisRangeMaxList());
       break;
     case 6:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setName(value);
       break;
     case 7:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setShortName(value);
       break;
     case 8:
@@ -6885,8 +7580,12 @@ proto.CustomRobot.deserializeBinaryFromReader = function(msg, reader) {
       msg.setFlangeCs(value);
       break;
     case 11:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setPresetRobotClass(value);
+      break;
+    case 12:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setKinematicsSolverClass(value);
       break;
     default:
       reader.skipField();
@@ -6996,6 +7695,13 @@ proto.CustomRobot.serializeBinaryToWriter = function(message, writer) {
   if (f != null) {
     writer.writeString(
       11,
+      f
+    );
+  }
+  f = /** @type {string} */ (jspb.Message.getField(message, 12));
+  if (f != null) {
+    writer.writeString(
+      12,
       f
     );
   }
@@ -7409,6 +8115,42 @@ proto.CustomRobot.prototype.hasPresetRobotClass = function() {
 };
 
 
+/**
+ * optional string kinematics_solver_class = 12;
+ * @return {string}
+ */
+proto.CustomRobot.prototype.getKinematicsSolverClass = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 12, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.CustomRobot} returns this
+ */
+proto.CustomRobot.prototype.setKinematicsSolverClass = function(value) {
+  return jspb.Message.setField(this, 12, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.CustomRobot} returns this
+ */
+proto.CustomRobot.prototype.clearKinematicsSolverClass = function() {
+  return jspb.Message.setField(this, 12, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.CustomRobot.prototype.hasKinematicsSolverClass = function() {
+  return jspb.Message.getField(this, 12) != null;
+};
+
+
 
 
 
@@ -7454,7 +8196,7 @@ proto.End.toObject = function(includeInstance, msg) {
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.End}
  */
 proto.End.deserializeBinary = function(bytes) {
@@ -7561,7 +8303,7 @@ format: jspb.Message.getFieldWithDefault(msg, 7, 0)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Euler}
  */
 proto.Euler.deserializeBinary = function(bytes) {
@@ -7826,6 +8568,1673 @@ proto.Euler.prototype.setFormat = function(value) {
  * @private {!Array<number>}
  * @const
  */
+proto.DriverPreset.repeatedFields_ = [7,8];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.DriverPreset.prototype.toObject = function(opt_includeInstance) {
+  return proto.DriverPreset.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.DriverPreset} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.DriverPreset.toObject = function(includeInstance, msg) {
+  var f, obj = {
+robotDriverClass: jspb.Message.getFieldWithDefault(msg, 1, ""),
+vendor: jspb.Message.getFieldWithDefault(msg, 2, ""),
+name: jspb.Message.getFieldWithDefault(msg, 3, ""),
+requiresLicense: jspb.Message.getBooleanFieldWithDefault(msg, 4, false),
+online: jspb.Message.getBooleanFieldWithDefault(msg, 5, false),
+runStateVariable: jspb.Message.getFieldWithDefault(msg, 6, ""),
+busyValuesList: (f = jspb.Message.getRepeatedField(msg, 7)) == null ? undefined : f,
+settingsList: jspb.Message.toObjectList(msg.getSettingsList(),
+    proto.SettingItem.toObject, includeInstance)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.DriverPreset}
+ */
+proto.DriverPreset.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.DriverPreset;
+  return proto.DriverPreset.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.DriverPreset} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.DriverPreset}
+ */
+proto.DriverPreset.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setRobotDriverClass(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setVendor(value);
+      break;
+    case 3:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setName(value);
+      break;
+    case 4:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setRequiresLicense(value);
+      break;
+    case 5:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setOnline(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setRunStateVariable(value);
+      break;
+    case 7:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.addBusyValues(value);
+      break;
+    case 8:
+      var value = new proto.SettingItem;
+      reader.readMessage(value,proto.SettingItem.deserializeBinaryFromReader);
+      msg.addSettings(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.DriverPreset.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.DriverPreset.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.DriverPreset} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.DriverPreset.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getRobotDriverClass();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getVendor();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+  f = message.getName();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
+  f = message.getRequiresLicense();
+  if (f) {
+    writer.writeBool(
+      4,
+      f
+    );
+  }
+  f = message.getOnline();
+  if (f) {
+    writer.writeBool(
+      5,
+      f
+    );
+  }
+  f = message.getRunStateVariable();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
+  f = message.getBusyValuesList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
+      7,
+      f
+    );
+  }
+  f = message.getSettingsList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      8,
+      f,
+      proto.SettingItem.serializeBinaryToWriter
+    );
+  }
+};
+
+
+/**
+ * optional string robot_driver_class = 1;
+ * @return {string}
+ */
+proto.DriverPreset.prototype.getRobotDriverClass = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.DriverPreset} returns this
+ */
+proto.DriverPreset.prototype.setRobotDriverClass = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string vendor = 2;
+ * @return {string}
+ */
+proto.DriverPreset.prototype.getVendor = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.DriverPreset} returns this
+ */
+proto.DriverPreset.prototype.setVendor = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional string name = 3;
+ * @return {string}
+ */
+proto.DriverPreset.prototype.getName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.DriverPreset} returns this
+ */
+proto.DriverPreset.prototype.setName = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * optional bool requires_license = 4;
+ * @return {boolean}
+ */
+proto.DriverPreset.prototype.getRequiresLicense = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 4, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.DriverPreset} returns this
+ */
+proto.DriverPreset.prototype.setRequiresLicense = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 4, value);
+};
+
+
+/**
+ * optional bool online = 5;
+ * @return {boolean}
+ */
+proto.DriverPreset.prototype.getOnline = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 5, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.DriverPreset} returns this
+ */
+proto.DriverPreset.prototype.setOnline = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 5, value);
+};
+
+
+/**
+ * optional string run_state_variable = 6;
+ * @return {string}
+ */
+proto.DriverPreset.prototype.getRunStateVariable = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.DriverPreset} returns this
+ */
+proto.DriverPreset.prototype.setRunStateVariable = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * repeated string busy_values = 7;
+ * @return {!Array<string>}
+ */
+proto.DriverPreset.prototype.getBusyValuesList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 7));
+};
+
+
+/**
+ * @param {!Array<string>} value
+ * @return {!proto.DriverPreset} returns this
+ */
+proto.DriverPreset.prototype.setBusyValuesList = function(value) {
+  return jspb.Message.setField(this, 7, value || []);
+};
+
+
+/**
+ * @param {string} value
+ * @param {number=} opt_index
+ * @return {!proto.DriverPreset} returns this
+ */
+proto.DriverPreset.prototype.addBusyValues = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 7, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.DriverPreset} returns this
+ */
+proto.DriverPreset.prototype.clearBusyValuesList = function() {
+  return this.setBusyValuesList([]);
+};
+
+
+/**
+ * repeated SettingItem settings = 8;
+ * @return {!Array<!proto.SettingItem>}
+ */
+proto.DriverPreset.prototype.getSettingsList = function() {
+  return /** @type{!Array<!proto.SettingItem>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.SettingItem, 8));
+};
+
+
+/**
+ * @param {!Array<!proto.SettingItem>} value
+ * @return {!proto.DriverPreset} returns this
+*/
+proto.DriverPreset.prototype.setSettingsList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 8, value);
+};
+
+
+/**
+ * @param {!proto.SettingItem=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.SettingItem}
+ */
+proto.DriverPreset.prototype.addSettings = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 8, opt_value, proto.SettingItem, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.DriverPreset} returns this
+ */
+proto.DriverPreset.prototype.clearSettingsList = function() {
+  return this.setSettingsList([]);
+};
+
+
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.SettingItem.repeatedFields_ = [6];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.SettingItem.prototype.toObject = function(opt_includeInstance) {
+  return proto.SettingItem.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.SettingItem} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.SettingItem.toObject = function(includeInstance, msg) {
+  var f, obj = {
+field: jspb.Message.getFieldWithDefault(msg, 1, ""),
+label: jspb.Message.getFieldWithDefault(msg, 2, ""),
+tooltip: jspb.Message.getFieldWithDefault(msg, 3, ""),
+kind: jspb.Message.getFieldWithDefault(msg, 4, 0),
+defaultValue: jspb.Message.getFieldWithDefault(msg, 5, ""),
+optionsList: (f = jspb.Message.getRepeatedField(msg, 6)) == null ? undefined : f,
+unit: jspb.Message.getFieldWithDefault(msg, 7, ""),
+tab: jspb.Message.getFieldWithDefault(msg, 8, ""),
+group: jspb.Message.getFieldWithDefault(msg, 9, ""),
+visibleWhenField: jspb.Message.getFieldWithDefault(msg, 10, ""),
+visibleWhenValue: jspb.Message.getFieldWithDefault(msg, 11, ""),
+selectFolder: jspb.Message.getBooleanFieldWithDefault(msg, 12, false),
+dropdown: jspb.Message.getBooleanFieldWithDefault(msg, 13, false),
+groupRequiresLicense: jspb.Message.getBooleanFieldWithDefault(msg, 14, false)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.SettingItem}
+ */
+proto.SettingItem.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.SettingItem;
+  return proto.SettingItem.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.SettingItem} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.SettingItem}
+ */
+proto.SettingItem.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setField(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setLabel(value);
+      break;
+    case 3:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setTooltip(value);
+      break;
+    case 4:
+      var value = /** @type {!proto.SettingKind} */ (reader.readEnum());
+      msg.setKind(value);
+      break;
+    case 5:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setDefaultValue(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.addOptions(value);
+      break;
+    case 7:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setUnit(value);
+      break;
+    case 8:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setTab(value);
+      break;
+    case 9:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setGroup(value);
+      break;
+    case 10:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setVisibleWhenField(value);
+      break;
+    case 11:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setVisibleWhenValue(value);
+      break;
+    case 12:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setSelectFolder(value);
+      break;
+    case 13:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setDropdown(value);
+      break;
+    case 14:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setGroupRequiresLicense(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.SettingItem.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.SettingItem.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.SettingItem} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.SettingItem.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getField();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getLabel();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+  f = message.getTooltip();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
+  f = message.getKind();
+  if (f !== 0.0) {
+    writer.writeEnum(
+      4,
+      f
+    );
+  }
+  f = message.getDefaultValue();
+  if (f.length > 0) {
+    writer.writeString(
+      5,
+      f
+    );
+  }
+  f = message.getOptionsList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
+      6,
+      f
+    );
+  }
+  f = message.getUnit();
+  if (f.length > 0) {
+    writer.writeString(
+      7,
+      f
+    );
+  }
+  f = message.getTab();
+  if (f.length > 0) {
+    writer.writeString(
+      8,
+      f
+    );
+  }
+  f = message.getGroup();
+  if (f.length > 0) {
+    writer.writeString(
+      9,
+      f
+    );
+  }
+  f = message.getVisibleWhenField();
+  if (f.length > 0) {
+    writer.writeString(
+      10,
+      f
+    );
+  }
+  f = message.getVisibleWhenValue();
+  if (f.length > 0) {
+    writer.writeString(
+      11,
+      f
+    );
+  }
+  f = message.getSelectFolder();
+  if (f) {
+    writer.writeBool(
+      12,
+      f
+    );
+  }
+  f = message.getDropdown();
+  if (f) {
+    writer.writeBool(
+      13,
+      f
+    );
+  }
+  f = message.getGroupRequiresLicense();
+  if (f) {
+    writer.writeBool(
+      14,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string field = 1;
+ * @return {string}
+ */
+proto.SettingItem.prototype.getField = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setField = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string label = 2;
+ * @return {string}
+ */
+proto.SettingItem.prototype.getLabel = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setLabel = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional string tooltip = 3;
+ * @return {string}
+ */
+proto.SettingItem.prototype.getTooltip = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setTooltip = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * optional SettingKind kind = 4;
+ * @return {!proto.SettingKind}
+ */
+proto.SettingItem.prototype.getKind = function() {
+  return /** @type {!proto.SettingKind} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
+};
+
+
+/**
+ * @param {!proto.SettingKind} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setKind = function(value) {
+  return jspb.Message.setProto3EnumField(this, 4, value);
+};
+
+
+/**
+ * optional string default_value = 5;
+ * @return {string}
+ */
+proto.SettingItem.prototype.getDefaultValue = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setDefaultValue = function(value) {
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * repeated string options = 6;
+ * @return {!Array<string>}
+ */
+proto.SettingItem.prototype.getOptionsList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 6));
+};
+
+
+/**
+ * @param {!Array<string>} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setOptionsList = function(value) {
+  return jspb.Message.setField(this, 6, value || []);
+};
+
+
+/**
+ * @param {string} value
+ * @param {number=} opt_index
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.addOptions = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 6, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.clearOptionsList = function() {
+  return this.setOptionsList([]);
+};
+
+
+/**
+ * optional string unit = 7;
+ * @return {string}
+ */
+proto.SettingItem.prototype.getUnit = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setUnit = function(value) {
+  return jspb.Message.setProto3StringField(this, 7, value);
+};
+
+
+/**
+ * optional string tab = 8;
+ * @return {string}
+ */
+proto.SettingItem.prototype.getTab = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setTab = function(value) {
+  return jspb.Message.setProto3StringField(this, 8, value);
+};
+
+
+/**
+ * optional string group = 9;
+ * @return {string}
+ */
+proto.SettingItem.prototype.getGroup = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setGroup = function(value) {
+  return jspb.Message.setProto3StringField(this, 9, value);
+};
+
+
+/**
+ * optional string visible_when_field = 10;
+ * @return {string}
+ */
+proto.SettingItem.prototype.getVisibleWhenField = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 10, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setVisibleWhenField = function(value) {
+  return jspb.Message.setProto3StringField(this, 10, value);
+};
+
+
+/**
+ * optional string visible_when_value = 11;
+ * @return {string}
+ */
+proto.SettingItem.prototype.getVisibleWhenValue = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setVisibleWhenValue = function(value) {
+  return jspb.Message.setProto3StringField(this, 11, value);
+};
+
+
+/**
+ * optional bool select_folder = 12;
+ * @return {boolean}
+ */
+proto.SettingItem.prototype.getSelectFolder = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 12, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setSelectFolder = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 12, value);
+};
+
+
+/**
+ * optional bool dropdown = 13;
+ * @return {boolean}
+ */
+proto.SettingItem.prototype.getDropdown = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 13, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setDropdown = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 13, value);
+};
+
+
+/**
+ * optional bool group_requires_license = 14;
+ * @return {boolean}
+ */
+proto.SettingItem.prototype.getGroupRequiresLicense = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 14, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.SettingItem} returns this
+ */
+proto.SettingItem.prototype.setGroupRequiresLicense = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 14, value);
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.RobotPreset.prototype.toObject = function(opt_includeInstance) {
+  return proto.RobotPreset.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.RobotPreset} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.RobotPreset.toObject = function(includeInstance, msg) {
+  var f, obj = {
+presetRobotClass: jspb.Message.getFieldWithDefault(msg, 1, ""),
+vendor: jspb.Message.getFieldWithDefault(msg, 2, ""),
+name: jspb.Message.getFieldWithDefault(msg, 3, ""),
+shortName: jspb.Message.getFieldWithDefault(msg, 4, ""),
+axisCount: jspb.Message.getFieldWithDefault(msg, 5, 0),
+solver: jspb.Message.getFieldWithDefault(msg, 6, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.RobotPreset}
+ */
+proto.RobotPreset.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.RobotPreset;
+  return proto.RobotPreset.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.RobotPreset} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.RobotPreset}
+ */
+proto.RobotPreset.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setPresetRobotClass(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setVendor(value);
+      break;
+    case 3:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setName(value);
+      break;
+    case 4:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setShortName(value);
+      break;
+    case 5:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setAxisCount(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setSolver(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.RobotPreset.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.RobotPreset.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.RobotPreset} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.RobotPreset.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getPresetRobotClass();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getVendor();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+  f = message.getName();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
+  f = message.getShortName();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
+      f
+    );
+  }
+  f = message.getAxisCount();
+  if (f !== 0) {
+    writer.writeInt32(
+      5,
+      f
+    );
+  }
+  f = message.getSolver();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string preset_robot_class = 1;
+ * @return {string}
+ */
+proto.RobotPreset.prototype.getPresetRobotClass = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.RobotPreset} returns this
+ */
+proto.RobotPreset.prototype.setPresetRobotClass = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string vendor = 2;
+ * @return {string}
+ */
+proto.RobotPreset.prototype.getVendor = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.RobotPreset} returns this
+ */
+proto.RobotPreset.prototype.setVendor = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional string name = 3;
+ * @return {string}
+ */
+proto.RobotPreset.prototype.getName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.RobotPreset} returns this
+ */
+proto.RobotPreset.prototype.setName = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * optional string short_name = 4;
+ * @return {string}
+ */
+proto.RobotPreset.prototype.getShortName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.RobotPreset} returns this
+ */
+proto.RobotPreset.prototype.setShortName = function(value) {
+  return jspb.Message.setProto3StringField(this, 4, value);
+};
+
+
+/**
+ * optional int32 axis_count = 5;
+ * @return {number}
+ */
+proto.RobotPreset.prototype.getAxisCount = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.RobotPreset} returns this
+ */
+proto.RobotPreset.prototype.setAxisCount = function(value) {
+  return jspb.Message.setProto3IntField(this, 5, value);
+};
+
+
+/**
+ * optional string solver = 6;
+ * @return {string}
+ */
+proto.RobotPreset.prototype.getSolver = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.RobotPreset} returns this
+ */
+proto.RobotPreset.prototype.setSolver = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.ExternalAxisPreset.repeatedFields_ = [6,7,8];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.ExternalAxisPreset.prototype.toObject = function(opt_includeInstance) {
+  return proto.ExternalAxisPreset.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.ExternalAxisPreset} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.ExternalAxisPreset.toObject = function(includeInstance, msg) {
+  var f, obj = {
+presetExternalAxisClass: jspb.Message.getFieldWithDefault(msg, 1, ""),
+vendor: jspb.Message.getFieldWithDefault(msg, 2, ""),
+name: jspb.Message.getFieldWithDefault(msg, 3, ""),
+shortName: jspb.Message.getFieldWithDefault(msg, 4, ""),
+externalAxisType: jspb.Message.getFieldWithDefault(msg, 5, 0),
+rangeMinList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 6)) == null ? undefined : f,
+rangeMaxList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 7)) == null ? undefined : f,
+speedList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 8)) == null ? undefined : f,
+defaultPosition: (f = msg.getDefaultPosition()) && proto.CartesianPosition.toObject(includeInstance, f)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.ExternalAxisPreset}
+ */
+proto.ExternalAxisPreset.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.ExternalAxisPreset;
+  return proto.ExternalAxisPreset.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.ExternalAxisPreset} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.ExternalAxisPreset}
+ */
+proto.ExternalAxisPreset.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setPresetExternalAxisClass(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setVendor(value);
+      break;
+    case 3:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setName(value);
+      break;
+    case 4:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setShortName(value);
+      break;
+    case 5:
+      var value = /** @type {!proto.ExternalAxisType} */ (reader.readEnum());
+      msg.setExternalAxisType(value);
+      break;
+    case 6:
+      reader.readPackableFloatInto(msg.getRangeMinList());
+      break;
+    case 7:
+      reader.readPackableFloatInto(msg.getRangeMaxList());
+      break;
+    case 8:
+      reader.readPackableFloatInto(msg.getSpeedList());
+      break;
+    case 9:
+      var value = new proto.CartesianPosition;
+      reader.readMessage(value,proto.CartesianPosition.deserializeBinaryFromReader);
+      msg.setDefaultPosition(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.ExternalAxisPreset.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.ExternalAxisPreset.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.ExternalAxisPreset} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.ExternalAxisPreset.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getPresetExternalAxisClass();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getVendor();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+  f = message.getName();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
+  f = message.getShortName();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
+      f
+    );
+  }
+  f = message.getExternalAxisType();
+  if (f !== 0.0) {
+    writer.writeEnum(
+      5,
+      f
+    );
+  }
+  f = message.getRangeMinList();
+  if (f.length > 0) {
+    writer.writePackedFloat(
+      6,
+      f
+    );
+  }
+  f = message.getRangeMaxList();
+  if (f.length > 0) {
+    writer.writePackedFloat(
+      7,
+      f
+    );
+  }
+  f = message.getSpeedList();
+  if (f.length > 0) {
+    writer.writePackedFloat(
+      8,
+      f
+    );
+  }
+  f = message.getDefaultPosition();
+  if (f != null) {
+    writer.writeMessage(
+      9,
+      f,
+      proto.CartesianPosition.serializeBinaryToWriter
+    );
+  }
+};
+
+
+/**
+ * optional string preset_external_axis_class = 1;
+ * @return {string}
+ */
+proto.ExternalAxisPreset.prototype.getPresetExternalAxisClass = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.setPresetExternalAxisClass = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string vendor = 2;
+ * @return {string}
+ */
+proto.ExternalAxisPreset.prototype.getVendor = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.setVendor = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional string name = 3;
+ * @return {string}
+ */
+proto.ExternalAxisPreset.prototype.getName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.setName = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * optional string short_name = 4;
+ * @return {string}
+ */
+proto.ExternalAxisPreset.prototype.getShortName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.setShortName = function(value) {
+  return jspb.Message.setProto3StringField(this, 4, value);
+};
+
+
+/**
+ * optional ExternalAxisType external_axis_type = 5;
+ * @return {!proto.ExternalAxisType}
+ */
+proto.ExternalAxisPreset.prototype.getExternalAxisType = function() {
+  return /** @type {!proto.ExternalAxisType} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
+};
+
+
+/**
+ * @param {!proto.ExternalAxisType} value
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.setExternalAxisType = function(value) {
+  return jspb.Message.setProto3EnumField(this, 5, value);
+};
+
+
+/**
+ * repeated float range_min = 6;
+ * @return {!Array<number>}
+ */
+proto.ExternalAxisPreset.prototype.getRangeMinList = function() {
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 6));
+};
+
+
+/**
+ * @param {!Array<number>} value
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.setRangeMinList = function(value) {
+  return jspb.Message.setField(this, 6, value || []);
+};
+
+
+/**
+ * @param {number} value
+ * @param {number=} opt_index
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.addRangeMin = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 6, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.clearRangeMinList = function() {
+  return this.setRangeMinList([]);
+};
+
+
+/**
+ * repeated float range_max = 7;
+ * @return {!Array<number>}
+ */
+proto.ExternalAxisPreset.prototype.getRangeMaxList = function() {
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 7));
+};
+
+
+/**
+ * @param {!Array<number>} value
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.setRangeMaxList = function(value) {
+  return jspb.Message.setField(this, 7, value || []);
+};
+
+
+/**
+ * @param {number} value
+ * @param {number=} opt_index
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.addRangeMax = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 7, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.clearRangeMaxList = function() {
+  return this.setRangeMaxList([]);
+};
+
+
+/**
+ * repeated float speed = 8;
+ * @return {!Array<number>}
+ */
+proto.ExternalAxisPreset.prototype.getSpeedList = function() {
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 8));
+};
+
+
+/**
+ * @param {!Array<number>} value
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.setSpeedList = function(value) {
+  return jspb.Message.setField(this, 8, value || []);
+};
+
+
+/**
+ * @param {number} value
+ * @param {number=} opt_index
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.addSpeed = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 8, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.clearSpeedList = function() {
+  return this.setSpeedList([]);
+};
+
+
+/**
+ * optional CartesianPosition default_position = 9;
+ * @return {?proto.CartesianPosition}
+ */
+proto.ExternalAxisPreset.prototype.getDefaultPosition = function() {
+  return /** @type{?proto.CartesianPosition} */ (
+    jspb.Message.getWrapperField(this, proto.CartesianPosition, 9));
+};
+
+
+/**
+ * @param {?proto.CartesianPosition|undefined} value
+ * @return {!proto.ExternalAxisPreset} returns this
+*/
+proto.ExternalAxisPreset.prototype.setDefaultPosition = function(value) {
+  return jspb.Message.setWrapperField(this, 9, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.ExternalAxisPreset} returns this
+ */
+proto.ExternalAxisPreset.prototype.clearDefaultPosition = function() {
+  return this.setDefaultPosition(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.ExternalAxisPreset.prototype.hasDefaultPosition = function() {
+  return jspb.Message.getField(this, 9) != null;
+};
+
+
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
 proto.ExternalAxis.repeatedFields_ = [4,5,6,7,9];
 
 
@@ -7870,7 +10279,8 @@ orientationList: jspb.Message.toObjectList(msg.getOrientationList(),
 position: (f = msg.getPosition()) && proto.CartesianPosition.toObject(includeInstance, f),
 geometryList: jspb.Message.toObjectList(msg.getGeometryList(),
     proto.PolyMesh.toObject, includeInstance),
-data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
+presetExternalAxisClass: (f = jspb.Message.getField(msg, 11)) == null ? undefined : f
   };
 
   if (includeInstance) {
@@ -7883,7 +10293,7 @@ data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.ExternalAxis}
  */
 proto.ExternalAxis.deserializeBinary = function(bytes) {
@@ -7912,30 +10322,21 @@ proto.ExternalAxis.deserializeBinaryFromReader = function(msg, reader) {
       msg.setExternalAxisType(value);
       break;
     case 2:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setName(value);
       break;
     case 3:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setShortName(value);
       break;
     case 4:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addRangeMin(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getRangeMinList());
       break;
     case 5:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addRangeMax(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getRangeMaxList());
       break;
     case 6:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addSpeed(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getSpeedList());
       break;
     case 7:
       var value = new proto.Matrix4x4;
@@ -7956,6 +10357,10 @@ proto.ExternalAxis.deserializeBinaryFromReader = function(msg, reader) {
       var value = new proto.MetaData;
       reader.readMessage(value,proto.MetaData.deserializeBinaryFromReader);
       msg.setData(value);
+      break;
+    case 11:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setPresetExternalAxisClass(value);
       break;
     default:
       reader.skipField();
@@ -8058,6 +10463,13 @@ proto.ExternalAxis.serializeBinaryToWriter = function(message, writer) {
       10,
       f,
       proto.MetaData.serializeBinaryToWriter
+    );
+  }
+  f = /** @type {string} */ (jspb.Message.getField(message, 11));
+  if (f != null) {
+    writer.writeString(
+      11,
+      f
     );
   }
 };
@@ -8378,6 +10790,42 @@ proto.ExternalAxis.prototype.hasData = function() {
 };
 
 
+/**
+ * optional string preset_external_axis_class = 11;
+ * @return {string}
+ */
+proto.ExternalAxis.prototype.getPresetExternalAxisClass = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.ExternalAxis} returns this
+ */
+proto.ExternalAxis.prototype.setPresetExternalAxisClass = function(value) {
+  return jspb.Message.setField(this, 11, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.ExternalAxis} returns this
+ */
+proto.ExternalAxis.prototype.clearPresetExternalAxisClass = function() {
+  return jspb.Message.setField(this, 11, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.ExternalAxis.prototype.hasPresetExternalAxisClass = function() {
+  return jspb.Message.getField(this, 11) != null;
+};
+
+
 
 /**
  * Oneof group definitions for this message. Each group defines the field
@@ -8452,7 +10900,7 @@ endFlow: (f = msg.getEndFlow()) && proto.End.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Flow}
  */
 proto.Flow.deserializeBinary = function(bytes) {
@@ -8703,7 +11151,7 @@ beat: jspb.Message.getFieldWithDefault(msg, 1, 0)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Heartbeat}
  */
 proto.Heartbeat.deserializeBinary = function(bytes) {
@@ -8833,7 +11281,7 @@ holdMs: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Hold}
  */
 proto.Hold.deserializeBinary = function(bytes) {
@@ -8965,7 +11413,7 @@ ifFalse: (f = msg.getIfFalse()) && proto.Task.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.IfElse}
  */
 proto.IfElse.deserializeBinary = function(bytes) {
@@ -9224,7 +11672,7 @@ isComment: jspb.Message.getBooleanFieldWithDefault(msg, 2, false)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.InsertCode}
  */
 proto.InsertCode.deserializeBinary = function(bytes) {
@@ -9249,7 +11697,7 @@ proto.InsertCode.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.addCode(value);
       break;
     case 2:
@@ -9405,7 +11853,7 @@ w: jspb.Message.getFieldWithDefault(msg, 4, 0)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Int4}
  */
 proto.Int4.deserializeBinary = function(bytes) {
@@ -9632,7 +12080,7 @@ externalAxisValuesList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 4))
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.JointTarget}
  */
 proto.JointTarget.deserializeBinary = function(bytes) {
@@ -9657,28 +12105,16 @@ proto.JointTarget.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addAxisValues(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getAxisValuesList());
       break;
     case 2:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addSpeed(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getSpeedList());
       break;
     case 3:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addAcceleration(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getAccelerationList());
       break;
     case 4:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addExternalAxisValues(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getExternalAxisValuesList());
       break;
     default:
       reader.skipField();
@@ -9934,7 +12370,7 @@ target: (f = msg.getTarget()) && proto.CartesianTarget.toObject(includeInstance,
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.LINMotion}
  */
 proto.LINMotion.deserializeBinary = function(bytes) {
@@ -10150,7 +12586,7 @@ m44: jspb.Message.getFloatingPointFieldWithDefault(msg, 16, 0.0)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Matrix4x4}
  */
 proto.Matrix4x4.deserializeBinary = function(bytes) {
@@ -10728,7 +13164,7 @@ meshColor: (f = msg.getMeshColor()) && proto.Int4.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Mesh}
  */
 proto.Mesh.deserializeBinary = function(bytes) {
@@ -11033,7 +13469,7 @@ dataMap: (f = msg.getDataMap()) ? f.toObject(includeInstance, undefined) : []
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.MetaData}
  */
 proto.MetaData.deserializeBinary = function(bytes) {
@@ -11058,13 +13494,13 @@ proto.MetaData.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setId(value);
       break;
     case 2:
       var value = msg.getDataMap();
       reader.readMessage(value, function(message, reader) {
-        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readStringRequireUtf8, jspb.BinaryReader.prototype.readStringRequireUtf8, null, "", "");
          });
       break;
     default:
@@ -11105,7 +13541,12 @@ proto.MetaData.serializeBinaryToWriter = function(message, writer) {
   }
   f = message.getDataMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(2, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+jspb.internal.public_for_gencode.serializeMapToBinary(
+    message.getDataMap(true),
+    2,
+    writer,
+    jspb.BinaryWriter.prototype.writeString,
+    jspb.BinaryWriter.prototype.writeString);
   }
 };
 
@@ -11227,7 +13668,7 @@ linMotion: (f = msg.getLinMotion()) && proto.LINMotion.toObject(includeInstance,
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.MotionCommand}
  */
 proto.MotionCommand.deserializeBinary = function(bytes) {
@@ -11541,7 +13982,7 @@ data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.MotionGroup}
  */
 proto.MotionGroup.deserializeBinary = function(bytes) {
@@ -11575,11 +14016,11 @@ proto.MotionGroup.deserializeBinaryFromReader = function(msg, reader) {
       msg.addCommands(value);
       break;
     case 3:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setInterpolation(value);
       break;
     case 4:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setToolId(value);
       break;
     case 5:
@@ -11881,7 +14322,7 @@ timeMs: jspb.Message.getFieldWithDefault(msg, 2, 0)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Ping}
  */
 proto.Ping.deserializeBinary = function(bytes) {
@@ -11906,7 +14347,7 @@ proto.Ping.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setPayload(value);
       break;
     case 2:
@@ -12052,7 +14493,7 @@ name: jspb.Message.getFieldWithDefault(msg, 4, "")
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.PolyMesh}
  */
 proto.PolyMesh.deserializeBinary = function(bytes) {
@@ -12092,7 +14533,7 @@ proto.PolyMesh.deserializeBinaryFromReader = function(msg, reader) {
       msg.setTransform(value);
       break;
     case 4:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setName(value);
       break;
     default:
@@ -12335,7 +14776,7 @@ target: (f = msg.getTarget()) && proto.CartesianTarget.toObject(includeInstance,
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.PTPMotion}
  */
 proto.PTPMotion.deserializeBinary = function(bytes) {
@@ -12580,7 +15021,7 @@ data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Robot}
  */
 proto.Robot.deserializeBinary = function(bytes) {
@@ -12605,7 +15046,7 @@ proto.Robot.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setPresetRobotClass(value);
       break;
     case 2:
@@ -12614,17 +15055,17 @@ proto.Robot.deserializeBinaryFromReader = function(msg, reader) {
       msg.setCustomRobot(value);
       break;
     case 3:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setRobotDriverClass(value);
       break;
     case 4:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setFriendlyId(value);
       break;
     case 5:
       var value = msg.getToolDictionaryMap();
       reader.readMessage(value, function(message, reader) {
-        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readMessage, proto.Tool.deserializeBinaryFromReader, "", new proto.Tool());
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readStringRequireUtf8, jspb.BinaryReader.prototype.readMessage, proto.Tool.deserializeBinaryFromReader, "", new proto.Tool());
          });
       break;
     case 6:
@@ -12712,7 +15153,13 @@ proto.Robot.serializeBinaryToWriter = function(message, writer) {
   }
   f = message.getToolDictionaryMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(5, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeMessage, proto.Tool.serializeBinaryToWriter);
+jspb.internal.public_for_gencode.serializeMapToBinary(
+    message.getToolDictionaryMap(true),
+    5,
+    writer,
+    jspb.BinaryWriter.prototype.writeString,
+    jspb.BinaryWriter.prototype.writeMessage,
+    proto.Tool.serializeBinaryToWriter);
   }
   f = message.getInitialBase();
   if (f != null) {
@@ -13144,7 +15591,7 @@ status: jspb.Message.getFieldWithDefault(msg, 16, 0)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.RobotState}
  */
 proto.RobotState.deserializeBinary = function(bytes) {
@@ -13183,7 +15630,7 @@ proto.RobotState.deserializeBinaryFromReader = function(msg, reader) {
       msg.setToolpathIndex(value);
       break;
     case 4:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setToolId(value);
       break;
     case 5:
@@ -13202,43 +15649,37 @@ proto.RobotState.deserializeBinaryFromReader = function(msg, reader) {
       msg.setFlangeFrame(value);
       break;
     case 8:
-      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addAxisAlarm(values[i]);
-      }
+      reader.readPackableBoolInto(msg.getAxisAlarmList());
       break;
     case 9:
-      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addExternalAxisAlarm(values[i]);
-      }
+      reader.readPackableBoolInto(msg.getExternalAxisAlarmList());
       break;
     case 10:
       var value = msg.getVariablesMap();
       reader.readMessage(value, function(message, reader) {
-        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readMessage, proto.VariableArray.deserializeBinaryFromReader, "", new proto.VariableArray());
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readStringRequireUtf8, jspb.BinaryReader.prototype.readMessage, proto.VariableArray.deserializeBinaryFromReader, "", new proto.VariableArray());
          });
       break;
     case 11:
       var value = msg.getDataMap();
       reader.readMessage(value, function(message, reader) {
-        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readStringRequireUtf8, jspb.BinaryReader.prototype.readStringRequireUtf8, null, "", "");
          });
       break;
     case 12:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setConnectionFeedback(value);
       break;
     case 13:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setTaskId(value);
       break;
     case 14:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setCommandId(value);
       break;
     case 15:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setRobotId(value);
       break;
     case 16:
@@ -13344,11 +15785,22 @@ proto.RobotState.serializeBinaryToWriter = function(message, writer) {
   }
   f = message.getVariablesMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(10, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeMessage, proto.VariableArray.serializeBinaryToWriter);
+jspb.internal.public_for_gencode.serializeMapToBinary(
+    message.getVariablesMap(true),
+    10,
+    writer,
+    jspb.BinaryWriter.prototype.writeString,
+    jspb.BinaryWriter.prototype.writeMessage,
+    proto.VariableArray.serializeBinaryToWriter);
   }
   f = message.getDataMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(11, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+jspb.internal.public_for_gencode.serializeMapToBinary(
+    message.getDataMap(true),
+    11,
+    writer,
+    jspb.BinaryWriter.prototype.writeString,
+    jspb.BinaryWriter.prototype.writeString);
   }
   f = message.getConnectionFeedback();
   if (f.length > 0) {
@@ -13865,7 +16317,7 @@ settingsDictionaryMap: (f = msg.getSettingsDictionaryMap()) ? f.toObject(include
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Settings}
  */
 proto.Settings.deserializeBinary = function(bytes) {
@@ -13892,7 +16344,7 @@ proto.Settings.deserializeBinaryFromReader = function(msg, reader) {
     case 1:
       var value = msg.getSettingsDictionaryMap();
       reader.readMessage(value, function(message, reader) {
-        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readStringRequireUtf8, jspb.BinaryReader.prototype.readStringRequireUtf8, null, "", "");
          });
       break;
     default:
@@ -13926,7 +16378,12 @@ proto.Settings.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getSettingsDictionaryMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(1, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+jspb.internal.public_for_gencode.serializeMapToBinary(
+    message.getSettingsDictionaryMap(true),
+    1,
+    writer,
+    jspb.BinaryWriter.prototype.writeString,
+    jspb.BinaryWriter.prototype.writeString);
   }
 };
 
@@ -13999,7 +16456,7 @@ newState: (f = msg.getNewState()) && proto.Variable.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.SetVariable}
  */
 proto.SetVariable.deserializeBinary = function(bytes) {
@@ -14106,12 +16563,172 @@ proto.SetVariable.prototype.hasNewState = function() {
 
 
 
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.ProgramFile.prototype.toObject = function(opt_includeInstance) {
+  return proto.ProgramFile.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.ProgramFile} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.ProgramFile.toObject = function(includeInstance, msg) {
+  var f, obj = {
+name: jspb.Message.getFieldWithDefault(msg, 1, ""),
+content: jspb.Message.getFieldWithDefault(msg, 2, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.ProgramFile}
+ */
+proto.ProgramFile.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.ProgramFile;
+  return proto.ProgramFile.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.ProgramFile} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.ProgramFile}
+ */
+proto.ProgramFile.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setName(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setContent(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.ProgramFile.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.ProgramFile.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.ProgramFile} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.ProgramFile.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getName();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getContent();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string name = 1;
+ * @return {string}
+ */
+proto.ProgramFile.prototype.getName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.ProgramFile} returns this
+ */
+proto.ProgramFile.prototype.setName = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string content = 2;
+ * @return {string}
+ */
+proto.ProgramFile.prototype.getContent = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.ProgramFile} returns this
+ */
+proto.ProgramFile.prototype.setContent = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+
 /**
  * List of repeated fields within this message type.
  * @private {!Array<number>}
  * @const
  */
-proto.SimulationResult.repeatedFields_ = [1];
+proto.SimulationResult.repeatedFields_ = [1,6];
 
 
 
@@ -14149,7 +16766,9 @@ simulationResultsList: jspb.Message.toObjectList(msg.getSimulationResultsList(),
 isValid: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
 time: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
 code: jspb.Message.getFieldWithDefault(msg, 4, ""),
-data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
+filesList: jspb.Message.toObjectList(msg.getFilesList(),
+    proto.ProgramFile.toObject, includeInstance)
   };
 
   if (includeInstance) {
@@ -14162,7 +16781,7 @@ data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.SimulationResult}
  */
 proto.SimulationResult.deserializeBinary = function(bytes) {
@@ -14200,13 +16819,18 @@ proto.SimulationResult.deserializeBinaryFromReader = function(msg, reader) {
       msg.setTime(value);
       break;
     case 4:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setCode(value);
       break;
     case 5:
       var value = new proto.MetaData;
       reader.readMessage(value,proto.MetaData.deserializeBinaryFromReader);
       msg.setData(value);
+      break;
+    case 6:
+      var value = new proto.ProgramFile;
+      reader.readMessage(value,proto.ProgramFile.deserializeBinaryFromReader);
+      msg.addFiles(value);
       break;
     default:
       reader.skipField();
@@ -14272,6 +16896,14 @@ proto.SimulationResult.serializeBinaryToWriter = function(message, writer) {
       5,
       f,
       proto.MetaData.serializeBinaryToWriter
+    );
+  }
+  f = message.getFilesList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      6,
+      f,
+      proto.ProgramFile.serializeBinaryToWriter
     );
   }
 };
@@ -14406,6 +17038,44 @@ proto.SimulationResult.prototype.hasData = function() {
 };
 
 
+/**
+ * repeated ProgramFile files = 6;
+ * @return {!Array<!proto.ProgramFile>}
+ */
+proto.SimulationResult.prototype.getFilesList = function() {
+  return /** @type{!Array<!proto.ProgramFile>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.ProgramFile, 6));
+};
+
+
+/**
+ * @param {!Array<!proto.ProgramFile>} value
+ * @return {!proto.SimulationResult} returns this
+*/
+proto.SimulationResult.prototype.setFilesList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 6, value);
+};
+
+
+/**
+ * @param {!proto.ProgramFile=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.ProgramFile}
+ */
+proto.SimulationResult.prototype.addFiles = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 6, opt_value, proto.ProgramFile, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.SimulationResult} returns this
+ */
+proto.SimulationResult.prototype.clearFilesList = function() {
+  return this.setFilesList([]);
+};
+
+
 
 /**
  * List of repeated fields within this message type.
@@ -14469,7 +17139,7 @@ motionType: jspb.Message.getFieldWithDefault(msg, 12, "")
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.SimulationResultUnit}
  */
 proto.SimulationResultUnit.deserializeBinary = function(bytes) {
@@ -14494,10 +17164,7 @@ proto.SimulationResultUnit.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addAxisValues(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getAxisValuesList());
       break;
     case 2:
       var value = new proto.Matrix4x4;
@@ -14509,41 +17176,26 @@ proto.SimulationResultUnit.deserializeBinaryFromReader = function(msg, reader) {
       msg.setTime(value);
       break;
     case 4:
-      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addCollision(values[i]);
-      }
+      reader.readPackableBoolInto(msg.getCollisionList());
       break;
     case 5:
-      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addSingularity(values[i]);
-      }
+      reader.readPackableBoolInto(msg.getSingularityList());
       break;
     case 6:
-      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addOutofreach(values[i]);
-      }
+      reader.readPackableBoolInto(msg.getOutofreachList());
       break;
     case 7:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedFloat() : [reader.readFloat()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addExternalAxisValues(values[i]);
-      }
+      reader.readPackableFloatInto(msg.getExternalAxisValuesList());
       break;
     case 8:
-      var values = /** @type {!Array<boolean>} */ (reader.isDelimited() ? reader.readPackedBool() : [reader.readBool()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addExternalAxisOutofreach(values[i]);
-      }
+      reader.readPackableBoolInto(msg.getExternalAxisOutofreachList());
       break;
     case 9:
       var value = /** @type {number} */ (reader.readFloat());
       msg.setInterpolationFactor(value);
       break;
     case 10:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setId(value);
       break;
     case 11:
@@ -14551,7 +17203,7 @@ proto.SimulationResultUnit.deserializeBinaryFromReader = function(msg, reader) {
       msg.setAlarm(value);
       break;
     case 12:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setMotionType(value);
       break;
     default:
@@ -15076,7 +17728,7 @@ data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Task}
  */
 proto.Task.deserializeBinary = function(bytes) {
@@ -15110,7 +17762,7 @@ proto.Task.deserializeBinaryFromReader = function(msg, reader) {
       msg.setType(value);
       break;
     case 3:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setName(value);
       break;
     case 4:
@@ -15365,7 +18017,7 @@ actionTask: (f = msg.getActionTask()) && proto.Action.toObject(includeInstance, 
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.TaskPayload}
  */
 proto.TaskPayload.deserializeBinary = function(bytes) {
@@ -15620,7 +18272,7 @@ toolRobotVariable: jspb.Message.getFieldWithDefault(msg, 6, "")
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Tool}
  */
 proto.Tool.deserializeBinary = function(bytes) {
@@ -15654,7 +18306,7 @@ proto.Tool.deserializeBinaryFromReader = function(msg, reader) {
       msg.setTcp(value);
       break;
     case 3:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setToolId(value);
       break;
     case 5:
@@ -15663,7 +18315,7 @@ proto.Tool.deserializeBinaryFromReader = function(msg, reader) {
       msg.setToolGeometry(value);
       break;
     case 6:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setToolRobotVariable(value);
       break;
     default:
@@ -15916,7 +18568,7 @@ transformationList: jspb.Message.toObjectList(msg.getTransformationList(),
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.TransformationArray}
  */
 proto.TransformationArray.deserializeBinary = function(bytes) {
@@ -16100,7 +18752,7 @@ name: jspb.Message.getFieldWithDefault(msg, 5, "")
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Variable}
  */
 proto.Variable.deserializeBinary = function(bytes) {
@@ -16137,11 +18789,11 @@ proto.Variable.deserializeBinaryFromReader = function(msg, reader) {
       msg.setInteger(value);
       break;
     case 4:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setText(value);
       break;
     case 5:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
       msg.setName(value);
       break;
     default:
@@ -16426,7 +19078,7 @@ variablesList: jspb.Message.toObjectList(msg.getVariablesList(),
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.VariableArray}
  */
 proto.VariableArray.deserializeBinary = function(bytes) {
@@ -16580,7 +19232,7 @@ z: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.Vector3}
  */
 proto.Vector3.deserializeBinary = function(bytes) {
@@ -16768,7 +19420,7 @@ awaitState: (f = msg.getAwaitState()) && proto.Variable.toObject(includeInstance
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.WaitForVariable}
  */
 proto.WaitForVariable.deserializeBinary = function(bytes) {
@@ -16920,7 +19572,7 @@ body: (f = msg.getBody()) && proto.Task.toObject(includeInstance, f)
 
 /**
  * Deserializes binary data (in protobuf wire format).
- * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.While}
  */
 proto.While.deserializeBinary = function(bytes) {
@@ -17109,6 +19761,19 @@ proto.EulerFormat = {
   ZYX: 0,
   AXISANGLE: 1,
   RPY: 2
+};
+
+/**
+ * @enum {number}
+ */
+proto.SettingKind = {
+  SETTING_TEXT: 0,
+  SETTING_NUMBER: 1,
+  SETTING_OPTION: 2,
+  SETTING_TOGGLE: 3,
+  SETTING_FILE: 4,
+  SETTING_TEXT_AREA: 5,
+  SETTING_IMAGE: 6
 };
 
 /**
