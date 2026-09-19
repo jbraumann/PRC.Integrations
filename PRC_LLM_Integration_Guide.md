@@ -4,7 +4,7 @@
 
 > **Purpose:** This document provides a thorough, structured reference for developers and LLMs building new integrations with PRC. It covers every protobuf message, the complete GRPC service API, data flows, coordinate conventions, unit systems, visualization patterns, and concrete code examples across C#, Python, and JavaScript.
 
-> **Scope:** Updated for PRC Server **1.727** (2026-09-14). New since the previous revision: the `DescribeLibrary` setup catalog ([Section 6.8](#68-library-catalog-describelibrary)), `SimulationResult.files`, external-axis presets by reference, custom-robot solvers by name, the KUKA Sunrise driver for the seven-axis LBR iiwa, iiQKA.OS 2 program upload, and gRPC server reflection.
+> **Scope:** Updated for PRC Server **1.732** (2026-09-19); 1.732 adds the `Client.DescribeLibrary` wrapper and the UR3, UR3e, ABB IRB 120 and IRB 140 presets. New since the 2026-08 revision: the `DescribeLibrary` setup catalog ([Section 6.8](#68-library-catalog-describelibrary)), `SimulationResult.files`, external-axis presets by reference, custom-robot solvers by name, the KUKA Sunrise driver for the seven-axis LBR iiwa, iiQKA.OS 2 program upload, and gRPC server reflection.
 
 ---
 
@@ -310,6 +310,7 @@ The `PRC.GRPC.Client.Client` class exposes the following methods and properties:
 | `QueryVariables` | `async Task<Dictionary<string, List<Variable>>> QueryVariables()` | Read the variables of all connected robots without modifying anything (sends an `UpdateVariableRequest` without a variable). |
 | `GetRobotData` | `async Task<PRC.GRPC.Robot?> GetRobotData()` | Retrieve the resolved robot definition (per-joint geometry, kinematics, tools, base, collision geometry, external axes) for the robot already set up on this client. Returns `null` if `SetupRobot` has not been called successfully, or if the server returns an error. |
 | `GetMachineData` | `async Task<GetRobotDataReply?> GetMachineData(string id, bool excludeGeometry = true)` | Retrieve the full `GetRobotDataReply` for **any connected machine** by its server-assigned ID — not just the robot set up on this client: the resolved definition plus its **live state** (current driver settings, variables, axis position, tool/flange frames, and visualization transformations). With `excludeGeometry` (the default) all mesh data is omitted, making the call cheap enough for high-frequency polling (30–60 Hz) — e.g. by a Supervisor client monitoring the other connected machines. Returns `null` on error. |
+| `DescribeLibrary` | `async Task<DescribeLibraryReply?> DescribeLibrary(string driverClass = "")` | The setup catalog ([Section 6.8](#68-library-catalog-describelibrary)): every preset robot, every driver with its settings schema, every external-axis preset. Needs only `Connect` — no `SetupRobot`, no license. `driverClass` restricts the driver list to one class. Returns `null` on error. |
 | `Ping` | `async Task<Ping> Ping(string payload = "")` | Connection health check. |
 | `Disconnect` | `async Task<TaskFeedback> Disconnect()` | Close the connection gracefully. |
 | `Reconnect` | `async Task<TaskFeedback> Reconnect()` | Reconnect, re-setup robot, and re-send last task. |
@@ -323,7 +324,7 @@ The `PRC.GRPC.Client.Client` class exposes the following methods and properties:
 | `SimulationProgress` | `int` | Simulation progress in percent (0–100), taken from the latest server heartbeat. Useful for progress bars during long `AddTask` calls. |
 | `LastFeedbackUtc` | `DateTime` | UTC time of the last message received on the feedback stream. The server heartbeats every second, so a stale value means the server is gone or the stream broke — use it as a liveness watchdog. |
 | `ShortCallTimeout` | `TimeSpan` | Client-side deadline for quick calls (`UpdateRobot`, `UpdateVariable`, `Ping`, and geometry-free `GetMachineData`). Default **10 s**. |
-| `SetupTimeout` | `TimeSpan` | Client-side deadline for `SetupRobot`, `GetRobotData`, and full-geometry `GetMachineData`. Default **60 s**. |
+| `SetupTimeout` | `TimeSpan` | Client-side deadline for `SetupRobot`, `GetRobotData`, `DescribeLibrary`, and full-geometry `GetMachineData`. Default **60 s**. |
 | `TaskTimeout` | `TimeSpan` | Client-side deadline for `AddTask`. Default **10 min** — generous because it covers the full simulation plus code generation of a potentially large toolpath. |
 
 **Deadlines & error handling:** All RPC calls carry a client-side deadline (the three timeout properties above, settable per client instance), so a hung or unreachable server never blocks a caller indefinitely. A timed-out or failed call returns an error `TaskFeedback`/`SimulationFeedback` with a descriptive message rather than throwing. Note that `AddTask` treats only the server status `"Processed."` as success — an empty or unrecognized status (old servers, `"Environment ID not found"`, …) surfaces as an error, never as success with empty data.
@@ -491,7 +492,19 @@ foreach (var file in simFeedback.Result.Files)
     File.WriteAllText(Path.Combine(folder, file.Name), file.Content);
 ```
 
-The .NET client does not wrap `DescribeLibrary` ([Section 6.8](#68-library-catalog-describelibrary)) yet — call it on the generated `ParametricRobotControlService.ParametricRobotControlServiceClient` when you need the catalog. With `PRC.Library` referenced you can also enumerate the `PRC.Library.Robots`, `PRC.Library.Drivers` and `PRC.Library.ExternalAxes` namespaces directly.
+### Setup Catalog
+
+`Client.DescribeLibrary(driverClass = "")` returns the setup catalog ([Section 6.8](#68-library-catalog-describelibrary)) as the raw `DescribeLibraryReply` — every preset robot, every driver with its settings schema, every external-axis preset — or `null` when the server reports an error (logged). It needs only `Connect`, not `SetupRobot`, and no license; pass a driver class to restrict the driver list and its schemas to that driver.
+
+```csharp
+var catalog = await client.DescribeLibrary();          // or DescribeLibrary("KUKA.KSS_KRL_Driver")
+if (catalog == null) return;
+foreach (var r in catalog.Robots)       Console.WriteLine($"{r.PresetRobotClass}: {r.Name}, {r.AxisCount} axes, {r.Solver}");
+foreach (var d in catalog.Drivers)      Console.WriteLine($"{d.RobotDriverClass}: {d.Name}, {d.Settings.Count} settings{(d.RequiresLicense ? ", licensed" : "")}");
+foreach (var a in catalog.ExternalAxes) Console.WriteLine($"{a.PresetExternalAxisClass}: {a.Name} ({a.ExternalAxisType})");
+```
+
+With `PRC.Library` referenced you can also enumerate the `PRC.Library.Robots`, `PRC.Library.Drivers` and `PRC.Library.ExternalAxes` namespaces directly.
 
 ---
 
@@ -1647,9 +1660,9 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 **KUKA** (61 models):
 `KUKA.KUKA_KR610R11002`, `KUKA.KUKA_KR610R9002`, `KUKA.KUKA_KR10R1420`, `KUKA.KUKA_KR120R1800`, `KUKA.KUKA_KR210R31002`, `KUKA.KUKA_KR3060`, `KUKA.KUKA_KR6R18402`, `KUKA.KUKA_KR8R1620`, `KUKA.KUKA_KR50R2500`, `KUKA.KUKA_KR1000`, `KUKA.KUKA_KR120R3900K`, `KUKA.KUKA_KR210KR240R2700`, `KUKA.KUKA_KR3R540`, `KUKA.KUKA_KR4R600`, `KUKA.KUKA_KR5arcHW`, `KUKA.KUKA_KR600R2830`, `KUKA.KUKA_KR480R3330`, `KUKA.KUKA_KR3605002`, `KUKA.KUKA_KR100120P2`, and many more — including the Agilus-3 ultra `KUKA.KUKA_KR10R11003` / `KUKA.KUKA_KR13R9003` (new in 1.727), the LBR iisy `KUKA.KUKA_LBR3R760`, the LBR iico `KUKA.KUKA_LBR12R1260` (offset wrist, `KUKA_6DOF_Offset` solver), and the seven-axis **LBR iiwa** `KUKA.KUKA_LBR7R800` / `KUKA.KUKA_LBR14R820` (`KUKA_7DOF` solver, Sunrise driver only).
 
-**Universal Robots:** `UR.UR_5` (UR5), `UR.UR_57e` (UR5e/7e), `UR.UR_10e`, `UR.UR_20`
+**Universal Robots:** `UR.UR_3` (UR3), `UR.UR_3e` (UR3e), `UR.UR_5` (UR5), `UR.UR_57e` (UR5e/7e), `UR.UR_10e`, `UR.UR_20`
 
-**ABB:** `ABB.ABB_IRB6620`, `ABB.ABB_IRB6700_150_320`
+**ABB:** `ABB.ABB_IRB120`, `ABB.ABB_IRB140`, `ABB.ABB_IRB6620`, `ABB.ABB_IRB6700_150_320`
 
 **FANUC:** `FANUC.FANUC_R2000iC_165F`, `FANUC.FANUC_LRMate200iD`, `FANUC.FANUC_M2000iA_2300`
 

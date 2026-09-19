@@ -46,6 +46,8 @@ DRIVER_BRAND = {d: brand for d, _, brand in _DRIVERS}
 
 _ROBOTS = [
     # ABB
+    ("ABB.ABB_IRB120",           "ABB IRB 120",                 "ABB"),
+    ("ABB.ABB_IRB140",           "ABB IRB 140",                 "ABB"),
     ("ABB.ABB_IRB6620",          "ABB IRB 6620",                "ABB"),
     ("ABB.ABB_IRB6700_150_320",  "ABB IRB 6700-150/3.20",       "ABB"),
 
@@ -115,6 +117,8 @@ _ROBOTS = [
 
     # Universal Robots
     ("UR.UR_10e",                 "Universal Robots UR10e",      "UR"),
+    ("UR.UR_3",                   "Universal Robots UR3",        "UR"),
+    ("UR.UR_3e",                  "Universal Robots UR3e",       "UR"),
     ("UR.UR_20",                  "Universal Robots UR20",       "UR"),
 ]
 
