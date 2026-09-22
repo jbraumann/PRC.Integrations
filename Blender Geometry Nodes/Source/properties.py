@@ -46,6 +46,9 @@ DRIVER_BRAND = {d: brand for d, _, brand in _DRIVERS}
 
 _ROBOTS = [
     # ABB
+    ("ABB.ABB_CRB15000_5_095",     "ABB GoFa CRB 15000-5/0.95",  "ABB"),
+    ("ABB.ABB_CRB15000_10_152",    "ABB GoFa CRB 15000-10/1.52", "ABB"),
+    ("ABB.ABB_CRB15000_12_127",    "ABB GoFa CRB 15000-12/1.27", "ABB"),
     ("ABB.ABB_IRB120",           "ABB IRB 120",                 "ABB"),
     ("ABB.ABB_IRB140",           "ABB IRB 140",                 "ABB"),
     ("ABB.ABB_IRB6620",          "ABB IRB 6620",                "ABB"),
@@ -100,6 +103,7 @@ _ROBOTS = [
     ("KUKA.KUKA_KR6R700",         "KUKA KR 6 R700",              "KUKA"),
     ("KUKA.KUKA_KR6R7002",        "KUKA KR 6 R700-2",            "KUKA"),
     ("KUKA.KUKA_KR70R21002",      "KUKA KR 70 R2100-2",          "KUKA"),
+    ("KUKA.KUKA_KR800R28002",        "KUKA KR 800 R2800-2",              "KUKA"),
     ("KUKA.KUKA_KR816R20102",     "KUKA KR 8/16 R2010-2",        "KUKA"),
     ("KUKA.KUKA_KR8R14402ArcHW",  "KUKA KR 8 R1440-2 Arc HW",    "KUKA"),
     ("KUKA.KUKA_KR8R1620",        "KUKA KR 8 R1620",             "KUKA"),
