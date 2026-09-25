@@ -9,7 +9,6 @@ The communication is based on *.proto files, which can be translated into variou
 
 Currently, you can find code samples to integrate Parametric Robot Control into the following platforms/programming languages
 - Unity (Game engine, using C#)
-- Unity with the CoreCLR scripting backend (`UnityCoreCLR`: the Clear the Table showcase, a complete Unity 6.7 project)
 - Blender (3D modeling, using Python) and Blender Geometry Nodes (a node-based add-on with bundled dependencies)
 - Autodesk Fusion 360 (CAD/CAM, using Python)
 - Javascript (does not require node.js)
