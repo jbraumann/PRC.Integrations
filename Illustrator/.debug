@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionList>
+    <Extension Id="com.jbraumann.prc.panel">
+        <HostList>
+            <Host Name="PHXS" Port="8003"/>
+            <Host Name="ILST" Port="8004"/>
+        </HostList>
+    </Extension>
+</ExtensionList>

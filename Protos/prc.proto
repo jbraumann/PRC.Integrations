@@ -1,0 +1,1105 @@
+// prc.proto — Parametric Robot Control (PRC) gRPC API
+// Merged from: primitives.proto, robotdata.proto, motion.proto,
+//              actions.proto, flow.proto, feedback.proto,
+//              requestreply.proto, services.proto
+// Comments automatically generated via LLM. Double-check for correctness.
+//
+// Units: millimetres for all positions, degrees for all joint/angle values.
+// Coordinate system: right-handed, Z+ = up, relative to WorldXY.
+// Server default address: https://127.0.0.1:5001 (TLS required).
+
+
+syntax = "proto3";
+
+option csharp_namespace = "PRC.GRPC";
+
+
+// ======================================================================
+//  SERVICE
+// ======================================================================
+
+// ParametricRobotControlService provides an interface for simulating and
+// controlling supported industrial robots through gRPC.
+//
+// Typical integration lifecycle:
+//   1. SetupRobot   — define the robot model, driver, tools, and base.
+//   2. AddRobotTask — send motion commands; receive simulation results and code.
+//   3. SubscribeRobotFeedback — open a persistent feedback stream.
+//   4. GetSimulatedRobotState — query robot state at any toolpath position (0.0–1.0).
+service ParametricRobotControlService {
+    // Step 1: Initialise the simulation/control environment with a robot model,
+    // driver, tools, base frame, and optional collision geometry.
+    // Returns a settings dictionary to be passed back with subsequent AddRobotTask calls.
+    // Calling SetupRobot again with the same client_id replaces the previous setup.
+    rpc SetupRobot (SetupRobotRequest) returns (SetupRobotReply);
+
+    // Step 2: Submit a task (motion commands, actions, flow control) for
+    // simulation and/or execution. Returns a SimulationResult containing
+    // per-step axis data, reachability flags, and the generated robot program code.
+    rpc AddRobotTask (AddRobotTaskRequest) returns (AddRobotTaskReply);
+
+    // Step 3: Open a persistent server-streaming connection to receive
+    // continuous feedback: heartbeats, robot state updates, settings changes, and pings.
+    rpc SubscribeRobotFeedback (SubscribeRobotFeedbackRequest) returns (stream RobotFeedback);
+
+    // Step 4: Query the simulated robot state at a normalised position (0.0–1.0)
+    // along the toolpath. The result is returned directly or written to the
+    // feedback stream when stream_update is true.
+    rpc GetSimulatedRobotState (GetSimulatedRobotStateRequest) returns (RobotState);
+
+    // Optional: Set a variable on the robot. Always returns the current variables
+    // of all connected robots.
+    rpc UpdateVariable (UpdateVariableRequest) returns (UpdateVariableReply);
+
+    // Optional: Retrieve the resolved robot definition (geometry, kinematics,
+    // tools, base, collision geometry, external axes) for a robot that has
+    // already been set up via SetupRobot. Fails with a non-empty status and
+    // an unset robot_data field when no matching setup exists.
+    rpc GetRobotData (GetRobotDataRequest) returns (GetRobotDataReply);
+
+    // Optional: Ping the controller for connection health checks.
+    rpc SendPing (Ping) returns (Ping);
+
+    // Optional: Describe what this PRC installation can set up — every preset robot of
+    // PRC.Library.Robots, every driver of PRC.Library.Drivers with its settings schema
+    // (labels, tooltips, types, defaults, options — what the Settings page renders), and
+    // every preset external axis — so a client can offer a robot setup wizard without a
+    // copy of the library. The catalog is built once per server process; later calls are
+    // cheap. Nothing is set up by this call.
+    rpc DescribeLibrary (DescribeLibraryRequest) returns (DescribeLibraryReply);
+}
+
+
+// ======================================================================
+//  REQUEST / REPLY
+// ======================================================================
+
+// AddRobotTaskReply returns the simulation result of the submitted task.
+message AddRobotTaskReply {
+    // Task processing feedback.
+    string status = 1;
+    // Simulation result containing axis data, reachability flags, timing,
+    // and the generated robot program code.
+    SimulationResult simulation_result_data = 2;
+}
+
+// AddRobotTaskRequest submits a new task to the robot. Depending on the driver,
+// the task may replace the previous one or be queued.
+message AddRobotTaskRequest {
+    // The server-assigned robot ID from SetupRobotReply.id.
+    string id = 1;
+    // The task containing motion commands, actions, and/or flow control.
+    Task robot_task = 2;
+    // Driver settings (use the dictionary from SetupRobotReply, optionally modified).
+    // Can be updated between calls without requiring a new SetupRobot.
+    Settings robot_settings = 3;
+}
+
+// DescribeLibraryRequest asks for the setup catalog (see DescribeLibrary).
+message DescribeLibraryRequest {
+    // Restrict the driver settings schemas to one driver class
+    // (e.g., "KUKA.KSS_KRL_Driver"); empty returns every driver with its schema.
+    string driver_class = 1;
+}
+
+// DescribeLibraryReply is the setup catalog: presets, drivers and external axes.
+message DescribeLibraryReply {
+    // "OK" on success, or a human-readable error description.
+    string status = 1;
+    // Version of the PRC.Library assembly the catalog was read from.
+    string library_version = 2;
+    // License state of PRC (serialized LicenseData, as in SetupRobotReply) — a
+    // Community license refuses external axes and licensed drivers at SetupRobot.
+    string license_state = 3;
+    // Every preset robot, sorted by vendor and class.
+    repeated RobotPreset robots = 4;
+    // Every driver with its settings schema (filtered by driver_class when set).
+    repeated DriverPreset drivers = 5;
+    // Every preset external axis (without geometry — the server adds it at SetupRobot).
+    repeated ExternalAxisPreset external_axes = 6;
+}
+
+// GetRobotDataRequest asks the server for the resolved robot definition of an
+// already set up robot. Any connected robot's ID may be queried, e.g. by a
+// Supervisor client monitoring the other machines.
+message GetRobotDataRequest {
+    // The server-assigned robot ID (from SetupRobotReply.id).
+    string id = 1;
+    // When true, the reply omits the robot's joint geometry, collision
+    // geometry, cell geometry and all tool geometry, making the call cheap
+    // enough for high-frequency polling (30-60 Hz). Defaults to false, which
+    // preserves the original full-geometry behavior.
+    bool exclude_geometry = 2;
+}
+
+// GetRobotDataReply returns the resolved robot definition, or an error status
+// when no matching setup exists.
+message GetRobotDataReply {
+    // "OK" on success, or a human-readable error description (e.g.,
+    // "Environment ID not found"). When set to an error, robot_data is unset.
+    string status = 1;
+    // Resolved robot data. Always populates the custom_robot side of the
+    // oneof (even when the robot was set up via a preset) so that joint
+    // geometry and kinematic parameters are always present. The original
+    // preset class, if any, is echoed in custom_robot.preset_robot_class.
+    Robot robot_data = 2;
+    // Current driver settings of the robot, as also returned by SetupRobot.
+    Settings robot_settings = 3;
+    // Current variables of the robot.
+    VariableArray variables = 4;
+    // Current axis position (including external axes), from the robot's last
+    // simulated or streamed state.
+    JointTarget axis_position = 5;
+    // Current Cartesian tool position (TCP frame relative to WorldXY).
+    Matrix4x4 tool_frame = 6;
+    // Current Cartesian flange position, before the tool is applied.
+    Matrix4x4 flange_frame = 7;
+    // Current visualization transformations per kinematic element, in the
+    // same format as RobotState.robot_transformations.
+    repeated TransformationArray robot_transformations = 8;
+}
+
+// GetSimulatedRobotStateRequest queries the robot state at a specific position
+// along the simulated toolpath.
+message GetSimulatedRobotStateRequest {
+    // The server-assigned robot ID.
+    string id = 1;
+    // Normalised toolpath position: 0.0 = start, 1.0 = end.
+    float normalized_state = 2;
+    // If true, the result is written to the SubscribeRobotFeedback stream
+    // instead of being returned directly by this call.
+    bool stream_update = 3;
+    // If true, the reply omits the variables map. Intended for clients that
+    // only visualize the robot state (e.g. slider scrubbing) and do not
+    // consume variables; the map otherwise carries every connected robot's
+    // variables on every query. Defaults to false, preserving the current
+    // behavior for existing clients.
+    bool omit_variables = 4;
+}
+
+// RobotFeedback is the streamed message returned by SubscribeRobotFeedback.
+// Each message carries exactly one payload type: Heartbeat, RobotState,
+// Settings, or Ping.
+message RobotFeedback {
+    // Connection feedback string.
+    string status = 1;
+    // Exactly one of the following is populated per message.
+    oneof data_package {
+        // Periodic alive signal from the server.
+        Heartbeat heartbeat_data = 2;
+        // Current robot state (joint positions, transforms, alarms, variables).
+        RobotState robot_state_data = 3;
+        // Updated driver settings (e.g., pushed by the server during real-time control).
+        Settings settings_data = 4;
+        // Ping response (echoed from SendPing).
+        Ping ping_data = 5;
+    }
+}
+
+// SetupRobotReply confirms that the robot environment has been initialised.
+message SetupRobotReply {
+    // Setup feedback string.
+    string status = 1;
+    // Server-assigned unique robot ID. Use this in all subsequent calls.
+    string id = 2;
+    // License state of PRC.
+    string license_state = 3;
+    // Initial driver settings dictionary. Pass this (optionally modified)
+    // back in AddRobotTaskRequest.robot_settings.
+    Settings robot_settings = 4;
+}
+
+// SetupRobotRequest initialises a new simulation/control environment.
+// Calling it again with the same client_id discards and replaces the previous setup.
+// Use different client_id values to run multiple robots simultaneously.
+message SetupRobotRequest {
+    // Client-chosen unique identifier for this robot. Returned as SetupRobotReply.id.
+    string client_id = 1;
+    // Optional version string of the client library.
+    string software_version = 2;
+    // Robot model, driver, tools, base, collision geometry, and external axes.
+    Robot robot_setup = 3;
+}
+
+// SubscribeRobotFeedbackRequest opens the server-streaming feedback channel
+// for the specified robot.
+message SubscribeRobotFeedbackRequest {
+    // The server-assigned robot ID.
+    string id = 1;
+}
+
+// UpdateVariableReply returns the current variables of all connected robots.
+message UpdateVariableReply {
+    // IDs of all connected robots, in the same order as the variables arrays.
+    repeated string id = 1;
+    // Variable lists for each connected robot, in the same order as the id array.
+    repeated VariableArray variables = 2;
+}
+
+// UpdateVariableRequest sets a variable on the robot.
+message UpdateVariableRequest {
+    // The server-assigned robot ID.
+    string id = 1;
+    // The variable to set. May be omitted to query variables without modifying them.
+    Variable var = 2;
+}
+
+
+// ======================================================================
+//  MESSAGES & ENUMS  (alphabetical — category shown in each description)
+// ======================================================================
+
+// [Actions] Describes a single non-motion command. Exactly one field of the
+// oneof must be set.
+message Action {
+    oneof action_node {
+        // Sets a named variable to a new value.
+        SetVariable set_variable_action = 1;
+        // Pauses execution until a variable reaches a target value.
+        WaitForVariable wait_for_variable_action = 2;
+        // Pauses execution for a fixed number of milliseconds.
+        Hold hold_action = 3;
+        // Pings the PRC server, e.g. to verify communication.
+        Ping ping_action = 4;
+        // Inserts arbitrary code verbatim into the generated robot program.
+        // Not parsed or simulated.
+        InsertCode insert_code_action = 5;
+    }
+}
+
+// [Motion] AxisMotion moves the robot to a position defined by joint values.
+// Use within PTP motion groups.
+message AxisMotion {
+    // Optional additional data.
+    MetaData data = 1;
+    // The target position in joint space.
+    JointTarget target = 2;
+}
+
+// [Primitives] AxisName identifies individual robot axes by name when they are not
+// in sequential order.
+enum AxisName {
+    A1 = 0;
+    A2 = 1;
+    A3 = 2;
+    A4 = 3;
+    A5 = 4;
+    A6 = 5;
+    A7 = 6;
+    E1 = 7;
+    E2 = 8;
+    E3 = 9;
+    E4 = 10;
+}
+
+// [Robot Data] Base defines the robot's local base coordinate system (mounting frame).
+message Base {
+    // Whether the base is fixed or attached to an external axis/positioner.
+    FrameType base_type = 1;
+    // The base frame (local coordinate system of the robot's mounting point).
+    CartesianPosition base_frame = 2;
+    // Identifier for this base.
+    string base_id = 3;
+}
+
+// [Primitives] CartesianPosition defines a Cartesian frame in 3D space using one of three
+// representations: a full 4x4 matrix, Euler angles, or a CoordinateSystem.
+// All translational values are in millimetres.
+message CartesianPosition {
+    // The frame representation — choose exactly one.
+    oneof frame {
+        // Full 4x4 transformation matrix.
+        Matrix4x4 matrix = 1;
+        // Position (mm) and orientation (degrees) as Euler angles with a specified format.
+        Euler euler = 2;
+        // Frame defined by an origin point, an X axis, and a Y axis vector.
+        CoordinateSystem cs = 3;
+    }
+    // Whether this frame is expressed in world space (ABSOLUTE), as an offset
+    // from the current position (RELATIVE), or relative to a parent frame (PARENT).
+    CartesianReference reference = 4;
+    // Optional parent transformation matrix (used when reference = PARENT).
+    Matrix4x4 parent = 5;
+    // Optional identifier for this position.
+    string id = 6;
+}
+
+// [Primitives] CartesianReference specifies how a CartesianPosition frame is interpreted
+// relative to the scene.
+enum CartesianReference {
+    // Expressed in the world (global) coordinate system.
+    ABSOLUTE = 0;
+    // Expressed as an offset from the current position.
+    RELATIVE = 1;
+    // Expressed relative to the provided parent Matrix4x4 frame.
+    PARENT = 2;
+}
+
+// [Primitives] CartesianTarget wraps a CartesianPosition with motion parameters.
+// Speed interpretation is driver-specific (e.g., m/s for KUKA LIN, % of
+// max speed for KUKA PTP). Acceleration is currently unused.
+message CartesianTarget {
+    // The target Cartesian frame.
+    CartesianPosition position = 1;
+    // Robot posture/configuration string (e.g., "110" for KUKA turn/status bits).
+    string posture = 2;
+    // Speed — single value for all axes, or one value per axis.
+    // Interpretation is driver-specific; do not assume a common unit.
+    repeated float speed = 3;
+    // Acceleration — single value or one per axis.
+    // Currently unused and reserved for future use.
+    repeated float acceleration = 4;
+    // External axis positions in mm (linear axes) or degrees (rotary axes).
+    repeated float external_axis_values = 5;
+    // Redundant axis value, e.g. the 7th axis angle of a 7-DOF robot.
+    float redundancy = 6;
+}
+
+// [Motion] CircularMotion moves the robot along a circular arc defined by three
+// Cartesian targets (start, via, end). Use within CP motion groups.
+message CircularMotion {
+    // Optional additional data.
+    MetaData data = 1;
+    // Three Cartesian targets defining the circular arc.
+    repeated CartesianTarget targets = 2;
+}
+
+// [Primitives] CoordinateSystem defines a frame through an origin point and two axis vectors.
+// The Z axis is derived implicitly as Z = cross(x_axis, y_axis), forming a
+// right-handed coordinate system. All positional values are in millimetres.
+message CoordinateSystem {
+    // Origin of the coordinate system in mm.
+    Vector3 origin = 1;
+    // Direction of the X axis (unit vector).
+    Vector3 x_axis = 2;
+    // Direction of the Y axis (unit vector). Z axis = cross(x_axis, y_axis).
+    Vector3 y_axis = 3;
+}
+
+// [Robot Data] CustomRobot defines a fully custom robot kinematic model. Each axis is
+// described by its centre, direction, speed, and joint range. Can optionally
+// extend an existing preset robot from the PRC library.
+message CustomRobot {
+    // Centre point of each joint axis (in mm).
+    repeated Vector3 axis_center = 1;
+    // Rotation or translation direction of each axis.
+    repeated Vector3 axis_direction = 2;
+    // Maximum speed of each axis (degrees/s for rotary, mm/s for linear).
+    repeated float axis_speed = 3;
+    // Minimum joint range for each axis (degrees or mm).
+    repeated float axis_range_min = 4;
+    // Maximum joint range for each axis (degrees or mm).
+    repeated float axis_range_max = 5;
+    // Full name of the robot.
+    optional string name = 6;
+    // Short name of the robot.
+    optional string short_name = 7;
+    // Geometry of the robot. Each PolyMesh represents one joint link.
+    repeated PolyMesh geometry = 8;
+    // Root coordinate system (mounting base frame) of the robot.
+    optional Matrix4x4 root_cs = 9;
+    // Flange coordinate system (end-effector mounting face) of the robot.
+    optional Matrix4x4 flange_cs = 10;
+    // Optional base preset from PRC.Library.Robots to extend
+    // (e.g., "KUKA.KUKA_KR610R11002"). Fields set here override the preset.
+    optional string preset_robot_class = 11;
+    // Kinematics solver class from PRC.Library.Solvers that drives this robot
+    // (e.g., "KUKA.KUKA_6DOF", "KUKA.KUKA_6DOF_Offset", "ABB.ABB_6DOF",
+    // "FANUC.FANUC_6DOF", "UR.UR_6DOF", "NEURA.NEURA_6DOF", "IGUS.IGUS_6DOF").
+    // Required for a custom robot with axes that names no preset_robot_class;
+    // when both are given, the solver named here replaces the preset's solver.
+    optional string kinematics_solver_class = 12;
+}
+
+// [Flow Control] End terminates the robot program.
+message End {
+}
+
+// [Primitives] Euler describes a Cartesian position and orientation using Euler-like angles.
+// Positions (x, y, z) are in millimetres; orientations (a, b, c) are in degrees.
+// The format field selects the rotation convention.
+message Euler {
+    // X position in mm.
+    float x = 1;
+    // Y position in mm.
+    float y = 2;
+    // Z position in mm.
+    float z = 3;
+    // First rotation angle in degrees.
+    float a = 4;
+    // Second rotation angle in degrees.
+    float b = 5;
+    // Third rotation angle in degrees.
+    float c = 6;
+    // Rotation convention: ZYX (KUKA), AXISANGLE (Universal Robots), or RPY (NEURA).
+    EulerFormat format = 7;
+}
+
+// [Primitives] EulerFormat selects the rotation convention used in Euler angle representations.
+enum EulerFormat {
+    // ZYX convention (KUKA): rotations applied Z, then Y, then X.
+    ZYX = 0;
+    // Axis-angle convention (Universal Robots): rotation vector = axis × angle.
+    AXISANGLE = 1;
+    // Roll-Pitch-Yaw convention (NEURA).
+    RPY = 2;
+}
+
+// [Library] DriverPreset is one robot driver of PRC.Library.Drivers as the setup catalog
+// lists it: the class string SetupRobot takes, and the settings schema behind the
+// Settings dictionary — the same items PRC's own Settings page renders.
+message DriverPreset {
+    // Driver class for Robot.robot_driver_class (e.g., "KUKA.KSS_KRL_Driver").
+    string robot_driver_class = 1;
+    // Vendor folder of the class ("KUKA", "ABB", "UR", "NEURA", "FANUC", "IGUS", "Supervisor").
+    string vendor = 2;
+    // The driver's display name (IRobotDriver.Name, e.g., "KSS_KRL").
+    string name = 3;
+    // True when SetupRobot refuses this driver without a full license.
+    bool requires_license = 4;
+    // True when the driver executes tasks on a connected controller (streams motion or
+    // starts programs online); false for drivers that only generate a program file.
+    bool online = 5;
+    // Name of the driver variable (UpdateVariable / GetRobotData) that carries the
+    // controller's execution state while a task runs — e.g. "ABB RWS State", "mxA State",
+    // "UR State", "NEURA State". Empty when the driver cannot report execution.
+    string run_state_variable = 6;
+    // Values (or prefixes) of run_state_variable that mean "a program is running", e.g.
+    // ["Running"] for ABB RWS, ["Streaming", "Following target"] for the realtime drivers.
+    // Any other value means the controller is idle.
+    repeated string busy_values = 7;
+    // The settings schema, in the order the Settings page shows it.
+    repeated SettingItem settings = 8;
+}
+
+// [Library] SettingItem is one driver setting: its dictionary key, how the Settings page
+// renders it, and its default. Values travel as strings in Settings.settings_dictionary —
+// numbers in invariant culture, toggles as "True"/"False".
+message SettingItem {
+    // The key in Settings.settings_dictionary.
+    string field = 1;
+    string label = 2;
+    string tooltip = 3;
+    SettingKind kind = 4;
+    // The driver's default, as it round-trips in the dictionary.
+    string default_value = 5;
+    // Choices for SETTING_OPTION items.
+    repeated string options = 6;
+    // Unit shown next to the value ("mm", "%"), when any.
+    string unit = 7;
+    // The tab the item sits in on the Settings page.
+    string tab = 8;
+    // The group inside the tab (empty for items directly in the tab).
+    string group = 9;
+    // Group visibility: shown only while the item named visible_when_field holds
+    // visible_when_value (empty = always visible).
+    string visible_when_field = 10;
+    string visible_when_value = 11;
+    // SETTING_FILE items: true selects a folder, false a file.
+    bool select_folder = 12;
+    // SETTING_OPTION items: true renders a dropdown, false radio chips.
+    bool dropdown = 13;
+    // The item's group needs a full license.
+    bool group_requires_license = 14;
+}
+
+// [Library] SettingKind is how a SettingItem is edited.
+enum SettingKind {
+    // Free text.
+    SETTING_TEXT = 0;
+    // A number (invariant-culture float in the dictionary).
+    SETTING_NUMBER = 1;
+    // One of the listed options.
+    SETTING_OPTION = 2;
+    // A boolean ("True"/"False" in the dictionary).
+    SETTING_TOGGLE = 3;
+    // A file or folder path.
+    SETTING_FILE = 4;
+    // Multi-line text.
+    SETTING_TEXT_AREA = 5;
+    // Presentation only (an image URL) — round-trips in the dictionary, never edited.
+    SETTING_IMAGE = 6;
+}
+
+// [Library] RobotPreset is one preset robot of PRC.Library.Robots as the setup catalog
+// lists it.
+message RobotPreset {
+    // Preset class for Robot.preset_robot_class (e.g., "KUKA.KUKA_KR6R700").
+    string preset_robot_class = 1;
+    // Vendor folder of the class ("KUKA", "ABB", "UR", "NEURA", "FANUC", "IGUS").
+    string vendor = 2;
+    // Full name ("KUKA Agilus KR6 R700").
+    string name = 3;
+    // Short name ("KR6 R700").
+    string short_name = 4;
+    // Number of main axes (6, 7).
+    int32 axis_count = 5;
+    // Kinematics solver class relative to PRC.Library.Solvers (e.g., "KUKA.KUKA_6DOF") —
+    // the value CustomRobot.kinematics_solver_class takes, so a client can build a custom
+    // robot with a preset's kinematics.
+    string solver = 6;
+}
+
+// [Library] ExternalAxisPreset is one preset external axis of PRC.Library.ExternalAxes,
+// without its geometry: reference it from ExternalAxis.preset_external_axis_class and the
+// server adds geometry, ranges and orientation at SetupRobot.
+message ExternalAxisPreset {
+    // Preset class for ExternalAxis.preset_external_axis_class (e.g., "KUKA.KUKA_KL4000").
+    string preset_external_axis_class = 1;
+    // Vendor folder of the class.
+    string vendor = 2;
+    // Full name ("KUKA KL4000 Linear Axis").
+    string name = 3;
+    // Short name ("KL4000").
+    string short_name = 4;
+    // Mechanical configuration.
+    ExternalAxisType external_axis_type = 5;
+    // Range and speed per sub-axis (mm / degrees).
+    repeated float range_min = 6;
+    repeated float range_max = 7;
+    repeated float speed = 8;
+    // Where the preset places itself relative to the robot when no position is given.
+    CartesianPosition default_position = 9;
+}
+
+// [Robot Data] ExternalAxis describes an external axis device attached to the robot system
+// (e.g., a linear rail, rotary positioner, or AGV).
+message ExternalAxis {
+    // Mechanical configuration of this external axis.
+    ExternalAxisType external_axis_type = 1;
+    // Full name of the external axis.
+    string name = 2;
+    // Short name of the external axis.
+    string short_name = 3;
+    // Minimum range per sub-axis (mm for linear, degrees for rotary).
+    repeated float range_min = 4;
+    // Maximum range per sub-axis (mm for linear, degrees for rotary).
+    repeated float range_max = 5;
+    // Speed per sub-axis.
+    repeated float speed = 6;
+    // Position and orientation of each sub-axis.
+    // Z+ is the rail direction (linear) or rotation axis (rotary).
+    repeated Matrix4x4 orientation = 7;
+    // Position of the axis relative to the robot (especially relevant for rotary axes).
+    CartesianPosition position = 8;
+    // Visual and collision geometry of the external axis.
+    repeated PolyMesh geometry = 9;
+    // Optional additional data.
+    MetaData data = 10;
+    // Optional preset from PRC.Library.ExternalAxes (e.g., "KUKA.KUKA_KL4000", see
+    // DescribeLibrary). The server constructs the preset — geometry, ranges, speed and
+    // orientation included — and every field set here overrides it; `position` places
+    // it (the preset's default placement otherwise).
+    optional string preset_external_axis_class = 11;
+}
+
+// [Robot Data] ExternalAxisType classifies the mechanical configuration of an external axis.
+enum ExternalAxisType {
+    // Single linear rail.
+    LINEAR_RAIL = 0;
+    // Two-axis linear positioning system.
+    LINEAR_DOUBLE = 1;
+    // Three-axis linear positioning system.
+    LINEAR_TRIPLE = 2;
+    // Single rotary axis positioner.
+    ROTARY_SINGLE = 3;
+    // Two-axis rotary positioner.
+    ROTARY_DOUBLE = 4;
+    // Autonomous ground vehicle carrying the robot.
+    AGV = 5;
+}
+
+// [Flow Control] Flow describes a control-flow step in the program. Exactly one flow type
+// must be set. Note: field numbers begin at 2 (field 1 is reserved).
+message Flow {
+    oneof flow_node {
+        // Conditional branch: executes one of two tasks based on a variable value.
+        IfElse if_else_flow = 2;
+        // Loop: repeatedly executes a task body while a variable condition holds.
+        While while_flow = 3;
+        // Terminates the robot program.
+        End end_flow = 4;
+    }
+}
+
+// [Robot Data] FrameType determines whether a tool or base frame is fixed or external.
+enum FrameType {
+    // Fixed frame (attached rigidly to the robot flange or world).
+    FIXED = 0;
+    // External frame (attached to an external axis or positioner).
+    EXTERNAL = 1;
+}
+
+// [Primitives] Heartbeat is a periodic alive signal sent by the server to confirm that the
+// connection is still active.
+message Heartbeat {
+    int32 beat = 1;
+}
+
+// [Actions] Hold pauses robot execution for a fixed duration.
+message Hold {
+    // Duration to wait in milliseconds.
+    float hold_ms = 1;
+}
+
+// [Flow Control] IfElse branches execution based on whether a variable condition is true or false.
+message IfElse {
+    // The variable evaluated as the branch condition.
+    Variable condition = 1;
+    // Executed when the condition is true.
+    Task if_true = 2;
+    // Executed when the condition is false.
+    Task if_false = 3;
+}
+
+// [Actions] InsertCode injects arbitrary strings into the generated robot program file.
+// The code is not parsed or simulated by PRC.
+message InsertCode {
+    // Lines of code to insert verbatim into the generated robot control file.
+    repeated string code = 1;
+    //Defines if the code should be executed or treated as a comment in the generated program.
+    bool is_comment = 2;
+}
+
+// [Primitives] Int4 holds four integers (x, y, z, w). Serves two distinct roles:
+//   Mesh face: indices of four vertices forming a quad; set z == w for triangles.
+//   Mesh colour: ARGB components {A, R, G, B} where each value is in 0–255.
+message Int4 {
+    int32 x = 1;
+    int32 y = 2;
+    int32 z = 3;
+    int32 w = 4;
+}
+
+// [Primitives] JointTarget defines a robot position in joint space with motion parameters.
+// Axis values are in degrees. Speed interpretation is driver-specific.
+// The acceleration field is currently unused and reserved for future use.
+message JointTarget {
+    // Joint angles in degrees (e.g., 6 values for a standard 6-axis robot).
+    repeated float axis_values = 1;
+    // Speed — single value for all axes, or one value per axis.
+    // Interpretation is driver-specific; do not assume a common unit.
+    repeated float speed = 2;
+    // Acceleration — single value or one per axis.
+    // Currently unused and reserved for future use.
+    repeated float acceleration = 3;
+    // External axis positions in mm (linear axes) or degrees (rotary axes).
+    repeated float external_axis_values = 4;
+}
+
+// [Motion] LINMotion moves the robot in a straight line to a Cartesian target.
+// Use within CP motion groups only.
+message LINMotion {
+    // Optional additional data.
+    MetaData data = 1;
+    // The Cartesian target position.
+    CartesianTarget target = 2;
+}
+
+// [Primitives] Matrix4x4 is a 4x4 homogeneous affine transformation matrix, identical in
+// layout to System.Numerics.Matrix4x4 (row-major, point × matrix convention).
+//
+// The top-left 3×3 block stores the rotation with each coordinate axis as a row.
+// Translation (m41, m42, m43) is in the last row, in millimetres.
+// Column 4 is always [0, 0, 0, 1] (homogeneous).
+//
+// When porting to column-major environments (OpenGL, Blender, Fusion 360),
+// transpose the matrix so that the translation moves to the last column.
+message Matrix4x4 {
+    // X-Axis (Row 1)
+    float m11 = 1;  // X-Axis.X
+    float m12 = 2;  // X-Axis.Y
+    float m13 = 3;  // X-Axis.Z
+    float m14 = 4;  // 0
+
+    // Y-Axis (Row 2)
+    float m21 = 5;  // Y-Axis.X
+    float m22 = 6;  // Y-Axis.Y
+    float m23 = 7;  // Y-Axis.Z
+    float m24 = 8;  // 0
+
+    // Z-Axis / Normal (Row 3)
+    float m31 = 9;   // Z-Axis.X
+    float m32 = 10;  // Z-Axis.Y
+    float m33 = 11;  // Z-Axis.Z
+    float m34 = 12;  // 0
+
+    // Origin / Translation (Row 4) — values in millimetres
+    float m41 = 13;  // Origin.X (mm)
+    float m42 = 14;  // Origin.Y (mm)
+    float m43 = 15;  // Origin.Z (mm)
+    float m44 = 16;  // 1 (homogeneous)
+}
+
+// [Primitives] Mesh defines a single geometric mesh with vertices, quad or triangle faces,
+// vertex normals, and a single uniform colour.
+message Mesh {
+    // Face definitions. Each Int4 holds four vertex indices into the vertices array.
+    // For triangular faces, set z == w (repeat the same index).
+    repeated Int4 faces = 1;
+    // Vertex positions in millimetres.
+    repeated Vector3 vertices = 2;
+    // Vertex normals (for shading).
+    repeated Vector3 normals = 3;
+    // Uniform colour for this mesh as {A, R, G, B} where each value is 0–255.
+    Int4 mesh_color = 4;
+}
+
+// [Primitives] MetaData carries an optional ID and a free-form key-value dictionary
+// for additional data on any message.
+message MetaData {
+    // ID of the parent object.
+    string id = 1;
+    // Additional data as key-value pairs.
+    map<string, string> data = 2;
+}
+
+// [Motion] MotionCommand wraps a single motion step. Exactly one command type must be set.
+// Match the command type to the enclosing MotionGroup type:
+//   CP group  → LINMotion or CircularMotion
+//   PTP group → AxisMotion or PTPMotion
+message MotionCommand {
+    oneof command {
+        // Joint-space motion to a position defined by axis values (PTP groups).
+        AxisMotion axis_motion = 1;
+        // Circular arc motion through three Cartesian positions (CP groups).
+        CircularMotion circular_motion = 2;
+        // Point-to-point Cartesian motion (PTP groups).
+        PTPMotion ptp_motion = 3;
+        // Linear Cartesian motion (CP groups).
+        LINMotion lin_motion = 4;
+    }
+}
+
+// [Motion] MotionGroup groups motion commands that share a motion type (CP, PTP, or
+// SPLINE), a tool, and a base frame. All commands must be compatible with the
+// chosen MotionGroupType.
+message MotionGroup {
+    // The motion interpolation type for all commands in this group.
+    MotionGroupType motion_group_type = 1;
+    // The motion commands. Must match the MotionGroupType
+    // (e.g., no AxisMotion in a CP group).
+    repeated MotionCommand commands = 2;
+    // Interpolation mode written into the generated code but not simulated.
+    string interpolation = 3;
+    // Tool ID — must match a key in Robot.tool_dictionary.
+    string tool_id = 4;
+    // The base frame used for all commands in this group.
+    Base robot_base = 5;
+    // Optional additional data.
+    MetaData data = 6;
+}
+
+// [Motion] MotionGroupType selects the kinematic interpolation strategy for a MotionGroup.
+enum MotionGroupType {
+    // Continuous path — TCP follows an exact Cartesian trajectory
+    // (e.g., linear or circular). Use LINMotion or CircularMotion.
+    CP = 0;
+    // Point-to-point — fast joint-interpolated motion; Cartesian path is not
+    // guaranteed. Use AxisMotion or PTPMotion.
+    PTP = 1;
+    // Spline — smooth multi-point path with continuity at waypoints.
+    SPLINE = 2;
+}
+
+// [Actions] Ping tests server connectivity. The server echoes the payload back unchanged.
+message Ping {
+    // Arbitrary payload echoed by the server.
+    string payload = 1;
+    // Timestamp or latency marker in milliseconds.
+    int64 time_ms = 2;
+}
+
+// [Primitives] PolyMesh represents a compound object (e.g., one robot joint, a tool, or a
+// cell element) consisting of multiple visual meshes and a separate, optional
+// simplified collision hull. The visual mesh count and collision mesh count
+// are independent of each other.
+message PolyMesh {
+    // Visual meshes for rendering. Multiple meshes allow different colours per part.
+    repeated Mesh meshes = 1;
+    // Simplified convex hull meshes used for collision checking. May differ in
+    // count and detail from the visual meshes.
+    repeated Mesh collision_convex_hull = 2;
+    // Placement of this PolyMesh relative to WorldXY
+    // (right-handed coordinate system, Z+ = up, units in mm).
+    Matrix4x4 transform = 3;
+    // Identifier for this PolyMesh.
+    string name = 4;
+}
+
+// [Motion] PTPMotion moves the robot to a Cartesian target using point-to-point
+// (joint-interpolated) motion. Use within PTP motion groups.
+message PTPMotion {
+    // Optional additional data.
+    MetaData data = 1;
+    // The Cartesian target position.
+    CartesianTarget target = 2;
+}
+
+// [Robot Data] Robot defines the complete robot setup: model (preset or custom), driver,
+// tools, base, optional collision geometry, and external axes.
+message Robot {
+    // Specify either a preset robot from the PRC library or a custom kinematic model.
+    oneof robot_data {
+        // Preset robot class from PRC.Library.Robots
+        // (e.g., "KUKA.KUKA_KR610R11002").
+        string preset_robot_class = 1;
+        // Fully custom kinematic robot model.
+        CustomRobot custom_robot = 2;
+    }
+    // Robot driver class from PRC.Library.Drivers
+    // (e.g., "KUKA.KSS_KRL_Driver").
+    string robot_driver_class = 3;
+    // Client-assigned unique identifier for this robot setup.
+    string friendly_id = 4;
+    // Tool definitions keyed by tool ID string. Must include all tools
+    // referenced by tool_id in motion groups.
+    map<string, Tool> tool_dictionary = 5;
+    // The initial base frame used with the robot.
+    Base initial_base = 6;
+    // Optional collision geometry evaluated when collision checking is enabled.
+    repeated PolyMesh collision_geometry = 7;
+    // External axes attached to this robot setup.
+    repeated ExternalAxis external_axes = 8;
+    // Optional cell geometry placed relative to the robot, used for collision
+    // checking and visualisation.
+    PolyMesh cell_geometry = 9;
+    // Optional additional data.
+    MetaData data = 10;
+}
+
+// [Feedback] RobotState represents the current or simulated state of the robot.
+// Used for real-time visualisation and for querying state along the toolpath.
+message RobotState {
+    // Joint axis positions of the robot.
+    JointTarget axis_position = 1;
+    // Transformation matrices for each joint plus the base of the robot.
+    // The first TransformationArray covers the robot body; each subsequent
+    // array covers one external axis. Apply relative to WorldXY (Z+ up, mm).
+    repeated TransformationArray robot_transformations = 2;
+    // Normalised toolpath position (0.0–1.0) describing the relative position
+    // along the simulated path.
+    float toolpath_index = 3;
+    // ID of the currently active tool.
+    string tool_id = 4;
+    // Position and orientation of the robot's TCP (tool centre point).
+    Matrix4x4 tool_frame = 5;
+    // Root frame of the robot.
+    Matrix4x4 root_frame = 6;
+    // Position and orientation of the robot's flange.
+    Matrix4x4 flange_frame = 7;
+    // One boolean per robot axis: true indicates a collision or out-of-reach alarm.
+    repeated bool axis_alarm = 8;
+    // One boolean per external axis: true indicates a collision or out-of-reach alarm.
+    repeated bool external_axis_alarm = 9;
+    // Variables of all connected robots, keyed by robot ID.
+    map<string, VariableArray> variables = 10;
+    // Additional key-value data.
+    map<string, string> data = 11;
+    // Connection feedback string.
+    string connection_feedback = 12;
+    // ID of the task currently being processed.
+    string task_id = 13;
+    // ID of the command currently being processed.
+    string command_id = 14;
+    // ID of the robot this state refers to.
+    string robot_id = 15;
+    // Overall operational status of the robot.
+    RobotStatus status = 16;
+}
+
+// [Feedback] RobotStatus reports the overall operational state of the robot.
+enum RobotStatus {
+    // Robot is idle and ready to receive new data.
+    IDLE = 0;
+    // Robot is actively processing data or executing a task.
+    ACTIVE = 1;
+    // Robot is in an error state.
+    ERROR = 2;
+}
+
+// [Primitives] Settings is a dictionary of driver-specific key-value pairs.
+// The server returns the initial dictionary in SetupRobotReply.robot_settings.
+// Pass it back (optionally modified) in AddRobotTaskRequest.robot_settings.
+// Settings can be changed between AddRobotTask calls without a new SetupRobot.
+message Settings {
+    map<string, string> settings_dictionary = 1;
+}
+
+// [Actions] SetVariable sets a named robot variable to a new value.
+message SetVariable {
+    // The new variable state.
+    Variable new_state = 1;
+}
+
+// [Feedback] ProgramFile is one generated program file, named with its extension.
+message ProgramFile {
+    // File name including the extension, e.g. "kukaprc_project.src".
+    string name = 1;
+    // File content, with the line endings the controller expects.
+    string content = 2;
+}
+
+// [Feedback] SimulationResult contains the complete result of simulating a Task.
+message SimulationResult {
+    // One SimulationResultUnit per interpolated step along the toolpath.
+    repeated SimulationResultUnit simulation_results = 1;
+    // True if the entire toolpath is free of reachability and collision problems.
+    bool is_valid = 2;
+    // Total estimated execution time in seconds.
+    float time = 3;
+    // Generated robot program code — always the content of the primary file.
+    // Write to a file with the driver-appropriate extension (e.g., .src for
+    // KUKA KRL, .mod for ABB RAPID) when `files` is empty.
+    string code = 4;
+    // Optional additional data.
+    MetaData data = 5;
+    // Every generated file with its file name, the primary program first. A
+    // driver whose controller expects several files per program (a KRL module's
+    // .src + .dat on iiQKA.OS 2) lists them all here. Empty when the driver only
+    // delivers `code` (some drivers, older servers) — then the client names the
+    // file itself.
+    repeated ProgramFile files = 6;
+}
+
+// [Feedback] SimulationResultUnit holds the simulated robot state at a single interpolated
+// step along the toolpath.
+message SimulationResultUnit {
+    // Joint axis values at this step, in degrees.
+    repeated float axis_values = 1;
+    // Cartesian position (TCP) at this step.
+    Matrix4x4 position = 2;
+    // Elapsed time in seconds from the start of the simulation to this step.
+    float time = 3;
+    // One collision flag per axis; true when a collision is detected at this step.
+    // Only populated when collision checking is enabled.
+    repeated bool collision = 4;
+    // One singularity flag per axis; true when the robot is near a singularity.
+    repeated bool singularity = 5;
+    // One out-of-reach flag per axis; true when the target is unreachable.
+    repeated bool outofreach = 6;
+    // External axis values at this step.
+    repeated float external_axis_values = 7;
+    // One out-of-reach flag per external axis.
+    repeated bool external_axis_outofreach = 8;
+    // Indicates whether this value is interpolated (0.0) or an exact target (1.0).
+    float interpolation_factor = 9;
+    // Matches the MetaData.id of the originating motion command, for correlating
+    // simulation results with inputs.
+    string id = 10;
+    // True if any collision or out-of-reach flag is set for this step.
+    bool alarm = 11;
+    // Type of the originating motion command, as the PRC.Core CommandType name
+    // ("LIN", "PTP", "Circular", "Spline", "Axis"). Empty when unknown.
+    string motion_type = 12;
+}
+
+// [Flow Control] Task is the top-level container for robot commands sent to the server.
+// The TaskType controls whether commands are simulated, executed, or both.
+message Task {
+    // The list of program steps (motion groups, actions, or flow control nodes).
+    repeated TaskPayload payload = 1;
+    // Controls how the server processes this task (simulate, execute, or both).
+    TaskType type = 2;
+    // Optional name for this task.
+    string name = 3;
+    // Optional additional data.
+    MetaData data = 4;
+}
+
+// [Flow Control] TaskPayload holds a single program step: a flow control node, a motion group,
+// or a non-motion action.
+message TaskPayload {
+    oneof payload {
+        // A control-flow node (if/else, while, or end).
+        Flow flow_task = 1;
+        // A group of motion commands sharing a motion type, tool, and base.
+        MotionGroup motion_group_task = 2;
+        // A single non-motion command (variable I/O, hold, ping, or code insertion).
+        Action action_task = 3;
+    }
+}
+
+// [Flow Control] TaskType controls how the server processes a submitted Task.
+enum TaskType {
+    // Simulate only; do not execute on the real robot.
+    SIMULATE_TASK = 0;
+    // Execute directly without prior simulation.
+    EXECUTE_TASK = 1;
+    // Execute only if simulation completes without errors.
+    EXECUTE_ON_SIMULATION_SUCCESS_TASK = 2;
+    // Simulate and execute regardless of the simulation result.
+    SIMULATE_AND_EXECUTE_TASK = 3;
+    // Groups several commands into a container (no independent execution).
+    CONTAINER = 4;
+}
+
+// [Robot Data] Tool describes a robot end-effector (tool or gripper).
+message Tool {
+    // Whether the tool is fixed to the robot flange or mounted externally.
+    FrameType tool_type = 1;
+    // The Tool Centre Point (TCP) — the active working tip of the tool.
+    CartesianPosition tcp = 2;
+    // Identifier for this tool, matching keys in Robot.tool_dictionary.
+    string tool_id = 3;
+    // Field number 4 is reserved (previously tool_state, an unused int32).
+    reserved 4;
+    reserved "tool_state";
+    // Geometry of the tool for visualisation and collision checking.
+    PolyMesh tool_geometry = 5;
+    // Identifier of the physical tool as known to the robot controller (the tool number
+    // written into generated code, e.g. "6" → KUKA Tool Nr.6). Several Tool entries may share
+    // a tool_robot_variable (and the same TCP) while differing only in geometry; tool_id
+    // remains the unique dictionary key / display name. Defaults to tool_id when unset.
+    string tool_robot_variable = 6;
+}
+
+// [Primitives] TransformationArray is a list of transformation matrices.
+// Used in RobotState.robot_transformations to provide the current transformation
+// of each joint plus the base. Apply each matrix to its corresponding joint mesh
+// relative to WorldXY (right-handed, Z+ up, units in mm).
+message TransformationArray {
+    repeated Matrix4x4 transformation = 1;
+}
+
+// [Primitives] Variable is a named value used for robot I/O communication and flow control.
+// Exactly one of the four value types may be set at a time.
+message Variable {
+    oneof variable_value {
+        bool boolean = 1;
+        float single = 2;
+        int32 integer = 3;
+        string text = 4;
+    }
+    // Name of the variable (e.g., a robot I/O signal name).
+    string name = 5;
+}
+
+// [Primitives] VariableArray holds a list of variables, e.g. all variables currently active
+// on a connected robot.
+message VariableArray {
+    repeated Variable variables = 1;
+}
+
+// [Primitives] Vector3 is a 3D vector with x, y, z float components. Used for positions
+// (in mm), axis directions (unit vectors), and mesh normals.
+message Vector3 {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+}
+
+// [Actions] WaitForVariable instructs the robot to wait until a variable reaches a
+// specified target value before continuing execution.
+message WaitForVariable {
+    // The variable state to wait for.
+    Variable await_state = 1;
+}
+
+// [Flow Control] While executes a task body in a loop as long as a variable condition holds.
+message While {
+    // The variable evaluated as the loop condition.
+    Variable condition = 1;
+    // The task body executed on each iteration.
+    Task body = 2;
+}
