@@ -36,7 +36,7 @@ class ParametricRobotControlServiceStub(object):
     Typical integration lifecycle:
     1. SetupRobot   — define the robot model, driver, tools, and base.
     2. AddRobotTask — send motion commands; receive simulation results and code.
-    3. SubscribeRobotFeedback — open a persistent feedback stream.
+    3. SubscribeRobotFeedback — open the feedback stream; it keeps the robot set up.
     4. GetSimulatedRobotState — query robot state at any toolpath position (0.0–1.0).
     """
 
@@ -99,7 +99,7 @@ class ParametricRobotControlServiceServicer(object):
     Typical integration lifecycle:
     1. SetupRobot   — define the robot model, driver, tools, and base.
     2. AddRobotTask — send motion commands; receive simulation results and code.
-    3. SubscribeRobotFeedback — open a persistent feedback stream.
+    3. SubscribeRobotFeedback — open the feedback stream; it keeps the robot set up.
     4. GetSimulatedRobotState — query robot state at any toolpath position (0.0–1.0).
     """
 
@@ -107,7 +107,8 @@ class ParametricRobotControlServiceServicer(object):
         """Step 1: Initialise the simulation/control environment with a robot model,
         driver, tools, base frame, and optional collision geometry.
         Returns a settings dictionary to be passed back with subsequent AddRobotTask calls.
-        Calling SetupRobot again with the same client_id replaces the previous setup.
+        Calling SetupRobot again with the same client_id replaces the previous setup and
+        ends its feedback stream: subscribe again (see SubscribeRobotFeedback).
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -125,6 +126,16 @@ class ParametricRobotControlServiceServicer(object):
     def SubscribeRobotFeedback(self, request, context):
         """Step 3: Open a persistent server-streaming connection to receive
         continuous feedback: heartbeats, robot state updates, settings changes, and pings.
+        The server keeps a robot set up under a client_id only while its feedback stream is
+        open: when the stream ends (the client cancels it, disposes its channel, quits or
+        crashes), the server removes the robot and disposes its driver within about a
+        second, which disconnects a realtime driver from its controller. A SetupRobot with
+        the same client_id ends the previous robot's stream without removing the new robot,
+        so subscribe again after every SetupRobot. A robot that never gets a stream stays on
+        the server until a SetupRobot with the same client_id replaces it (or it is unloaded
+        from the server's dashboard). Each robot has one stream: a later subscription to the
+        same id, from any client, takes the feedback over, and from then on that stream
+        keeps the robot.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -238,7 +249,7 @@ class ParametricRobotControlService(object):
     Typical integration lifecycle:
     1. SetupRobot   — define the robot model, driver, tools, and base.
     2. AddRobotTask — send motion commands; receive simulation results and code.
-    3. SubscribeRobotFeedback — open a persistent feedback stream.
+    3. SubscribeRobotFeedback — open the feedback stream; it keeps the robot set up.
     4. GetSimulatedRobotState — query robot state at any toolpath position (0.0–1.0).
     """
 

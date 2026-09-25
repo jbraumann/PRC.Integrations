@@ -55,7 +55,8 @@ _ROBOTS = [
     ("ABB.ABB_IRB6700_150_320",  "ABB IRB 6700-150/3.20",       "ABB"),
 
     # IGUS
-    ("IGUS.IGUS_ReBel",          "IGUS ReBel",                  "IGUS"),
+    ("IGUS.IGUS_ReBel",          "IGUS ReBel 6DOF-01",          "IGUS"),
+    ("IGUS.IGUS_ReBel03",        "IGUS ReBel 6DOF-03",          "IGUS"),
 
     # KUKA
     ("KUKA.KUKA_KR1000",          "KUKA KR 1000",                "KUKA"),

@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "prc_blender"
-version = "0.1.4"
+version = "0.1.5"
 name = "Parametric Robot Control"
 tagline = "Create robot toolpaths with Geometry Nodes and run them via PRC"
 maintainer = "Johannes Braumann | Robots in Architecture and Creative Robotics"

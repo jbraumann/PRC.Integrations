@@ -4,7 +4,7 @@
 
 > **Purpose:** This document provides a thorough, structured reference for developers and LLMs building new integrations with PRC. It covers every protobuf message, the complete GRPC service API, data flows, coordinate conventions, unit systems, visualization patterns, and concrete code examples across C#, Python, and JavaScript.
 
-> **Scope:** Updated for PRC Server **1.735** (2026-09-22); 1.735 adds the KUKA Sunrise online execution modes (TCP link), the KR 800 R2800-2 and the ABB GoFa presets with the `ABB.ABB_6DOF_Offset` solver. 1.732 added the `Client.DescribeLibrary` wrapper and the UR3, UR3e, ABB IRB 120 and IRB 140 presets. New since the 2026-08 revision: the `DescribeLibrary` setup catalog ([Section 6.8](#68-library-catalog-describelibrary)), `SimulationResult.files`, external-axis presets by reference, custom-robot solvers by name, the KUKA Sunrise driver for the seven-axis LBR iiwa, iiQKA.OS 2 program upload, and gRPC server reflection.
+> **Scope:** Updated for PRC Server **1.738** (2026-09-25); 1.738 adds the igus iRC program format and driver name `IGUS_IRC`, the ReBel 6DOF-03 preset, one blending rule for the simulation and every driver (`MotionGroup.interpolation`), the feedback-stream lifetime rule, per-vendor speed units, ABB RAPID external axes and the empty-posture default. 1.735 added the KUKA Sunrise online execution modes (TCP link), the KR 800 R2800-2 and the ABB GoFa presets with the `ABB.ABB_6DOF_Offset` solver. 1.732 added the `Client.DescribeLibrary` wrapper and the UR3, UR3e, ABB IRB 120 and IRB 140 presets. New since the 2026-08 revision: the `DescribeLibrary` setup catalog ([Section 6.8](#68-library-catalog-describelibrary)), `SimulationResult.files`, external-axis presets by reference, custom-robot solvers by name, the KUKA Sunrise driver for the seven-axis LBR iiwa, iiQKA.OS 2 program upload, and gRPC server reflection.
 
 ---
 
@@ -57,7 +57,7 @@ Parametric Robot Control (PRC) is a client–server system for simulating and co
 ```
 
 **Key principles:**
-- **Units:** PRC works in **millimetres** for all positional data and **degrees** for all angular/axis data.
+- **Units:** PRC works in **millimetres** for all positional data and **degrees** for all angular/axis data. Motion speeds are the exception: they use each robot vendor's own units — a percentage, m/s, mm/s or rad/s depending on the robot and the motion type (see [Speed units](#speed-units)).
 - **Coordinate system:** Right-handed, **Z+ = up**. All transformation matrices are expressed relative to WorldXY in this convention.
 - **Communication:** GRPC over HTTPS with TLS. Supports gzip compression and unlimited message sizes.
 - **Protobuf definition:** The PRC API is defined in a single `.proto` file that contains all messages, enums, and the service contract. Code can be generated for any language using the standard `protoc` compiler.
@@ -104,6 +104,9 @@ robot_id = SetupRobot(
 )
 // → Returns: server-assigned robot_id, settings dictionary
 
+feedback_stream = SubscribeRobotFeedback(id = robot_id)
+// Keep it open while you use the robot: the server removes the robot when it ends.
+
 // ── Phase 2: Task ──
 simulation_result = AddRobotTask(
     id       = robot_id,
@@ -114,8 +117,8 @@ simulation_result = AddRobotTask(
                 type     = PTP,
                 tool_id  = "0",
                 commands = [
-                    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 0.15),
-                    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 0.15),
+                    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 15),  // KUKA: 15 % of each axis's maximum speed
+                    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 15),
                 ]
             )
         ]
@@ -156,6 +159,10 @@ for slider_value in 0.0 to 1.0:
 - **If you call `SetupRobot` again with the same `client_id`, the previous robot setup is discarded and replaced.** The server does not maintain multiple robots under the same ID.
 - To run multiple robots simultaneously, use different `client_id` values for each.
 - The returned `robot_id` (from `SetupRobotReply.id`) is used in all subsequent `AddRobotTask`, `GetSimulatedRobotState`, `SubscribeRobotFeedback`, and `UpdateVariable` calls.
+- **The server keeps a robot only while its feedback stream is open.** When the `SubscribeRobotFeedback` stream ends — the client cancels it, disposes its channel, quits or crashes — the server removes the robot and disposes its driver within about a second, which disconnects a realtime driver from its controller.
+- A `SetupRobot` with the same `client_id` ends the previous robot's feedback stream without removing the new robot, so **subscribe again after every `SetupRobot`**. The .NET Client library does this automatically.
+- A robot that never gets a feedback stream stays on the server until a `SetupRobot` with the same `client_id` replaces it, or until it is unloaded from the server's dashboard.
+- Each robot has one feedback stream: a later `SubscribeRobotFeedback` for the same ID, from any client, takes the feedback over, and from then on that stream keeps the robot.
 
 ### When to Call AddRobotTask Again
 
@@ -175,7 +182,7 @@ After setup, `SubscribeRobotFeedback` opens a **server-streaming** connection th
 - **Settings updates** — when the server modifies settings (e.g., during real-time control)
 - **Pings** — response to ping requests
 
-This stream stays open for the lifetime of the robot setup. It is automatically started by the .NET Client library when `SetupRobot` is called.
+Keep the stream open for as long as you use the robot: the server keeps the robot only while its feedback stream is open, and a new `SetupRobot` ends the stream, so subscribe again after every `SetupRobot` (see [ID Reuse Behaviour](#id-reuse-behaviour)). The .NET Client library opens the stream automatically on every `SetupRobot`.
 
 ---
 
@@ -302,7 +309,7 @@ The `PRC.GRPC.Client.Client` class exposes the following methods and properties:
 | Method | Signature | Description |
 |---|---|---|
 | `Connect` | `async Task<TaskFeedback> Connect(string ip, bool grpcWeb = false)` | Establish connection to PRC server. Handles TLS certificates automatically. |
-| `SetupRobot` | `async Task<SetupFeedback> SetupRobot(string clientId, IRobotProperties robot, string robotDriver, PRC.GRPC.Robot? bufferedSetup = null)` | Initialize robot environment. Automatically subscribes to the feedback stream. Returns settings dictionary. For a robot-less monitoring connection, pass `new PRC.Library.Robots.Supervisor.Supervisor_Device()` as the robot with `"Supervisor.Supervisor_Driver"` as the driver. The optional `bufferedSetup` sends an already-serialized `PRC.GRPC.Robot` message verbatim instead of serializing `robot` — used e.g. when replaying a stored robot package. |
+| `SetupRobot` | `async Task<SetupFeedback> SetupRobot(string clientId, IRobotProperties robot, string robotDriver, PRC.GRPC.Robot? bufferedSetup = null)` | Initialize robot environment. Automatically subscribes to the feedback stream (again on every call), which keeps the robot on the server. Returns settings dictionary. For a robot-less monitoring connection, pass `new PRC.Library.Robots.Supervisor.Supervisor_Device()` as the robot with `"Supervisor.Supervisor_Driver"` as the driver. The optional `bufferedSetup` sends an already-serialized `PRC.GRPC.Robot` message verbatim instead of serializing `robot` — used e.g. when replaying a stored robot package. |
 | `AddTask` | `async Task<SimulationFeedback> AddTask(Task task, Dictionary<string, string> settings, CancellationToken cancellationToken = default)` | Send motion commands. Returns simulation result with code, axis data, reachability. Pass a `CancellationToken` to abandon a task that has been superseded by a newer request — a cancelled call returns an error feedback (`"Task superseded by a newer request."`) instead of throwing. |
 | `UpdateRobot` | `async Task<RobotState> UpdateRobot(float simulationState, bool streamFeedback = false)` | Query robot state at a normalized position (0.0–1.0). |
 | `UpdateVariable` | `async Task<Dictionary<string, List<Variable>>> UpdateVariable(Variable variable)` | Set/update a robot variable. Returns all variables of all connected robots. |
@@ -312,7 +319,7 @@ The `PRC.GRPC.Client.Client` class exposes the following methods and properties:
 | `GetMachineData` | `async Task<GetRobotDataReply?> GetMachineData(string id, bool excludeGeometry = true)` | Retrieve the full `GetRobotDataReply` for **any connected machine** by its server-assigned ID — not just the robot set up on this client: the resolved definition plus its **live state** (current driver settings, variables, axis position, tool/flange frames, and visualization transformations). With `excludeGeometry` (the default) all mesh data is omitted, making the call cheap enough for high-frequency polling (30–60 Hz) — e.g. by a Supervisor client monitoring the other connected machines. Returns `null` on error. |
 | `DescribeLibrary` | `async Task<DescribeLibraryReply?> DescribeLibrary(string driverClass = "")` | The setup catalog ([Section 6.8](#68-library-catalog-describelibrary)): every preset robot, every driver with its settings schema, every external-axis preset. Needs only `Connect` — no `SetupRobot`, no license. `driverClass` restricts the driver list to one class. Returns `null` on error. |
 | `Ping` | `async Task<Ping> Ping(string payload = "")` | Connection health check. |
-| `Disconnect` | `async Task<TaskFeedback> Disconnect()` | Close the connection gracefully. |
+| `Disconnect` | `async Task<TaskFeedback> Disconnect()` | Close the connection gracefully. This ends the feedback stream, so the server removes the robot. |
 | `Reconnect` | `async Task<TaskFeedback> Reconnect()` | Reconnect, re-setup robot, and re-send last task. |
 
 | Property | Type | Description |
@@ -371,8 +378,8 @@ task.TaskType = SimulateAndExecuteTask
 motionGroup = new PTPMotionGroup()
 motionGroup.ToolID = "0"
 motionGroup.PTPMotions = [
-    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 0.15),
-    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 0.15),
+    AxisMotion(target = [-45, -90, 90, 0, 0, 0], speed = 15),  // KUKA: 15 % of each axis's maximum speed
+    AxisMotion(target = [ 45, -90, 90, 0, 0, 0], speed = 15),
 ]
 task.Commands.Add(motionGroup)
 
@@ -450,7 +457,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { -45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 0.15f }
+                Speed = new float[] { 15f }  // KUKA: 15 % of each axis's maximum speed
             }
         },
         new PRC.Core.Commands.Motion.Axis
@@ -458,7 +465,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { 45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 0.15f }
+                Speed = new float[] { 15f }
             }
         }
     };
@@ -521,6 +528,8 @@ service ParametricRobotControlService {
   rpc AddRobotTask (AddRobotTaskRequest) returns (AddRobotTaskReply);
 
   // Step 3: Subscribe to feedback from the simulation/control environment.
+  // The server keeps the robot only while this stream is open; subscribe again
+  // after every SetupRobot.
   rpc SubscribeRobotFeedback (SubscribeRobotFeedbackRequest) returns (stream RobotFeedback);
 
   // Step 4: Request a simulation update at a specific progress point.
@@ -550,7 +559,7 @@ service ParametricRobotControlService {
 |---|---|---|
 | `SetupRobot` | Unary | Initialize robot model, driver, tools, base, collision geometry. Returns settings dictionary. |
 | `AddRobotTask` | Unary | Send motion commands. Returns `SimulationResult` with axis data, reachability, generated code. |
-| `SubscribeRobotFeedback` | Server streaming | Real-time stream of heartbeats, robot state, settings updates, pings. |
+| `SubscribeRobotFeedback` | Server streaming | Real-time stream of heartbeats, robot state, settings updates, pings. The server keeps the robot only while this stream is open — subscribe again after every `SetupRobot` (see [ID Reuse Behaviour](#id-reuse-behaviour)). |
 | `GetSimulatedRobotState` | Unary | Query robot state at a normalized position (0.0–1.0) along the toolpath. |
 | `UpdateVariable` | Unary | Set a variable on the robot. Returns all variables of all connected robots. The variable may be omitted to query without modifying anything. |
 | `GetRobotData` | Unary | Retrieve the resolved robot definition **and live state** (current settings, variables, axis position, tool/flange frames, visualization transformations) for any machine already set up via `SetupRobot` — any connected machine's ID may be queried, e.g. by a Supervisor client monitoring the other machines. Set `exclude_geometry` to skip all mesh data for high-frequency polling. Returns an error status before setup completes. |
@@ -707,9 +716,9 @@ Wraps a `CartesianPosition` with motion parameters:
 | Field | Type | Description |
 |---|---|---|
 | `position` | `CartesianPosition` | The target frame |
-| `posture` | `string` | Robot posture/configuration string (e.g., `"110"` for KUKA turn/status) |
-| `speed` | `repeated float` | Speed — single value for all axes, or one per axis. Normalized 0.0–1.0. |
-| `acceleration` | `repeated float` | Acceleration — single value or one per axis. Normalized 0.0–1.0. |
+| `posture` | `string` | Robot posture/configuration string (e.g., `"110"` for KUKA status bits; ABB `cfx` and FANUC turn strings are converted per family). **Empty means the solver's default branch** (status bits 0/1/0 — KUKA/FANUC/NEURA `"010"`, ABB `cfx 0`, UR `"111"`), not the previous motion's posture; a LIN after such a PTP inherits the empty string and stays on that branch. The generators never write it empty: KRL and Sunrise write the status of the simulated joints, RAPID `cfx 0` with the joints' quadrants, FANUC `N U T`. |
+| `speed` | `repeated float` | Speed of the move to this target; only the first value is used. In a `PTPMotion` it is a joint-move speed, in the unit of `JointTarget.speed`. In a `LINMotion` or `CircularMotion` it is the TCP path speed in **m/s** (ABB: **mm/s**). See [Speed units](#speed-units). |
+| `acceleration` | `repeated float` | Reserved; currently not used. |
 | `external_axis_values` | `repeated float` | Positions of external axes (in mm or degrees depending on type) |
 | `redundancy` | `float` | Redundant axis value (e.g., 7th axis of a 7-DOF robot) |
 
@@ -718,8 +727,8 @@ Wraps a `CartesianPosition` with motion parameters:
 CartesianTarget:
     position             = CartesianPosition
     posture              = "110"          // robot configuration string
-    speed                = [0.15]         // single value or per-axis, 0.0–1.0
-    acceleration         = [0.1]          // single value or per-axis, 0.0–1.0
+    speed                = [0.25]         // LIN/CIRC: 0.25 m/s (ABB: mm/s); PTP: as JointTarget.speed
+    acceleration         = []             // reserved, not used
     external_axis_values = [500.0, 0.0]   // mm or degrees
     redundancy           = 0.0            // 7th axis value
 ```
@@ -731,16 +740,16 @@ Defines a robot position in joint space:
 | Field | Type | Description |
 |---|---|---|
 | `axis_values` | `repeated float` | Joint angles in **degrees** (e.g., 6 values for a 6-axis robot) |
-| `speed` | `repeated float` | Speed — single value or one per axis. Normalized 0.0–1.0. |
-| `acceleration` | `repeated float` | Acceleration — single value or one per axis. Normalized 0.0–1.0. |
+| `speed` | `repeated float` | Speed of the joint move to this target; only the first value is used. On KUKA, FANUC, NEURA and igus robots it is a **percentage (1–100) of each axis's maximum speed**: `15` means 15 %, `0.15` means 0.15 %. On ABB robots it is the TCP speed in **mm/s**, on UR robots the leading joint's speed in **rad/s**. See [Speed units](#speed-units). |
+| `acceleration` | `repeated float` | Reserved; currently not used. |
 | `external_axis_values` | `repeated float` | External axis positions |
 
 **Pseudocode:**
 ```
 JointTarget:
     axis_values          = [A1_deg, A2_deg, A3_deg, A4_deg, A5_deg, A6_deg]
-    speed                = [0.15]         // 15% of max speed
-    acceleration         = [0.1]          // 10% of max acceleration
+    speed                = [15]           // 15 % of each axis's max speed (ABB: mm/s, UR: rad/s)
+    acceleration         = []             // reserved, not used
     external_axis_values = [E1, E2, ...]  // mm or degrees
 ```
 
@@ -1066,7 +1075,7 @@ Defines an external axis (linear rail, rotary positioner, AGV, etc.):
 |---|---|---|
 | `motion_group_type` | `MotionGroupType` | `CP` (Continuous Path / Linear), `PTP` (Point-to-Point), or `SPLINE` |
 | `commands` | `repeated MotionCommand` | The list of motion commands. Must be compatible with the group type. |
-| `interpolation` | `string` | Interpolation/blending mode string (e.g., `"C_PTP"`, `"C_DIS"`, `"C_VEL"`). Written into generated code, and honored live by the realtime drivers (e.g. the mxA driver maps `C_PTP`/`C_VEL` for PTP-type motions and `C_DIS`/`C_VEL` for CP motions onto the KRC's approximation parameters). Blending is not reflected in the simulation. |
+| `interpolation` | `string` | Blending at the group's targets. Empty, blank or `"FINE"`: the robot stops exactly at every target. Any other value means "blend" — use `"C_DIS"` in CP groups and `"C_PTP"` in PTP groups. The simulation times the blend the way the driver's program runs, while its path still passes through every target; see **Blending** below. |
 | `tool_id` | `string` | The `tool_id` (dictionary key) of a tool in `Robot.tool_dictionary`. May be a number (`"0"`) or a name (`"gripper_open"`). Switching to a different key that resolves to the **same** `tool_robot_variable` swaps geometry only — no tool-change is emitted in the generated code (see the [Tool](#tool) message). |
 | `robot_base` | `Base` | Base frame for this motion group |
 | `data` | `MetaData` | Additional data |
@@ -1076,7 +1085,7 @@ Defines an external axis (linear rail, rotary positioner, AGV, etc.):
 MotionGroup:
     motion_group_type = PTP | CP | SPLINE
     commands          = [MotionCommand, MotionCommand, ...]
-    interpolation     = "C_PTP"           // written to generated code
+    interpolation     = "C_PTP"           // blend through the targets ("" = stop at each)
     tool_id           = "0"               // dictionary key; must exist in Robot.tool_dictionary
     robot_base        = Base(...)
 ```
@@ -1090,6 +1099,21 @@ MotionGroup:
 | `SPLINE` | `PTPMotion`, `LINMotion` | Smooth spline interpolation through waypoints. Not yet supported by the KSS_KRL code generator. |
 
 > **KUKA spline motion commands:** Independently of the `SPLINE` group type, the KUKA KSS_KRL driver can emit single-point spline commands — **SPTP** instead of PTP, **SLIN** instead of LIN, **SCIRC** instead of CIRC (with `C_SPL` as the approximation criterion) — for regular `PTP` and `CP` motion groups when the `UseSplineMotions` setting is enabled. Requires KSS 8.3 or higher. See [Section 8](#8-settings-dictionary).
+
+**Blending:** an empty, blank or `"FINE"` (any case) `interpolation` makes the robot stop exactly at every target of the group. Any other value means "blend": the robot moves through each target without stopping. The simulation times it the way the driver's program runs — the speed carries through the targets and into the next motion group, and the robot stops before a `Hold` or a `WaitForVariable`, at the task's last target, and wherever the driver's program stops (last column below) — but it does not round the corners: the simulated path still passes exactly through every target, so blending shortens the simulated time, not the path. Use `"C_DIS"` in CP groups and `"C_PTP"` in PTP groups (the Grasshopper components do the same); every driver reads them, and `"C_VEL"`, as a blend.
+
+| Driver | What a blend becomes | Where the robot also stops |
+|---|---|---|
+| KUKA KSS (KRL) | `C_DIS` on LIN and CIRC, `C_PTP` on PTP (`C_SPL` with spline motions) | at every target with `$ADVANCE` = 0 (the ADVANCE setting): the controller cannot approximate |
+| KUKA mxA (realtime) | `C_VEL`: the velocity criterion; anything else `C_DIS` on LIN and `C_PTP` on PTP/AXIS | — |
+| ABB (RAPID, RWS) | the Default Zone setting; a zone such as `"z10"` passes through | — |
+| FANUC | the Default CNT setting; `CNT<n>`, `CR<n>` and `CD<n>` pass through | — |
+| UR (offline and realtime) | the Default Blending radius; a number is a radius in m (`"0.02"`) | at every target with a radius of 0, a Default Blending of 0 included |
+| NEURA (offline and realtime) | blending with the driver's settings | at every target with the Blending switch off (realtime) or a Blending Radius of 0 (offline); at the end of every group and where a group is split into several NeuraPy calls (a speed change in a PTP group, the CP Targets per Call limit); at every target with the `NeuraPy [JSON]` output format, which carries no blending |
+| igus iRC | `smooth="100"` | — |
+| KUKA Sunrise | `blend="true"`, with the CP/PTP Blending settings | before an output and before a tool change |
+
+ABB, FANUC and UR log a warning for a value they do not know (a probable typo) and blend with their default.
 
 #### `MotionCommand`
 
@@ -1113,18 +1137,18 @@ MotionCommand = ONE OF:
     AxisMotion:                           // Joint-space target
         target = JointTarget(
             axis_values = [-45, -90, 90, 0, 0, 0],  // degrees
-            speed       = [0.15]                      // 15% max speed
+            speed       = [15]                        // 15 % of each axis's max speed (ABB: mm/s, UR: rad/s)
         )
 
     PTPMotion:                            // Cartesian target, PTP interpolation
         target = CartesianTarget(
             position = CartesianPosition(matrix or euler or cs),
             posture  = "110",
-            speed    = [0.1]
+            speed    = [10]                           // joint-move speed, as for AxisMotion
         )
 
     LINMotion:                            // Cartesian target, linear interpolation
-        target = CartesianTarget(...)
+        target = CartesianTarget(..., speed = [0.25]) // TCP path speed in m/s (ABB: mm/s)
 
     CircularMotion:                       // Arc through 3 Cartesian points
         targets = [CartesianTarget, CartesianTarget, CartesianTarget]
@@ -1137,7 +1161,7 @@ motion = prc_pb2.MotionCommand(
     axis_motion=prc_pb2.AxisMotion(
         target=prc_pb2.JointTarget(
             axis_values=[-45, -90, 90, 0, 0, 0],  # 6 joint angles in degrees
-            speed=[0.15]                            # 15% of max speed
+            speed=[15]                              # 15 % of each axis's max speed (ABB: mm/s, UR: rad/s)
         )
     )
 )
@@ -1157,7 +1181,7 @@ motion = prc_pb2.MotionCommand(
                 )
             ),
             posture="110",
-            speed=[0.1]
+            speed=[10]  # joint-move speed: 10 % of each axis's max speed (ABB: mm/s, UR: rad/s)
         )
     )
 )
@@ -1178,11 +1202,30 @@ motion = prc_pb2.MotionCommand(
         target=prc_pb2.CartesianTarget(
             position=prc_pb2.CartesianPosition(matrix=matrix),
             posture="110",
-            speed=[0.1]
+            speed=[10]  # joint-move speed: 10 % of each axis's max speed (ABB: mm/s, UR: rad/s)
         )
     )
 )
 ```
+
+#### Speed units
+
+A target's `speed` is handed to the robot as its own speed parameter, so the unit depends on the robot vendor and on the motion type — there is no normalized 0–1 speed. Only the first value of the list is used.
+
+| Robot (drivers) | Joint moves: `AxisMotion`, `PTPMotion` | Path moves: `LINMotion`, `CircularMotion` | Default-speed settings |
+|---|---|---|---|
+| KUKA (`KUKA.KSS_KRL_Driver`, `KUKA.KSS_IOB_Driver`, `KUKA.KSS_MXA_Driver`, `KUKA.KUKA_Sunrise_Driver`) | % of each axis's maximum speed | m/s | `PTPSpeed`, `CPSpeed` |
+| FANUC (`FANUC.FANUC_LS_Driver`) | % of each axis's maximum speed, rounded to a whole percent from 1 to 100 — the `J` line's value | m/s (the LS program carries mm/sec) | `PTPSpeedPercent`, `CPSpeed` |
+| NEURA (`NEURA.NEURA_SIM_Driver`, `NEURA.NEURA_RT_Driver`) | % of each axis's maximum speed | m/s | `PTPSpeed`, `CPSpeed` |
+| igus (`IGUS.IGUS_Driver`) | % of each axis's maximum speed | m/s (the iRC program carries mm/s) | `PTPSpeed`, `CPSpeed` |
+| Universal Robots (`UR.UR_Driver`, `UR.UR_RT_Driver`) | rad/s: the speed of the leading joint (`movej`'s `v`) | m/s | `PTPSpeed`, `CPSpeed` |
+| ABB (`ABB.ABB_RAPID_Driver`, `ABB.ABB_RWS_Driver`) | TCP speed in mm/s | mm/s | `Speed` — a speeddata name such as `"v500"`, for joint and path moves |
+
+- **A percentage is not a fraction.** A joint-move speed of `15` is 15 % of each axis's maximum speed (the robot's `axis_speed`, see [`CustomRobot`](#customrobot)); `0.15` is 0.15 %. KRL, mxAutomation, LS and iRC commands carry whole percents, so give whole numbers from 1 to 100.
+- **`PTPMotion`:** the Cartesian target is reached with a joint move, so its `speed` is a joint-move speed.
+- **Unset speeds:** a target without a speed — an empty list, `0` or a negative value — keeps the previous speed of the same kind (joint or path); the first move of a task takes the driver's default (last column; the keys are in the settings dictionary, see [Section 8](#8-settings-dictionary)).
+- **ABB:** the program uses the matching predefined speeddata (`v100`, `v500`, …), else the next faster one with the exact speed as `\V` (for example `v60 \V:=55`).
+- **Universal Robots:** a joint move is a `movej`. All joints arrive together, and the joint that moves furthest runs at the speed, less if another joint would exceed its maximum speed. The move accelerates at the `DefaultAcceleration` setting (`UR.UR_Driver`) or `PTPAcceleration` (`UR.UR_RT_Driver`), in rad/s², and the simulation times it the same way.
 
 ---
 
@@ -1650,7 +1693,7 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 | `ABB.ABB_RAPID_Driver` | Experimental | ABB robots using RAPID language (offline code generation). |
 | `ABB.ABB_RWS_Driver` | Experimental | ABB **online** driver via Robot Web Services (HTTPS + Digest auth, OmniCore): on an execute-type task it uploads the generated RAPID module, loads it, resets the program pointer to `main`, turns motors on and starts execution; live joint/Cartesian position and RAPID execution state stream back via a subscription and are published as `RobotState` updates (`data["State"]` = `Running`/`Stopped`, `data["Moving"]`, `data["Error"]`) plus `ABB …` variables. Honors the moderation variables: `Run` (missing = true) gates connect/execute — an **empty task re-executes the previous task only when `Run` is explicitly true** (a simulate-only buffered task is escalated to an execute on such a rerun), so a plain re-simulation can never fire a RAPID run by itself; `OV` maps to the controller speed ratio; a `Reset` rising edge resets the program pointer. `Run` also gates live following (missing = on; the legacy `Online` variable is still honored alongside it). |
 | `FANUC.FANUC_LS_Driver` | Experimental | FANUC offline code generation: outputs an **LS** program source (TP format) with XYZWPR frame data; CP speeds are interpreted in m/s in the simulation. Save `SimulationResult.code` as `.ls`. |
-| `IGUS.IGUS_Driver` | Proof of Concept | IGUS ReBel robot support. |
+| `IGUS.IGUS_Driver` | Proof of Concept | igus ReBel (`IGUS.IGUS_ReBel` = REBEL-6DOF-01, `IGUS.IGUS_ReBel03` = REBEL-6DOF-03) offline code generation: writes an **igus Robot Control (iRC) XML program** in the shape iRC V15 saves (XML declaration, CRLF, a `Header` naming the robot type and `GripperType` = the program's tool name + `.xml`, empty without a tool), one file `<ProgramName>.xml` (display name `IGUS_IRC`, no license). Axis values are the **iRC's own joint values** (A2 = 0 with the upper arm vertical; the kinematics are the iRC's, so PRC's positions match the iRC's readouts). Settings: program name, save file/folder, start position (default: the iRC home 0, −20, 110, 0, 90, 0) and initial posture, default CP/PTP speed, collision checking. There is **no base setting** — the iRC has no base frames, so targets in a motion group's base are written in robot coordinates with the base applied, as `UserFrame="#base"`. Writes `Joint` (axis and PTP motions, from the simulated joints), `Linear` (LIN), `Circular` (CIRC: auxiliary point, end point and end orientation), `Output` (a boolean variable whose name ends with its number, e.g. `DOut1`, or a `GSig` signal), `Wait` (hold time; wait for a condition), `If`/`Else`/`EndIf` and `Loop`/`EndLoop` (a WHILE, its condition negated: the iRC loops until the condition holds). Conditions take a boolean input whose name ends with its number (`DIn1`, `$IN[1]`) or a `GSig` signal. `smooth` is 100 in a group with interpolation data, else 0. **Refused in `AddRobotTask`** with a message naming the command: spline motions, END, custom code and other variables. Cartesian targets are TCP positions of PRC's tool, so the iRC's active tool must match it. |
 | `NEURA.NEURA_SIM_Driver` | Proof of Concept | NEURA robots (MAiRA 7-DOF and LARA 6-DOF). Generates NeuraPy v5 Python code — `move_joint` blocks for PTP groups and one `move_composite` per CP group (linear/circular children with per-child velocities, each child's `target_pose` seeded with the pose the segment starts from) — or a neutral JSON toolpath format, selected via the `OutputFormat` setting. Oversized CP groups are split into several `move_composite` calls (`CPTargetsPerCall` setting) because the NeuraPy socket server rejects requests beyond its read buffer. |
 | `NEURA.NEURA_RT_Driver` | Experimental | NEURA **realtime** driver: connects to the NeuraPy socket server on the robot control box (default `192.168.2.13:65432`) and executes/streams motions live, with configurable blending and feedback interval; oversized CP groups are split into several `move_composite` calls (`CPTargetsPerCall` setting). In **Follow Target Mode** the task's last **Cartesian PTP** target is chased via the servo interface (`movelinear_online`), with a real PTP to the solver's joint solution priming the commanded posture at session start and on posture changes — see [Section 8](#8-settings-dictionary). |
 | `Supervisor.Supervisor_Driver` | Functional | Connection-only driver for accessing I/O values and data from other robots/IoT devices. Does not accept tasks. `GetSimulatedRobotState` returns the variables of **all** connected robots plus a machine inventory in `data` (`Machines` = comma-separated IDs, and per machine `<id> Name`, `<id> Model`, `<id> Driver`, `<id> Status`). Any machine ID from the inventory can then be queried in detail via `GetRobotData` — with `exclude_geometry = true` for high-frequency live-state polling (see [Section 6.7](#67-requestreply)). Pairs with the `Supervisor.Supervisor_Device` robot class, which is also the server-side default when a setup request contains no robot definition. |
@@ -1666,7 +1709,7 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 
 **FANUC:** `FANUC.FANUC_R2000iC_165F`, `FANUC.FANUC_LRMate200iD`, `FANUC.FANUC_M2000iA_2300`
 
-**IGUS:** `IGUS.IGUS_ReBel`
+**IGUS:** `IGUS.IGUS_ReBel` (ReBel 6DOF-01), `IGUS.IGUS_ReBel03` (ReBel 6DOF-03)
 
 **NEURA:** `NEURA.NEURA_MAIRA_M` (7-DOF), `NEURA.NEURA_LARA_3` (LARA 3, 6-DOF)
 
@@ -2241,6 +2284,7 @@ polymesh = prc_pb2.PolyMesh(
 | Up axis | **Z+** |
 | Linear units | **Millimetres (mm)** |
 | Angular units | **Degrees** |
+| Speeds | Per robot vendor and motion type — see [Speed units](#speed-units) |
 | Matrix layout | Row-major (`System.Numerics.Matrix4x4` compatible) |
 | Translation in matrix | Bottom row: m41 (X), m42 (Y), m43 (Z) |
 
@@ -2335,7 +2379,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { -45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 0.15f }
+                Speed = new float[] { 15f }  // KUKA: 15 % of each axis's maximum speed
             }
         },
         new PRC.Core.Commands.Motion.Axis
@@ -2343,7 +2387,7 @@ if (connectFeedback.Status == Status.Success)
             Target = new PRC.Core.Primitives.JointTarget
             {
                 AxisValues = new float[] { 45, -90, 90, 0, 0, 0 },
-                Speed = new float[] { 0.15f }
+                Speed = new float[] { 15f }
             }
         }
     };
@@ -2450,11 +2494,11 @@ var taskReply = await client.AddRobotTaskAsync(new AddRobotTaskRequest
                         new MotionCommand { AxisMotion = new AxisMotion {
                             Target = new JointTarget {
                                 AxisValues = { -45, -90, 90, 0, 0, 0 },
-                                Speed = { 0.15f } } } },
+                                Speed = { 15f } } } },  // KUKA: 15 % of each axis's maximum speed
                         new MotionCommand { AxisMotion = new AxisMotion {
                             Target = new JointTarget {
                                 AxisValues = { 45, -90, 90, 0, 0, 0 },
-                                Speed = { 0.15f } } } }
+                                Speed = { 15f } } } }
                     }
                 }
             }
@@ -2572,10 +2616,10 @@ thread.start()
 motions = [
     prc_pb2.MotionCommand(axis_motion=prc_pb2.AxisMotion(
         target=prc_pb2.JointTarget(
-            axis_values=[0, 20, -90, 90, 70, -115], speed=[0.1]))),
+            axis_values=[0, 20, -90, 90, 70, -115], speed=[10]))),  # KUKA: 10 % of each axis's maximum speed
     prc_pb2.MotionCommand(axis_motion=prc_pb2.AxisMotion(
         target=prc_pb2.JointTarget(
-            axis_values=[0, -40, 75, -80, -90, -125], speed=[0.15]))),
+            axis_values=[0, -40, 75, -80, -90, -125], speed=[15]))),
 ]
 
 task_reply = stub.AddRobotTask(prc_pb2.AddRobotTaskRequest(
@@ -2622,7 +2666,7 @@ for i in range(0, 101, 5):
 # --- Cleanup ---
 stop_event.set()
 thread.join(timeout=5)
-channel.close()
+channel.close()  # ends the feedback stream, so the server removes the robot
 ```
 
 ### 13.4 JavaScript Example
@@ -2673,12 +2717,12 @@ const addTaskReply = await client.addRobotTask(
                             new prc.AxisMotion().setTarget(
                                 new prc.JointTarget()
                                     .setAxisValuesList([0, 20, -90, 90, 70, -115])
-                                    .setSpeedList([0.1]))),
+                                    .setSpeedList([10]))),  // KUKA: 10 % of each axis's maximum speed
                         new prc.MotionCommand().setAxisMotion(
                             new prc.AxisMotion().setTarget(
                                 new prc.JointTarget()
                                     .setAxisValuesList([0, -40, 75, -80, -90, -125])
-                                    .setSpeedList([0.1])))
+                                    .setSpeedList([10])))
                     ])
                 )
             ])

@@ -24,13 +24,14 @@ option csharp_namespace = "PRC.GRPC";
 // Typical integration lifecycle:
 //   1. SetupRobot   — define the robot model, driver, tools, and base.
 //   2. AddRobotTask — send motion commands; receive simulation results and code.
-//   3. SubscribeRobotFeedback — open a persistent feedback stream.
+//   3. SubscribeRobotFeedback — open the feedback stream; it keeps the robot set up.
 //   4. GetSimulatedRobotState — query robot state at any toolpath position (0.0–1.0).
 service ParametricRobotControlService {
     // Step 1: Initialise the simulation/control environment with a robot model,
     // driver, tools, base frame, and optional collision geometry.
     // Returns a settings dictionary to be passed back with subsequent AddRobotTask calls.
-    // Calling SetupRobot again with the same client_id replaces the previous setup.
+    // Calling SetupRobot again with the same client_id replaces the previous setup and
+    // ends its feedback stream: subscribe again (see SubscribeRobotFeedback).
     rpc SetupRobot (SetupRobotRequest) returns (SetupRobotReply);
 
     // Step 2: Submit a task (motion commands, actions, flow control) for
@@ -40,6 +41,16 @@ service ParametricRobotControlService {
 
     // Step 3: Open a persistent server-streaming connection to receive
     // continuous feedback: heartbeats, robot state updates, settings changes, and pings.
+    // The server keeps a robot set up under a client_id only while its feedback stream is
+    // open: when the stream ends (the client cancels it, disposes its channel, quits or
+    // crashes), the server removes the robot and disposes its driver within about a
+    // second, which disconnects a realtime driver from its controller. A SetupRobot with
+    // the same client_id ends the previous robot's stream without removing the new robot,
+    // so subscribe again after every SetupRobot. A robot that never gets a stream stays on
+    // the server until a SetupRobot with the same client_id replaces it (or it is unloaded
+    // from the server's dashboard). Each robot has one stream: a later subscription to the
+    // same id, from any client, takes the feedback over, and from then on that stream
+    // keeps the robot.
     rpc SubscribeRobotFeedback (SubscribeRobotFeedbackRequest) returns (stream RobotFeedback);
 
     // Step 4: Query the simulated robot state at a normalised position (0.0–1.0)
@@ -780,7 +791,35 @@ message MotionGroup {
     // The motion commands. Must match the MotionGroupType
     // (e.g., no AxisMotion in a CP group).
     repeated MotionCommand commands = 2;
-    // Interpolation mode written into the generated code but not simulated.
+    // Blending at the group's targets. Empty, blank or "FINE" (any case): the robot stops
+    // exactly at every target. Any other value means "blend": the robot moves through each
+    // target without stopping. The simulation times it the way the driver's program runs:
+    // the speed carries through the targets and into the next motion group, and the robot
+    // stops before a Hold or a WaitForVariable, at the task's last target, and wherever
+    // the driver's program stops (below). It does not round the corners: the simulated
+    // path still passes exactly through every target, so blending shortens the simulated
+    // time, not the path.
+    // Use "C_DIS" in CP groups and "C_PTP" in PTP groups; every driver reads them, and
+    // "C_VEL", as a blend. What each driver writes or runs for a blend:
+    //   KUKA KRL:     C_DIS on LIN and CIRC, C_PTP on PTP (C_SPL with spline motions).
+    //                 With $ADVANCE = 0 the controller cannot blend: exact stops.
+    //   KUKA mxA:     C_VEL with the velocity criterion, anything else C_DIS on LIN and
+    //                 C_PTP on PTP/AXIS.
+    //   ABB RAPID:    the Default Zone setting; a zone ("z10") passes through.
+    //   FANUC:        the Default CNT setting; CNT<n>, CR<n> and CD<n> pass through.
+    //   UR:           the Default Blending radius; a number is a radius in m ("0.02").
+    //                 A radius of 0 (also a Default Blending of 0) is an exact stop.
+    //   NEURA:        with the driver's blending settings (off: the Blending switch, or a
+    //                 Blending Radius of 0). NeuraPy blends only within one call, so the
+    //                 robot also stops at the end of every group and where a group is
+    //                 split into calls (a speed change in a PTP group, CP Targets per
+    //                 Call). The NeuraPy [JSON] output format carries no blending: exact
+    //                 stops.
+    //   igus iRC:     smooth 100.
+    //   KUKA Sunrise: blend, with the CP/PTP Blending settings; the robot also stops
+    //                 before an output and before a tool change.
+    // ABB, FANUC and UR report a value they do not know (a probable typo) and blend with
+    // their default.
     string interpolation = 3;
     // Tool ID — must match a key in Robot.tool_dictionary.
     string tool_id = 4;
