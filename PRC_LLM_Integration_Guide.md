@@ -4,7 +4,7 @@
 
 > **Purpose:** This document provides a thorough, structured reference for developers and LLMs building new integrations with PRC. It covers every protobuf message, the complete GRPC service API, data flows, coordinate conventions, unit systems, visualization patterns, and concrete code examples across C#, Python, and JavaScript.
 
-> **Scope:** Updated for PRC Server **1.738** (2026-09-25); 1.738 adds the igus iRC program format and driver name `IGUS_IRC`, the ReBel 6DOF-03 preset, one blending rule for the simulation and every driver (`MotionGroup.interpolation`), the feedback-stream lifetime rule, per-vendor speed units, ABB RAPID external axes and the empty-posture default. 1.735 added the KUKA Sunrise online execution modes (TCP link), the KR 800 R2800-2 and the ABB GoFa presets with the `ABB.ABB_6DOF_Offset` solver. 1.732 added the `Client.DescribeLibrary` wrapper and the UR3, UR3e, ABB IRB 120 and IRB 140 presets. New since the 2026-08 revision: the `DescribeLibrary` setup catalog ([Section 6.8](#68-library-catalog-describelibrary)), `SimulationResult.files`, external-axis presets by reference, custom-robot solvers by name, the KUKA Sunrise driver for the seven-axis LBR iiwa, iiQKA.OS 2 program upload, and gRPC server reflection.
+> **Scope:** Updated for PRC Server **1.741** (2026-09-28); 1.741 adds the checks of gRPC input (frames, `CartesianReference`, `hold_ms` in seconds), realtime tasks that start where the robot stands, the simulation of the paths an IF/ELSE or WHILE does not take, and joint-move speeds capped at 100 %. 1.738 added the igus iRC program format and driver name `IGUS_IRC`, the ReBel 6DOF-03 preset, one blending rule for the simulation and every driver (`MotionGroup.interpolation`), the feedback-stream lifetime rule, per-vendor speed units, ABB RAPID external axes and the empty-posture default. 1.735 added the KUKA Sunrise online execution modes (TCP link), the KR 800 R2800-2 and the ABB GoFa presets with the `ABB.ABB_6DOF_Offset` solver. 1.732 added the `Client.DescribeLibrary` wrapper and the UR3, UR3e, ABB IRB 120 and IRB 140 presets. New since the 2026-08 revision: the `DescribeLibrary` setup catalog ([Section 6.8](#68-library-catalog-describelibrary)), `SimulationResult.files`, external-axis presets by reference, custom-robot solvers by name, the KUKA Sunrise driver for the seven-axis LBR iiwa, iiQKA.OS 2 program upload, and gRPC server reflection.
 
 ---
 
@@ -631,13 +631,15 @@ Matrix4x4:
 
 When porting to engines or libraries that use **column-major layout** or a **pre-multiply / column-vector convention** (e.g., OpenGL, Blender, Fusion 360), you must **transpose** the matrix so the translation ends up in the last column.
 
+**What the server checks** (motion targets, TCPs, bases, external-axis frames): the values must be finite and column 4 must be `[0, 0, 0, 1]`, so a matrix sent transposed (translation in `m14..m34`) is refused with an error instead of putting the target at the base origin. Scaled rows (for example a scaled scene object's world matrix) are normalized, and axes that are not quite perpendicular are made perpendicular, keeping X. A zero or mirrored rotation is refused.
+
 #### `CartesianPosition`
 
 Defines a position in 3D Cartesian space. Uses a `oneof` to support three representations:
 
 | Frame Type | Message | Description |
 |---|---|---|
-| `matrix` | `Matrix4x4` | Full 4x4 transformation matrix. Most general representation. |
+| `matrix` | `Matrix4x4` | Full 4x4 transformation matrix (row-vector form, see above). Most general representation. |
 | `euler` | `Euler` | Position (X, Y, Z in mm) + orientation (A, B, C) with a specified `EulerFormat`. |
 | `cs` | `CoordinateSystem` | Origin point + X-axis vector + Y-axis vector (Z derived from cross product). |
 
@@ -648,14 +650,15 @@ CartesianPosition:
         Matrix4x4   → full 4x4 matrix
         Euler       → {x, y, z} in mm + {a, b, c} angles + format
         CoordinateSystem → origin(mm) + x_axis(unit) + y_axis(unit)
-    reference = ABSOLUTE | RELATIVE | PARENT
-    parent    = optional Matrix4x4 (parent frame, if reference = PARENT)
+    reference = ABSOLUTE (the only supported value)
+    parent    = not used (ignored)
     id        = string identifier
 ```
 
 Additional fields:
-- **`reference`** (`CartesianReference` enum): `ABSOLUTE` (world frame), `RELATIVE` (offset from current), or `PARENT` (relative to parent matrix).
-- **`parent`** (`Matrix4x4`): Optional parent transformation matrix.
+- **`reference`** (`CartesianReference` enum): only `ABSOLUTE` is supported: a target is expressed in its motion group's base, a TCP relative to the flange. `RELATIVE` and `PARENT` are refused with an error.
+- **`parent`** (`Matrix4x4`): not used; a parent sent with a position is ignored.
+- A target needs a frame: a `CartesianPosition` with none of `matrix`, `euler` or `cs` (or an unknown `EulerFormat`) is refused. A TCP or base without a frame is the identity.
 - **`id`** (`string`): Identifier for the position.
 
 #### `Euler`
@@ -695,17 +698,17 @@ Defines a frame through three vectors:
 | Field | Type | Description |
 |---|---|---|
 | `origin` | `Vector3` | Position of the origin in **mm** |
-| `x_axis` | `Vector3` | Direction of the X axis (unit vector) |
-| `y_axis` | `Vector3` | Direction of the Y axis (unit vector) |
+| `x_axis` | `Vector3` | Direction of the X axis (normalized by the server) |
+| `y_axis` | `Vector3` | Direction of the Y axis; should be perpendicular to `x_axis` |
 
-The Z axis is implicitly derived as the cross product of X and Y (`Z = X x Y`), forming a right-handed coordinate system.
+The Z axis is implicitly derived as the cross product of X and Y (`Z = X x Y`), forming a right-handed coordinate system. If Y is not perpendicular to X (for example X = the path tangent, Y = world up), the server keeps X and makes Y perpendicular to it, as Rhino's `Plane` does; zero or parallel axes are refused.
 
 **Pseudocode:**
 ```
 CoordinateSystem:
     origin = Vector3(x_mm, y_mm, z_mm)
     x_axis = Vector3(normalized direction)
-    y_axis = Vector3(normalized direction)
+    y_axis = Vector3(normalized direction, perpendicular to x_axis)
     // z_axis = cross(x_axis, y_axis)  ← implicit, right-handed
 ```
 
@@ -875,7 +878,7 @@ Generic additional data container:
 
 | Enum | Values | Description |
 |---|---|---|
-| `CartesianReference` | `ABSOLUTE=0`, `RELATIVE=1`, `PARENT=2` | Frame reference type |
+| `CartesianReference` | `ABSOLUTE=0`, `RELATIVE=1`, `PARENT=2` | Frame reference type; only `ABSOLUTE` is supported |
 | `FrameType` | `FIXED=0`, `EXTERNAL=1` | Whether a tool/base is fixed to the robot or external |
 | `EulerFormat` | `ZYX=0`, `AXISANGLE=1`, `RPY=2` | Euler angle convention |
 | `ExternalAxisType` | `LINEAR_RAIL=0`, `LINEAR_DOUBLE=1`, `LINEAR_TRIPLE=2`, `ROTARY_SINGLE=3`, `ROTARY_DOUBLE=4`, `AGV=5` | Type of external axis mechanism |
@@ -928,10 +931,10 @@ Defines a robotic end-effector tool:
 
 | Field | Type | Description |
 |---|---|---|
-| `tool_type` | `FrameType` | `FIXED` (mounted on flange) or `EXTERNAL` (stationary tool in the cell) |
+| `tool_type` | `FrameType` | `FIXED` (mounted on flange) or `EXTERNAL` (the TCP is a stationary point in the cell) |
 | `tcp` | `CartesianPosition` | Tool Center Point — the tip of the tool, relative to the robot flange. Any of the three `CartesianPosition` representations can be used. |
 | `tool_id` | `string` | **Dictionary key / display name.** Must match the key in `Robot.tool_dictionary` and is what `MotionGroup.tool_id` references. May be a number (`"0"`, `"6"`) or a descriptive name (`"gripper_open"`). |
-| `tool_geometry` | `PolyMesh` | Visual and collision mesh of the tool |
+| `tool_geometry` | `PolyMesh` | Visual and collision mesh of what the flange carries: the tool, or for an `EXTERNAL` tool the gripper with its workpiece. Model the stationary external tool itself as `Robot.collision_geometry`. |
 | `tool_robot_variable` | `string` | **Controller-side tool identifier** — the tool number written into generated code (e.g. `"6"` → KUKA `Tool6`). Several `Tool` entries may share one `tool_robot_variable` (and the same TCP) while differing only in geometry; this is how multiple geometric states of one physical tool are expressed. **Defaults to `tool_id` when left empty.** |
 
 > **Note (field 4 reserved):** The former `int32 tool_state` field (field number 4) has been **removed**. It is now `reserved` in the proto, so the field number is never reused. Switching tool configurations is now done with `tool_robot_variable` + multiple dictionary entries (see below), not a per-tool state index.
@@ -1222,6 +1225,7 @@ A target's `speed` is handed to the robot as its own speed parameter, so the uni
 | ABB (`ABB.ABB_RAPID_Driver`, `ABB.ABB_RWS_Driver`) | TCP speed in mm/s | mm/s | `Speed` — a speeddata name such as `"v500"`, for joint and path moves |
 
 - **A percentage is not a fraction.** A joint-move speed of `15` is 15 % of each axis's maximum speed (the robot's `axis_speed`, see [`CustomRobot`](#customrobot)); `0.15` is 0.15 %. KRL, mxAutomation, LS and iRC commands carry whole percents, so give whole numbers from 1 to 100.
+- **A joint move runs at 100 % at most.** The KRL, mxAutomation and igus drivers round the value half up to a whole percent from 1 to 100; the program carries that percent, the simulation times the move with it, and the driver warns where it differs from the requested value. `KUKA.KSS_IOB_Driver` and the Sunrise driver keep the value as given (at most 100).
 - **`PTPMotion`:** the Cartesian target is reached with a joint move, so its `speed` is a joint-move speed.
 - **Unset speeds:** a target without a speed — an empty list, `0` or a negative value — keeps the previous speed of the same kind (joint or path); the first move of a task takes the driver's default (last column; the keys are in the settings dictionary, see [Section 8](#8-settings-dictionary)).
 - **ABB:** the program uses the matching predefined speeddata (`v100`, `v500`, …), else the next faster one with the exact speed as `\V` (for example `v60 \V:=55`).
@@ -1237,7 +1241,7 @@ Actions are non-movement commands embedded in a task via `TaskPayload.action_tas
 |---|---|---|
 | `set_variable_action` | `SetVariable` | Sets a robot variable (bool/float/int/string) |
 | `wait_for_variable_action` | `WaitForVariable` | Pauses execution until a variable reaches a target state |
-| `hold_action` | `Hold` | Pauses execution for `hold_ms` milliseconds. Advances the simulation timeline by that duration and emits a sample at the held (preceding waypoint's) pose. |
+| `hold_action` | `Hold` | Pauses execution for `hold_ms` **seconds** (despite the field's name). Advances the simulation timeline by that duration and emits a sample at the held (preceding waypoint's) pose. |
 | `ping_action` | `Ping` | Pings the PRC server |
 | `insert_code_action` | `InsertCode` | Inserts arbitrary lines of robot code. Not parsed or simulated. |
 
@@ -1246,7 +1250,7 @@ Actions are non-movement commands embedded in a task via `TaskPayload.action_tas
 Action = ONE OF:
     SetVariable:        set variable "GripperOpen" = true
     WaitForVariable:    wait until variable "SensorReady" == true
-    Hold:               pause for 2000 ms
+    Hold:               pause for 2 s (hold_ms is in seconds)
     Ping:               ping server with payload
     InsertCode:         insert raw code lines ["LINE1", "LINE2"]
 ```
@@ -1255,7 +1259,7 @@ Action = ONE OF:
 
 ```python
 hold_action = prc_pb2.Action(
-    hold_action=prc_pb2.Hold(hold_ms=2000)
+    hold_action=prc_pb2.Hold(hold_ms=2)  # seconds, despite the name
 )
 
 set_var_action = prc_pb2.Action(
@@ -1327,6 +1331,8 @@ Supports three flow types:
 - **`While`**: Evaluates a `Variable` condition, repeatedly executes `body` `Task` while true.
 - **`End`**: Terminates the program.
 
+The simulation's timeline follows one path through the task, but the paths it does not take are simulated as well: every `if_false` from the state at its `IfElse`, and every move into a join or back to the top of a loop. A problem on such a path (out of reach, a collision, a failed simulation) makes the result invalid, and the error (`SimulationResult.data["Error"]`, the reply's `Error: …` status) names the path, e.g. the ELSE of an IF.
+
 **Pseudocode:**
 ```
 Flow = ONE OF:
@@ -1357,6 +1363,8 @@ Returned in `AddRobotTaskReply.simulation_result_data`. Contains the complete si
 | `code` | `string` | Generated robot control code — **always the text of the primary file** (KRL for KUKA KSS, Sunrise XML for the LBR iiwa, URScript for UR, RAPID for ABB, LS for FANUC, igus XML, NeuraPy Python for NEURA, …). Use it only when `files` is empty (older servers); then choose the extension yourself: `.src` (KUKA KRL), `.xml` (KUKA Sunrise, igus), `.urp`/`.urpx`/`.script` (UR, per the Polyscope setting), `.mod`/`.modx` (ABB, per `IRCVersion`), `.ls` (FANUC), `.py` or `.json` (NEURA, per `OutputFormat`), `.json` (`KUKA.KSS_IOB_Driver` Path-Table take file) — see [Section 8](#8-settings-dictionary). |
 | `files` | `repeated ProgramFile` (field 6, since 1.716) | **Every generated file with its file name, the primary program first.** A driver whose controller expects several files per program lists them all (a program plus the data files that belong to it). Empty when the driver only delivers `code` (the realtime drivers have no program file; older servers) — then the client names the file itself. Names derive from the `ProgramName` setting, sanitised as the controller requires. |
 | `data` | `MetaData` | Additional information |
+
+A move that would need more than 1,000,000 interpolation samples is refused before it is interpolated (a joint value far outside its range or a speed far too low asks for that, e.g. an ABB speed given in m/s), and so is a task once its samples pass 5,000,000; the reply's status carries the error.
 
 `ProgramFile` has two fields: `name` — the file name including its extension, e.g. `kukaprc_project.src` — and `content`, the file text with the line endings the controller expects (write it without newline translation).
 
@@ -1686,16 +1694,16 @@ PRC includes a library of built-in robot models and drivers referenced by class 
 |---|---|---|
 | `KUKA.KSS_KRL_Driver` | **Preview** | Driver for KUKA robots running KSS (KRC1-5) and **iiQKA.OS 2**. Outputs KRL code. `KSSVersion` targets the controller generation (`KRC1-KRC2 Legacy`, `KRC2-KRC5 (KSS <= 8.7)` — default, `iiQKA.OS 2 (KSS >= 9.0)`); with the iiQKA target the driver can **upload the program directly to the controller** (DeviceManager gRPC on port 443 — `ControllerAddress`, `ControllerInstance`, `ControllerUsername`, `ControllerPassword`, `ControllerFolder`; `AutoUpload` pushes every program regenerated by an execute-type task, see [Section 8](#8-settings-dictionary)). Can optionally emit spline motion commands (SLIN/SPTP/SCIRC) instead of LIN/PTP/CIRC via the `UseSplineMotions` setting. Six-axis KUKA kinematics only (`KUKA_6DOF` / `KUKA_6DOF_Offset`) — the seven-axis LBR iiwa is refused in `AddRobotTask` with a message naming the Sunrise driver. |
 | `KUKA.KSS_IOB_Driver` | Experimental | KUKA driver for the IO Builder integration, derived from KSS_KRL. Two interaction modes (chosen via the `Interaction` setting): **Servoing** streams the robot's current axis position as JSON over UDP to an external system whenever the simulation updates, and visualizes positions received back live; **Path-Table** takes each motion's absolute time from the metadata key `TimeStamp` (seconds, on `MetaData.data`) instead of computing timing from speed, and generates a time-stamped axis_recorder take file (JSON) as its `code` output instead of KRL. |
-| `KUKA.KSS_MXA_Driver` | Experimental | KUKA mxAutomation **realtime** interface: streams motion commands cyclically over UDP to a KRC running the mxA option package. The bundled `KUKA.MxAutomation.dll` speaks mxA **interface 6.0** (a `KUKA.MxAutomation_3_3.dll` for interface-3.3 controllers ships alongside; the assembly version is *not* the interface version). The handshake fails with error 503 on an interface mismatch — the diagnosis, including both version numbers, is surfaced in `RobotState.data["Error"]` / the `mxA Last Error` variable. PRC sends to UDP 1336 and receives on 1336 (interface 5+) or 1337 (interface 3), selected automatically from the referenced DLL. Honors `C_PTP`/`C_VEL` blending on PTP groups and `C_DIS`/`C_VEL` on CP groups at runtime. **A new task cancels the running one by default** — its first order is sent in aborting mode, stopping the current motion and flushing the KRC-side queue. Honors the moderation variables (see below); without any `OV` the override defaults to 10 %. |
+| `KUKA.KSS_MXA_Driver` | Experimental | KUKA mxAutomation **realtime** interface: streams motion commands cyclically over UDP to a KRC running the mxA option package. The bundled `KUKA.MxAutomation.dll` speaks mxA **interface 6.0** (a `KUKA.MxAutomation_3_3.dll` for interface-3.3 controllers ships alongside; the assembly version is *not* the interface version). The handshake fails with error 503 on an interface mismatch — the diagnosis, including both version numbers, is surfaced in `RobotState.data["Error"]` / the `mxA Last Error` variable. PRC sends to UDP 1336 and receives on 1336 (interface 5+) or 1337 (interface 3), selected automatically from the referenced DLL. Honors `C_PTP`/`C_VEL` blending on PTP groups and `C_DIS`/`C_VEL` on CP groups at runtime. **A new task cancels the running one by default** — its first order is sent in aborting mode, stopping the current motion and flushing the KRC-side queue. Honors the moderation variables (see below); without any `OV` the override defaults to 10 %. **A task that moves the robot starts where the robot reports it stands:** with `Run` on, the driver starts its link and waits for a fresh position report; without one the task is simulated but not sent, and the error starts with `Not sent:`. |
 | `KUKA.KUKA_Sunrise_Driver` | Experimental | **KUKA LBR iiwa** (7 R800 / 14 R820 — seven axes, `KUKA.KUKA_7DOF` solver) on **Sunrise.OS**. Licensed (display name `KUKA_SUNRISE`); offline by default, online in two of its execution modes (`DescribeLibrary` lists it as `online` with the run-state variable `Sunrise State`). `OutputFormat` selects `Sunrise XML (PRC Java library)` — a `<PRCProgram version="3">` file (mm, degrees, mm/s, %; a `Settings` block with base, initial tool, blending, acceleration and default speeds; one element per command: `Axis a1..a7`, `Lin`/`Ptp`/`Circ` with `e1` = A3 redundancy, `Ptp` also with `status`/`turn`, `Wait`, `DigitalOutput`/`AnalogOutput`, `ChangeTool`, optional `Compliance` child) executed by the **PRC Sunrise Java library**'s `PRC_RunXML` application (program chooser on the smartPAD), downloadable from the driver's Settings page (*Controller Software* group; Java 6 sources for Sunrise Workbench) — or `Sunrise Workbench Frames`, a `RoboticsAPIData` frame file to import into Workbench. The `ExecutionMode` setting (`Program File` — default — / `Online: Run Program` / `Online: Follow Target`, with `RobotIP` and `RobotPort` 30000) selects the two **online modes over a TCP link** to the library's `PRC_RunOnline` application: Run Program sends every executed task as a complete program the controller runs (a new one replaces the running one), Follow Target lets the robot follow the task's last target — a PTP or an axis motion — with a SmartServo motion in joint space (the simulated joint solution is the destination; no priming motion; a task ending with a LIN, circular or spline target is refused); while the controller streams its state, the simulation starts from the robot's actual position instead of the Start Position settings; the controller's `STATE`/`PROGRAM`/`LOG` replies become the live robot state and the `Sunrise State`, `Sunrise Link` (the last send outcome: program sent, target sent, stopped, stop pending, not connected), `Sunrise Progress`, `Sunrise Program`, `Sunrise Controller`, `Sunrise Message`, `Sunrise TCP X..C` and `Sunrise Force X..Z` variables. LIN/PTP targets may carry `SunriseStiffness` / `SunriseAdditionalForce` metadata (`"x,y,z"`) for compliant motion. An unset redundancy is A3 = 0 on the wire. **Unsupported commands are refused in `AddRobotTask`**: IF/ELSE, WHILE, wait-for-variable, custom code (spline groups are not generated by any offline driver yet). |
 | `UR.UR_Driver` | Experimental | Universal Robots offline code generation (UR5, UR5e/7e, UR10e, UR20). Outputs URScript. Supports Polyscope 5 and Polyscope X. |
-| `UR.UR_RT_Driver` | Experimental | Universal Robots **realtime** driver: simulates PRC tasks with the UR solver, streams them as URScript programs over the controller's secondary interface (port 30002), and displays the actual robot position live via RTDE (port 30004). Both channels are officially supported on Polyscope 5 and PolyScope X. |
+| `UR.UR_RT_Driver` | Experimental | Universal Robots **realtime** driver: simulates PRC tasks with the UR solver, streams them as URScript programs over the controller's secondary interface (port 30002), and displays the actual robot position live via RTDE (port 30004). Both channels are officially supported on Polyscope 5 and PolyScope X. **A task that moves the robot starts where the robot reports it stands:** with `Run` on, the driver starts its link and waits for a fresh position report; without one the task is simulated but not sent, and the error starts with `Not sent:`. |
 | `ABB.ABB_RAPID_Driver` | Experimental | ABB robots using RAPID language (offline code generation). |
 | `ABB.ABB_RWS_Driver` | Experimental | ABB **online** driver via Robot Web Services (HTTPS + Digest auth, OmniCore): on an execute-type task it uploads the generated RAPID module, loads it, resets the program pointer to `main`, turns motors on and starts execution; live joint/Cartesian position and RAPID execution state stream back via a subscription and are published as `RobotState` updates (`data["State"]` = `Running`/`Stopped`, `data["Moving"]`, `data["Error"]`) plus `ABB …` variables. Honors the moderation variables: `Run` (missing = true) gates connect/execute — an **empty task re-executes the previous task only when `Run` is explicitly true** (a simulate-only buffered task is escalated to an execute on such a rerun), so a plain re-simulation can never fire a RAPID run by itself; `OV` maps to the controller speed ratio; a `Reset` rising edge resets the program pointer. `Run` also gates live following (missing = on; the legacy `Online` variable is still honored alongside it). |
 | `FANUC.FANUC_LS_Driver` | Experimental | FANUC offline code generation: outputs an **LS** program source (TP format) with XYZWPR frame data; CP speeds are interpreted in m/s in the simulation. Save `SimulationResult.code` as `.ls`. |
 | `IGUS.IGUS_Driver` | Proof of Concept | igus ReBel (`IGUS.IGUS_ReBel` = REBEL-6DOF-01, `IGUS.IGUS_ReBel03` = REBEL-6DOF-03) offline code generation: writes an **igus Robot Control (iRC) XML program** in the shape iRC V15 saves (XML declaration, CRLF, a `Header` naming the robot type and `GripperType` = the program's tool name + `.xml`, empty without a tool), one file `<ProgramName>.xml` (display name `IGUS_IRC`, no license). Axis values are the **iRC's own joint values** (A2 = 0 with the upper arm vertical; the kinematics are the iRC's, so PRC's positions match the iRC's readouts). Settings: program name, save file/folder, start position (default: the iRC home 0, −20, 110, 0, 90, 0) and initial posture, default CP/PTP speed, collision checking. There is **no base setting** — the iRC has no base frames, so targets in a motion group's base are written in robot coordinates with the base applied, as `UserFrame="#base"`. Writes `Joint` (axis and PTP motions, from the simulated joints), `Linear` (LIN), `Circular` (CIRC: auxiliary point, end point and end orientation), `Output` (a boolean variable whose name ends with its number, e.g. `DOut1`, or a `GSig` signal), `Wait` (hold time; wait for a condition), `If`/`Else`/`EndIf` and `Loop`/`EndLoop` (a WHILE, its condition negated: the iRC loops until the condition holds). Conditions take a boolean input whose name ends with its number (`DIn1`, `$IN[1]`) or a `GSig` signal. `smooth` is 100 in a group with interpolation data, else 0. **Refused in `AddRobotTask`** with a message naming the command: spline motions, END, custom code and other variables. Cartesian targets are TCP positions of PRC's tool, so the iRC's active tool must match it. |
 | `NEURA.NEURA_SIM_Driver` | Proof of Concept | NEURA robots (MAiRA 7-DOF and LARA 6-DOF). Generates NeuraPy v5 Python code — `move_joint` blocks for PTP groups and one `move_composite` per CP group (linear/circular children with per-child velocities, each child's `target_pose` seeded with the pose the segment starts from) — or a neutral JSON toolpath format, selected via the `OutputFormat` setting. Oversized CP groups are split into several `move_composite` calls (`CPTargetsPerCall` setting) because the NeuraPy socket server rejects requests beyond its read buffer. |
-| `NEURA.NEURA_RT_Driver` | Experimental | NEURA **realtime** driver: connects to the NeuraPy socket server on the robot control box (default `192.168.2.13:65432`) and executes/streams motions live, with configurable blending and feedback interval; oversized CP groups are split into several `move_composite` calls (`CPTargetsPerCall` setting). In **Follow Target Mode** the task's last **Cartesian PTP** target is chased via the servo interface (`movelinear_online`), with a real PTP to the solver's joint solution priming the commanded posture at session start and on posture changes — see [Section 8](#8-settings-dictionary). |
+| `NEURA.NEURA_RT_Driver` | Experimental | NEURA **realtime** driver: connects to the NeuraPy socket server on the robot control box (default `192.168.2.13:65432`) and executes/streams motions live, with configurable blending and feedback interval; oversized CP groups are split into several `move_composite` calls (`CPTargetsPerCall` setting). In **Follow Target Mode** the task's last **Cartesian PTP** target is chased via the servo interface (`movelinear_online`), with a real PTP to the solver's joint solution priming the commanded posture at session start and on posture changes — see [Section 8](#8-settings-dictionary). **A task that moves the robot starts where the robot reports it stands:** with `Run` on, the driver starts its link and waits for a fresh position report; without one the task is simulated but not sent, and the error starts with `Not sent:`. |
 | `Supervisor.Supervisor_Driver` | Functional | Connection-only driver for accessing I/O values and data from other robots/IoT devices. Does not accept tasks. `GetSimulatedRobotState` returns the variables of **all** connected robots plus a machine inventory in `data` (`Machines` = comma-separated IDs, and per machine `<id> Name`, `<id> Model`, `<id> Driver`, `<id> Status`). Any machine ID from the inventory can then be queried in detail via `GetRobotData` — with `exclude_geometry = true` for high-frequency live-state polling (see [Section 6.7](#67-requestreply)). Pairs with the `Supervisor.Supervisor_Device` robot class, which is also the server-side default when a setup request contains no robot definition. |
 
 ### Robot Models (Selection)

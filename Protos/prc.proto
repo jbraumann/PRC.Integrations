@@ -268,7 +268,7 @@ message Action {
         SetVariable set_variable_action = 1;
         // Pauses execution until a variable reaches a target value.
         WaitForVariable wait_for_variable_action = 2;
-        // Pauses execution for a fixed number of milliseconds.
+        // Pauses execution for a fixed time, in seconds (see Hold.hold_ms).
         Hold hold_action = 3;
         // Pings the PRC server, e.g. to verify communication.
         Ping ping_action = 4;
@@ -319,17 +319,20 @@ message Base {
 message CartesianPosition {
     // The frame representation — choose exactly one.
     oneof frame {
-        // Full 4x4 transformation matrix.
+        // Full 4x4 transformation matrix in PRC's row-vector form: the axes in rows 1-3, the
+        // translation in m41, m42, m43, the last column 0, 0, 0, 1. Scaled rows are normalized
+        // and skewed axes made perpendicular (keeping X); a transposed (column-major), zero or
+        // mirrored matrix is refused.
         Matrix4x4 matrix = 1;
         // Position (mm) and orientation (degrees) as Euler angles with a specified format.
         Euler euler = 2;
         // Frame defined by an origin point, an X axis, and a Y axis vector.
         CoordinateSystem cs = 3;
     }
-    // Whether this frame is expressed in world space (ABSOLUTE), as an offset
-    // from the current position (RELATIVE), or relative to a parent frame (PARENT).
+    // Only ABSOLUTE is supported: a target is expressed in its motion group's base, a TCP
+    // relative to the flange. RELATIVE and PARENT are refused with an error.
     CartesianReference reference = 4;
-    // Optional parent transformation matrix (used when reference = PARENT).
+    // Not used: PRC ignores a parent sent with a position.
     Matrix4x4 parent = 5;
     // Optional identifier for this position.
     string id = 6;
@@ -338,11 +341,11 @@ message CartesianPosition {
 // [Primitives] CartesianReference specifies how a CartesianPosition frame is interpreted
 // relative to the scene.
 enum CartesianReference {
-    // Expressed in the world (global) coordinate system.
+    // Expressed in the motion group's base (the only reference PRC supports).
     ABSOLUTE = 0;
-    // Expressed as an offset from the current position.
+    // Not supported (refused): an offset from the current position.
     RELATIVE = 1;
-    // Expressed relative to the provided parent Matrix4x4 frame.
+    // Not supported (refused): relative to a parent frame.
     PARENT = 2;
 }
 
@@ -381,9 +384,11 @@ message CircularMotion {
 message CoordinateSystem {
     // Origin of the coordinate system in mm.
     Vector3 origin = 1;
-    // Direction of the X axis (unit vector).
+    // Direction of the X axis (normalized by PRC).
     Vector3 x_axis = 2;
-    // Direction of the Y axis (unit vector). Z axis = cross(x_axis, y_axis).
+    // Direction of the Y axis. It should be perpendicular to x_axis: PRC keeps X and makes Y
+    // perpendicular to it (Rhino's convention); zero or parallel axes are refused.
+    // Z axis = cross(x_axis, y_axis).
     Vector3 y_axis = 3;
 }
 
@@ -637,7 +642,10 @@ message Flow {
 enum FrameType {
     // Fixed frame (attached rigidly to the robot flange or world).
     FIXED = 0;
-    // External frame (attached to an external axis or positioner).
+    // External frame (attached to an external axis or positioner). For a tool, the TCP is a
+    // stationary point in the cell; its tool_geometry is still what the flange carries (the
+    // gripper with the workpiece), and the stationary tool itself belongs in
+    // Robot.collision_geometry.
     EXTERNAL = 1;
 }
 
@@ -649,7 +657,8 @@ message Heartbeat {
 
 // [Actions] Hold pauses robot execution for a fixed duration.
 message Hold {
-    // Duration to wait in milliseconds.
+    // Duration to wait, in SECONDS despite the field's name: hold_ms = 2 waits 2 s. The name
+    // stays for wire compatibility; NaN and negative values are refused.
     float hold_ms = 1;
 }
 
@@ -1084,7 +1093,9 @@ message Tool {
     // Field number 4 is reserved (previously tool_state, an unused int32).
     reserved 4;
     reserved "tool_state";
-    // Geometry of the tool for visualisation and collision checking.
+    // Geometry the flange carries, for visualisation and collision checking: the tool, or for
+    // an EXTERNAL tool the gripper with its workpiece (model the stationary tool as
+    // Robot.collision_geometry).
     PolyMesh tool_geometry = 5;
     // Identifier of the physical tool as known to the robot controller (the tool number
     // written into generated code, e.g. "6" → KUKA Tool Nr.6). Several Tool entries may share

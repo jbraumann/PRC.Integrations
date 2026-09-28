@@ -12,7 +12,7 @@ import bpy
 TOOL_ENCODING_BY_BRAND = {
     "KUKA":    "ZYX",          # XYZABC, A/B/C in degrees
     "NEURA":   "RPY",          # Roll-Pitch-Yaw in degrees
-    "UR":      "AXISANGLE",    # rotation vector (rad-axis)
+    "UR":      "AXISANGLE",    # rotation vector in radians, sent in degrees
     "ABB":     "QUATERNION",   # Qw, Qx, Qy, Qz
     "IGUS":    "ZYX",
     "":        "ZYX",          # Generic fallback
@@ -193,10 +193,11 @@ class PRCToolProps(bpy.types.PropertyGroup):
     tool_y: bpy.props.FloatProperty(name="Y", description="TCP Y offset (mm)", default=0.0)
     tool_z: bpy.props.FloatProperty(name="Z", description="TCP Z offset (mm)", default=0.0)
 
-    # KUKA ZYX / NEURA RPY / IGUS / Generic — degrees.
-    tool_a: bpy.props.FloatProperty(name="A", description="Rotation A (deg)", default=0.0)
-    tool_b: bpy.props.FloatProperty(name="B", description="Rotation B (deg)", default=0.0)
-    tool_c: bpy.props.FloatProperty(name="C", description="Rotation C (deg)", default=0.0)
+    # KUKA ZYX / NEURA RPY / IGUS / Generic — degrees; UR — the rotation vector in radians
+    # (converted to degrees when the tool is encoded, grpc_client._build_user_tool).
+    tool_a: bpy.props.FloatProperty(name="A", description="Rotation A (deg; UR: Rx of the rotation vector, rad)", default=0.0)
+    tool_b: bpy.props.FloatProperty(name="B", description="Rotation B (deg; UR: Ry of the rotation vector, rad)", default=0.0)
+    tool_c: bpy.props.FloatProperty(name="C", description="Rotation C (deg; UR: Rz of the rotation vector, rad)", default=0.0)
 
     # ABB — unit quaternion. Default identity (1, 0, 0, 0).
     tool_qw: bpy.props.FloatProperty(name="Qw", default=1.0)
