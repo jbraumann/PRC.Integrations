@@ -1364,7 +1364,7 @@ Returned in `AddRobotTaskReply.simulation_result_data`. Contains the complete si
 | `files` | `repeated ProgramFile` (field 6, since 1.716) | **Every generated file with its file name, the primary program first.** A driver whose controller expects several files per program lists them all (a program plus the data files that belong to it). Empty when the driver only delivers `code` (the realtime drivers have no program file; older servers) — then the client names the file itself. Names derive from the `ProgramName` setting, sanitised as the controller requires. |
 | `data` | `MetaData` | Additional information |
 
-A move that would need more than 1,000,000 interpolation samples is refused before it is interpolated (a joint value far outside its range or a speed far too low asks for that, e.g. an ABB speed given in m/s), and so is a task once its samples pass 5,000,000; the reply's status carries the error.
+A move that would need more than 1,000,000 interpolation samples is refused before it is interpolated (a joint value far outside its range or a speed far too low asks for that, e.g. an ABB speed given in m/s); the reply's status carries the error.
 
 `ProgramFile` has two fields: `name` — the file name including its extension, e.g. `kukaprc_project.src` — and `content`, the file text with the line endings the controller expects (write it without newline translation).
 
