@@ -202,7 +202,7 @@ message RobotFeedback {
         RobotState robot_state_data = 3;
         // Updated driver settings (e.g., pushed by the server during real-time control).
         Settings settings_data = 4;
-        // Ping response (echoed from SendPing).
+        // A ping a driver reports as feedback (none does at present; SendPing answers directly).
         Ping ping_data = 5;
     }
 }
@@ -850,11 +850,12 @@ enum MotionGroupType {
     SPLINE = 2;
 }
 
-// [Actions] Ping tests server connectivity. The server echoes the payload back unchanged.
+// [Actions] Ping tests server connectivity: SendPing answers with the server's current time in
+// time_ms and an empty payload, whatever the request carries.
 message Ping {
-    // Arbitrary payload echoed by the server.
+    // Arbitrary text. SendPing ignores it; its reply carries none.
     string payload = 1;
-    // Timestamp or latency marker in milliseconds.
+    // Milliseconds since the Unix epoch (UTC). In SendPing's reply: the server's current time.
     int64 time_ms = 2;
 }
 
