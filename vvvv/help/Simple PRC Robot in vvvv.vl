@@ -20,7 +20,7 @@
                 <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
                 <Choice Kind="ProcessAppFlag" Name="SceneWindow" />
               </p:NodeReference>
-              <Pin Id="Pzp3F3hFQd5QBhki2hyts5" Name="Bounds" Kind="InputPin" DefaultValue="2127, 187, 984, 842" IsHidden="true" />
+              <Pin Id="Pzp3F3hFQd5QBhki2hyts5" Name="Bounds" Kind="InputPin" DefaultValue="2430, 143, 757, 842" IsHidden="true" />
               <Pin Id="S5yS5PparGFOXvOQS9GmbH" Name="Bound to Document" Kind="InputPin" IsHidden="true" />
               <Pin Id="Ef8uY4tSsV7OGUZeBaJqW1" Name="Dialog If Document Changed" Kind="InputPin" IsHidden="true" />
               <Pin Id="Obl3t5nE1e9LeYYaccHmyA" Name="Save Bounds" Kind="InputPin" IsHidden="true" />
@@ -480,6 +480,7 @@
             </p:NodeReference>
             <Pin Id="FkSsr3AcKEmPLOknweaCmQ" Name="Client" Kind="OutputPin" />
             <Pin Id="ByvFbF5MhxYOWbVRS6lSWd" Name="Node Context" Kind="InputPin" IsHidden="true" />
+            <Pin Id="ECec3icUodDLeaLoao49FA" Name="OpenOnBrowser" Kind="InputPin" IsHidden="true" />
           </Node>
         </Canvas>
         <Patch Id="GpvDPEQUnfNQQeo0TzmAB1" Name="Create" />
