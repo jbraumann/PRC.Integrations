@@ -24,7 +24,7 @@ In the **Robot Setup** box (gear icon):
 1. Set **Client ID** (any stable string, default `PRC_Blender`).
 2. Pick a **Driver** (e.g. `KUKA KSS (KRL)`). The Robot dropdown auto-filters to that brand.
 3. Pick a **Robot** from the filtered list.
-4. *(Optional)* In the **Tool** box, set the TCP — Position (mm) and Rotation. The rotation fields adapt to the driver convention (ZYX degrees for KUKA, RPY for NEURA, axis-angle for UR, quaternion for ABB). The Tool ID determines which dictionary slot the TCP lives at.
+4. *(Optional)* In the **Tool** box, set the TCP — Position (mm) and Rotation. The rotation fields adapt to the driver convention (ZYX degrees for KUKA, WPR for FANUC, RPY for NEURA, axis-angle for UR, quaternion for ABB). The Tool ID determines which dictionary slot the TCP lives at.
 5. Click **Setup Robot**.
 
 The first run downloads the robot mesh from the server and creates `A0..A6` link objects, the `TCP` axis-arrow marker, the `Tool` Empty (parented to TCP — drop your own tool geometry under this Empty and it will follow the TCP), and the `PRC_Program` carrier object.

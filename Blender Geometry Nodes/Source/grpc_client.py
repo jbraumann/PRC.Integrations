@@ -708,7 +708,7 @@ def _build_user_tool(tool_snapshot: dict, driver_brand: str) -> Optional["prc_pb
             # The panel takes UR's rotation vector in radians, as the pendant shows it;
             # PRC reads every orientation in degrees (a pi flip used to arrive as 3.14 deg).
             a, b, c = math.degrees(a), math.degrees(b), math.degrees(c)
-        else:
+        else:  # ZYX; FANUC's WPR is the same rotation with A = R, B = P, C = W
             fmt = prc_pb2.EulerFormat.ZYX
         tcp = prc_pb2.CartesianPosition(
             euler=prc_pb2.Euler(

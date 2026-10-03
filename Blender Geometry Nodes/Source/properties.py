@@ -14,6 +14,7 @@ TOOL_ENCODING_BY_BRAND = {
     "NEURA":   "RPY",          # Roll-Pitch-Yaw in degrees
     "UR":      "AXISANGLE",    # rotation vector in radians, sent in degrees
     "ABB":     "QUATERNION",   # Qw, Qx, Qy, Qz
+    "FANUC":   "WPR",          # XYZWPR: W about X, P about Y, R about Z, in degrees (sent as ZYX with A = R, B = P, C = W)
     "IGUS":    "ZYX",
     "":        "ZYX",          # Generic fallback
 }
@@ -33,7 +34,7 @@ _DRIVERS = [
     ("UR.UR_Driver",         "Universal Robots",        "UR"),
     ("IGUS.IGUS_Driver",     "IGUS ReBel",              "IGUS"),
     ("NEURA.NEURA_SIM_Driver", "NEURA",                  "NEURA"),
-    ("Generic.Generic_Driver", "Generic (any robot)",    ""),
+    ("FANUC.FANUC_LS_Driver",  "FANUC (LS)",             "FANUC"),
 ]
 
 DRIVER_ITEMS = [(d, label, "") for d, label, _ in _DRIVERS]
@@ -54,12 +55,18 @@ _ROBOTS = [
     ("ABB.ABB_IRB6620",          "ABB IRB 6620",                "ABB"),
     ("ABB.ABB_IRB6700_150_320",  "ABB IRB 6700-150/3.20",       "ABB"),
 
+    # FANUC
+    ("FANUC.FANUC_LRMate200iD",  "FANUC LR Mate 200iD",         "FANUC"),
+    ("FANUC.FANUC_M2000iA_2300", "FANUC M-2000iA/2300",         "FANUC"),
+    ("FANUC.FANUC_R2000iC_165F", "FANUC R-2000iC/165F",         "FANUC"),
+
     # IGUS
     ("IGUS.IGUS_ReBel",          "IGUS ReBel 6DOF-01",          "IGUS"),
     ("IGUS.IGUS_ReBel03",        "IGUS ReBel 6DOF-03",          "IGUS"),
 
     # KUKA
     ("KUKA.KUKA_KR1000",          "KUKA KR 1000",                "KUKA"),
+    ("KUKA.KUKA_KR100120P2",      "KUKA KR 100-120 P-2",         "KUKA"),
     ("KUKA.KUKA_KR10R11003",      "KUKA KR 10 R1100-3",          "KUKA"),
     ("KUKA.KUKA_KR10R1420",       "KUKA KR 10 R1420",            "KUKA"),
     ("KUKA.KUKA_KR10R14402",      "KUKA KR 10 R1440-2",          "KUKA"),
@@ -118,19 +125,22 @@ _ROBOTS = [
     ("KUKA.KUKA_OALego",          "KUKA OALego",                 "KUKA"),
 
     # NEURA
+    ("NEURA.NEURA_LARA_3",        "NEURA LARA 3",                "NEURA"),
     ("NEURA.NEURA_MAIRA_M",       "NEURA MAiRA M",               "NEURA"),
 
     # Universal Robots
     ("UR.UR_10e",                 "Universal Robots UR10e",      "UR"),
     ("UR.UR_3",                   "Universal Robots UR3",        "UR"),
     ("UR.UR_3e",                  "Universal Robots UR3e",       "UR"),
+    ("UR.UR_5",                   "Universal Robots UR5",        "UR"),
+    ("UR.UR_57e",                 "Universal Robots UR5e/7e",    "UR"),
     ("UR.UR_20",                  "Universal Robots UR20",       "UR"),
 ]
 
 
 def _robot_items_callback(self, context):
     """Dynamic enum populator: filters robots by the currently-selected
-    driver's brand. Empty brand ('Generic') shows all robots."""
+    driver's brand. An empty brand shows all robots."""
     selected_driver = getattr(self, "robot_driver", "")
     brand = DRIVER_BRAND.get(selected_driver, "")
     if brand == "":
@@ -193,7 +203,7 @@ class PRCToolProps(bpy.types.PropertyGroup):
     tool_y: bpy.props.FloatProperty(name="Y", description="TCP Y offset (mm)", default=0.0)
     tool_z: bpy.props.FloatProperty(name="Z", description="TCP Z offset (mm)", default=0.0)
 
-    # KUKA ZYX / NEURA RPY / IGUS / Generic — degrees; UR — the rotation vector in radians
+    # KUKA ZYX / NEURA RPY / IGUS / FANUC WPR (W in C, P in B, R in A) — degrees; UR — the rotation vector in radians
     # (converted to degrees when the tool is encoded, grpc_client._build_user_tool).
     tool_a: bpy.props.FloatProperty(name="A", description="Rotation A (deg; UR: Rx of the rotation vector, rad)", default=0.0)
     tool_b: bpy.props.FloatProperty(name="B", description="Rotation B (deg; UR: Ry of the rotation vector, rad)", default=0.0)
