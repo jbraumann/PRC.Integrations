@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="SY81l9l4AjXLbJe2aIuuaE" LanguageVersion="2026.8.0-0149-g2f04a6566a" Version="0.128">
+<Document xmlns:p="property" xmlns:r="reflection" Id="SY81l9l4AjXLbJe2aIuuaE" LanguageVersion="2026.8.0-0158-gda117bc374" Version="0.128">
   <NugetDependency Id="BEaa0gsWxWmMyaYoRk8BaT" Location="VL.CoreLib" />
   <Patch Id="N2A1Pze8zOwLhVREnzmZwu">
     <Canvas Id="Etybjns2yx5MHceGRL693e" DefaultCategory="ParametricRobotControl" CanvasType="FullCategory">
@@ -20,7 +20,7 @@
                 <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
                 <Choice Kind="ProcessAppFlag" Name="SceneWindow" />
               </p:NodeReference>
-              <Pin Id="Pzp3F3hFQd5QBhki2hyts5" Name="Bounds" Kind="InputPin" DefaultValue="1623, 1, 929, 600" IsHidden="true" />
+              <Pin Id="Pzp3F3hFQd5QBhki2hyts5" Name="Bounds" Kind="InputPin" DefaultValue="1492, 439, 929, 600" IsHidden="true" />
               <Pin Id="S5yS5PparGFOXvOQS9GmbH" Name="Bound to Document" Kind="InputPin" IsHidden="true" />
               <Pin Id="Ef8uY4tSsV7OGUZeBaJqW1" Name="Dialog If Document Changed" Kind="InputPin" IsHidden="true" />
               <Pin Id="Obl3t5nE1e9LeYYaccHmyA" Name="Save Bounds" Kind="InputPin" IsHidden="true" />
@@ -414,7 +414,7 @@
               <p:minimum p:Type="Single">0</p:minimum>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="U62enTVfWiCMuWWGXAqbDQ" Comment="AxisValues" Bounds="538,200,48,126" ShowValueBox="true" isIOBox="true" Value="49, -91, 88, 32, 38, 0">
+          <Pad Id="U62enTVfWiCMuWWGXAqbDQ" Comment="AxisValues" Bounds="538,200,48,126" ShowValueBox="true" isIOBox="true" Value="106, -91, 88, 32, 38, 0">
             <p:TypeAnnotation LastCategoryFullName="Collections.Mutable" LastDependency="VL.CoreLib.vl">
               <Choice Kind="TypeFlag" Name="MutableArray" />
               <p:TypeArguments>
@@ -443,7 +443,7 @@
               <p:buttonmode p:Assembly="VL.UI.Forms" p:Type="VL.HDE.PatchEditor.Editors.ButtonModeEnum">Toggle</p:buttonmode>
             </p:ValueBoxSettings>
           </Pad>
-          <Node Bounds="66,250,86,19" Id="V5JtgdHNDaCPd6FzYFKtO0">
+          <Node Bounds="18,100,86,19" Id="V5JtgdHNDaCPd6FzYFKtO0">
             <p:NodeReference LastCategoryFullName="Main" LastDependency="PRC.vl">
               <Choice Kind="NodeFlag" Name="Node" Fixed="true" />
               <Choice Kind="ProcessNode" Name="OpenPRCServer" />
@@ -451,8 +451,11 @@
             <Pin Id="Ms9VreeXgloMu63HrJ6TMt" Name="Node Context" Kind="InputPin" IsHidden="true" />
             <Pin Id="RSJCmdwPytvLv3T1znSuyN" Name="Enabled" Kind="InputPin" />
             <Pin Id="McHMxOlYNtgMSaM8vj9ds2" Name="OpenOnBrowser" Kind="InputPin" />
+            <Pin Id="FGypvLvlEOnNkD4XcIPCEF" Name="IsReady" Kind="OutputPin" />
+            <Pin Id="G8Xj2ARUpqCMGmBxfpFc44" Name="Started Here" Kind="OutputPin" />
+            <Pin Id="R9MEjLcIKA4OCYKb3B6S5B" Name="Error" Kind="OutputPin" />
           </Node>
-          <Pad Id="Heb9lfsbSNMQd2aa97X9TR" Comment="OpenOnBrowser" Bounds="149,210,35,35" ShowValueBox="true" isIOBox="true" Value="false">
+          <Pad Id="Heb9lfsbSNMQd2aa97X9TR" Comment="OpenOnBrowser" Bounds="101,61,35,35" ShowValueBox="true" isIOBox="true" Value="false">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="ImmutableTypeFlag" Name="Boolean" />
             </p:TypeAnnotation>
@@ -460,7 +463,7 @@
               <p:buttonmode p:Assembly="VL.UI.Forms" p:Type="VL.HDE.PatchEditor.Editors.ButtonModeEnum">Bang</p:buttonmode>
             </p:ValueBoxSettings>
           </Pad>
-          <Pad Id="S5Yfbz8LPHRQXp0I8icDvb" Comment="Enabled" Bounds="68,130,35,35" ShowValueBox="true" isIOBox="true" Value="True">
+          <Pad Id="S5Yfbz8LPHRQXp0I8icDvb" Comment="Enabled" Bounds="20,40,35,35" ShowValueBox="true" isIOBox="true" Value="True">
             <p:TypeAnnotation LastCategoryFullName="Primitive" LastDependency="VL.CoreLib.vl">
               <Choice Kind="ImmutableTypeFlag" Name="Boolean" />
             </p:TypeAnnotation>
@@ -485,6 +488,7 @@
             <Pin Id="EIWsyAAmMLjLKPDNcdEegc" Name="Output" Kind="StateOutputPin" />
           </Node>
           <Pad Id="TFVZcqZTbTGNOuoTKP9tBm" Comment="TaskFeedbackMessage" Bounds="673,750,68,25" ShowValueBox="true" isIOBox="true" />
+          <Pad Id="R17py0w8qhHQDbwyeKlHTp" Comment="IsReady" Bounds="20,150,35,35" ShowValueBox="true" isIOBox="true" />
         </Canvas>
         <Patch Id="GpvDPEQUnfNQQeo0TzmAB1" Name="Create" />
         <Patch Id="I7xz2LBq9k6N73kGGPOBeq" Name="Update" />
@@ -511,12 +515,11 @@
         <Link Id="Nl9p4rXBZJuQJLZndu6FME" Ids="GgnTJqii21DQTqeMcNacph,NKDyrDrp7zzMfUq1rSdq54" />
         <Link Id="KJ2qtXLQnppO6B5oyHHPiK" Ids="PgHfrNX1B5GQDFbCNh74Ex,TFVZcqZTbTGNOuoTKP9tBm" />
         <Link Id="EcU2Nz6ImSNLRdHPVfv6fb" Ids="EIWsyAAmMLjLKPDNcdEegc,IWBEZ4FlhN2MDfd3SbdvYK" />
+        <Link Id="PLANpmEiWsUO8tjSW9bGxf" Ids="FGypvLvlEOnNkD4XcIPCEF,R17py0w8qhHQDbwyeKlHTp" />
       </Patch>
     </Node>
   </Patch>
   <DocumentDependency Id="UlybNnneMXsPBTWPjboeYR" Location="../PRC.vl" />
   <NugetDependency Id="DrrNy8K2LflOupjwYy2brU" Location="VL.Stride" />
   <NugetDependency Id="MvaUcWuoFmfOM63QhM0xTZ" Location="VL.Stride.TextureFX" />
-  <NugetDependency Id="T7BUlhbWHIgLCiGaBnTsdk" Location="PRC.Server" Version="1.742.0" />
-  <NugetDependency Id="ONcZXnFcjMEQcw9A1J1TgN" Location="PRC.Library" Version="1.742.0" />
 </Document>
