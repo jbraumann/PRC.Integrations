@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Document xmlns:p="property" xmlns:r="reflection" Id="C8IEwxxuPz3MQo6LrsznQm" LanguageVersion="2026.8.0-0149-g2f04a6566a" Version="0.128">
+<Document xmlns:p="property" xmlns:r="reflection" Id="C8IEwxxuPz3MQo6LrsznQm" LanguageVersion="2026.8.0-0158-gda117bc374" Version="0.128">
   <NugetDependency Id="TFIRM6jSYY7OvIy47ZDHjw" Location="VL.CoreLib" />
   <Patch Id="Otpp5ogWOEEL2eNaOVsMJT">
     <Canvas Id="R3slPW9dhJwLONuOiI4mYl" DefaultCategory="ParametricRobotControl" CanvasType="FullCategory">
@@ -1610,7 +1610,7 @@
     ************************ OpenPRCServer ************************
 
 -->
-      <Node Name="OpenPRCServer" Bounds="462,250" Id="EgAyfDrxpEhP1RPi2VlPg0">
+      <Node Name="OpenPRCServer" Bounds="320,50" Id="EgAyfDrxpEhP1RPi2VlPg0">
         <p:NodeReference>
           <Choice Kind="ContainerDefinition" Name="Process" />
           <CategoryReference Kind="Category" Name="Primitive" />
@@ -14772,6 +14772,25 @@
           <Link Id="DoKC4hyCCaDOJvy7PmxHzz" Ids="PiSFz7FoCJhMCTgW5TrHcV,VVJANYRUTeDMmMWCcVuYz5" IsHidden="true" />
         </Patch>
       </Node>
+      <!--
+
+    ************************ RunPRCServer ************************
+
+-->
+      <Node Name="RunPRCServer" Bounds="499,50" Id="V7q3O4Qm6CON3ZT1y57ZMK">
+        <p:NodeReference>
+          <Choice Kind="ContainerDefinition" />
+        </p:NodeReference>
+        <Patch Id="VA8EchGyf2POGUwNRdNv4D">
+          <Canvas Id="QkaUXyM0WaDNP6Ds7d0Cg5" CanvasType="Group" />
+          <Patch Id="H5ptbqJtU0yNFVI7nP36NM" Name="Create" />
+          <Patch Id="CExa8iuX9m2LxLwEzrd0H2" Name="Update" />
+          <ProcessDefinition Id="Ia6ofifPxGUOOs6CkX1eQV">
+            <Fragment Id="EYEp0aqRsViQVfVvKhlKom" Patch="H5ptbqJtU0yNFVI7nP36NM" Enabled="true" />
+            <Fragment Id="MR0tUuxATArPiNUng1zM7D" Patch="CExa8iuX9m2LxLwEzrd0H2" Enabled="true" />
+          </ProcessDefinition>
+        </Patch>
+      </Node>
     </Canvas>
     <!--
 
@@ -14807,9 +14826,9 @@
   <PlatformDependency Id="Pb2WMKzdzrFOmkdaMTshER" Location="System.Reflection.Emit" />
   <PlatformDependency Id="IXKGJVTApHbN3kSnHFxVsO" Location="System.Reflection.DispatchProxy" />
   <NugetDependency Id="JlEEysZpLkhPXkzwjkiUfe" Location="VL.Serialization.MessagePack" />
-  <NugetDependency Id="ICRYwmJKL4HPvZ5eFzWsZY" Location="PRC.Server" Version="1.742.0" />
-  <NugetDependency Id="FAztmxdMIDYP4FGBhFRP0j" Location="PRC.Library" Version="1.742.0" />
-  <NugetDependency Id="Ryiyog3HDEHLspZJD1l6Jh" Location="PRC.GRPC" Version="1.742.0" />
-  <NugetDependency Id="FmTyHCln55ENHzMlqZjWgL" Location="PRC.Core" Version="1.742.0" />
-  <NugetDependency Id="JzvZszW6fM2MDGjsMpj3Tx" Location="SuperSimpleTcp" Version="3.0.17" />
+  <NugetDependency Id="ICRYwmJKL4HPvZ5eFzWsZY" Location="PRC.Server" Version="1.749.0-rc.1" />
+  <NugetDependency Id="FAztmxdMIDYP4FGBhFRP0j" Location="PRC.Library" Version="1.749.0-rc.1" />
+  <NugetDependency Id="Ryiyog3HDEHLspZJD1l6Jh" Location="PRC.GRPC" Version="1.749.0-rc.1" />
+  <NugetDependency Id="FmTyHCln55ENHzMlqZjWgL" Location="PRC.Core" Version="1.749.0-rc.1" />
+  <NugetDependency Id="Lz47VXAYgjoN0WuD7SxAnp" Location="PRC.Server.Bundle" Version="1.749.0-rc.1" />
 </Document>
