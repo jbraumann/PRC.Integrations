@@ -17,7 +17,7 @@ Currently, you can find code samples to integrate Parametric Robot Control into 
 - C# (both direct implementation and using our wrapper library)
 - Python (also used in Blender and Fusion 360)
 
-The Protos folder holds the current `prc.proto` and `generate_protos.sh`, which regenerates the client code of every integration with the pinned generator versions.
+The Protos folder holds the current `prc.proto`, the optional `prc_library.proto` (the setup catalog, `DescribeLibrary`; it imports `prc.proto`) and `generate_protos.sh`, which regenerates the client code of every integration from `prc.proto` with the pinned generator versions.
 
 ##### The PRC_LLM_Integration_Guide.md file is automatically generated and serves as a starting point for the LLM-guided integration of PRC into custom software. It outlines most functions and how they are used, providing context to the LLM. #####
 

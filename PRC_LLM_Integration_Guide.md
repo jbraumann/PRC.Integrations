@@ -4,7 +4,7 @@
 
 > **Purpose:** This document provides a thorough, structured reference for developers and LLMs building new integrations with PRC. It covers every protobuf message, the complete GRPC service API, data flows, coordinate conventions, unit systems, visualization patterns, and concrete code examples across C#, Python, and JavaScript.
 
-> **Scope:** Updated for PRC Server **1.746** (2026-10-03); 1.746 adds the `StreamingMode` setting of the online drivers (`Default (Aborting)`, `Queue` on `UR.UR_RT_Driver`, `ABB.ABB_RWS_Driver`, `KUKA.KSS_MXA_Driver` and `KUKA.KUKA_Sunrise_Driver`, `Servoing` on `KUKA.KSS_MXA_Driver`, `NEURA.NEURA_RT_Driver` and `KUKA.KUKA_Sunrise_Driver`; the 1.742 setting `RefuseWhileBusy` and the `FollowTargetMode` toggle are gone), the Sunrise `ExecutionMode` values `Program File` / `Online`, the `Queued` and `Servoing` run-state values, and the `PRC.Server.Bundle` NuGet package (a runnable portable server with a launcher). 1.742 added the UR Polyscope X `.script` output (the `.urpx` template is gone), a .NET `Client` that returns PRC.Core types (`GetRobotData`, `GetMachineData`, `DescribeLibrary` as JSON, `Ping` as the server's time), `SendPing` answering with the server's time, no limit on a task's total samples, and one replay rule for the online drivers: a null or empty task replays the last task and sends it only while `Run` is explicitly `true`. 1.741 added the checks of gRPC input (frames, `CartesianReference`, `hold_ms` in seconds), realtime tasks that start where the robot stands, the simulation of the paths an IF/ELSE or WHILE does not take, and joint-move speeds capped at 100 %. 1.738 added the igus iRC program format and driver name `IGUS_IRC`, the ReBel 6DOF-03 preset, one blending rule for the simulation and every driver (`MotionGroup.interpolation`), the feedback-stream lifetime rule, per-vendor speed units, ABB RAPID external axes and the empty-posture default. 1.735 added the KUKA Sunrise online execution modes (TCP link), the KR 800 R2800-2 and the ABB GoFa presets with the `ABB.ABB_6DOF_Offset` solver. 1.732 added the `Client.DescribeLibrary` wrapper and the UR3, UR3e, ABB IRB 120 and IRB 140 presets. New since the 2026-08 revision: the `DescribeLibrary` setup catalog ([Section 6.8](#68-library-catalog-describelibrary)), `SimulationResult.files`, external-axis presets by reference, custom-robot solvers by name, the KUKA Sunrise driver for the seven-axis LBR iiwa, iiQKA.OS 2 program upload, and gRPC server reflection.
+> **Scope:** Updated for PRC Server **1.749** (2026-10-06); 1.749 moves the optional `DescribeLibrary` setup catalog into its own file, `prc_library.proto`, as `ParametricRobotControlLibraryService` (the messages are unchanged; `prc.proto` keeps every other rpc). 1.746 added the `StreamingMode` setting of the online drivers (`Default (Aborting)`, `Queue` on `UR.UR_RT_Driver`, `ABB.ABB_RWS_Driver`, `KUKA.KSS_MXA_Driver` and `KUKA.KUKA_Sunrise_Driver`, `Servoing` on `KUKA.KSS_MXA_Driver`, `NEURA.NEURA_RT_Driver` and `KUKA.KUKA_Sunrise_Driver`; the 1.742 setting `RefuseWhileBusy` and the `FollowTargetMode` toggle are gone), the Sunrise `ExecutionMode` values `Program File` / `Online`, the `Queued` and `Servoing` run-state values, and the `PRC.Server.Bundle` NuGet package (a runnable portable server with a launcher). 1.742 added the UR Polyscope X `.script` output (the `.urpx` template is gone), a .NET `Client` that returns PRC.Core types (`GetRobotData`, `GetMachineData`, `DescribeLibrary` as JSON, `Ping` as the server's time), `SendPing` answering with the server's time, no limit on a task's total samples, and one replay rule for the online drivers: a null or empty task replays the last task and sends it only while `Run` is explicitly `true`. 1.741 added the checks of gRPC input (frames, `CartesianReference`, `hold_ms` in seconds), realtime tasks that start where the robot stands, the simulation of the paths an IF/ELSE or WHILE does not take, and joint-move speeds capped at 100 %. 1.738 added the igus iRC program format and driver name `IGUS_IRC`, the ReBel 6DOF-03 preset, one blending rule for the simulation and every driver (`MotionGroup.interpolation`), the feedback-stream lifetime rule, per-vendor speed units, ABB RAPID external axes and the empty-posture default. 1.735 added the KUKA Sunrise online execution modes (TCP link), the KR 800 R2800-2 and the ABB GoFa presets with the `ABB.ABB_6DOF_Offset` solver. 1.732 added the `Client.DescribeLibrary` wrapper and the UR3, UR3e, ABB IRB 120 and IRB 140 presets. New since the 2026-08 revision: the `DescribeLibrary` setup catalog ([Section 6.8](#68-library-catalog-describelibrary)), `SimulationResult.files`, external-axis presets by reference, custom-robot solvers by name, the KUKA Sunrise driver for the seven-axis LBR iiwa, iiQKA.OS 2 program upload, and gRPC server reflection.
 
 ---
 
@@ -60,8 +60,8 @@ Parametric Robot Control (PRC) is a client–server system for simulating and co
 - **Units:** PRC works in **millimetres** for all positional data and **degrees** for all angular/axis data. Motion speeds are the exception: they use each robot vendor's own units — a percentage, m/s, mm/s or rad/s depending on the robot and the motion type (see [Speed units](#speed-units)).
 - **Coordinate system:** Right-handed, **Z+ = up**. All transformation matrices are expressed relative to WorldXY in this convention.
 - **Communication:** GRPC over HTTPS with TLS. Supports gzip compression and unlimited message sizes.
-- **Protobuf definition:** The PRC API is defined in a single `.proto` file that contains all messages, enums, and the service contract. Code can be generated for any language using the standard `protoc` compiler.
-- **Discovery:** `DescribeLibrary` returns the setup catalog — every preset robot, every driver with its settings schema, every external-axis preset — so a client can offer a robot setup wizard without a copy of the library (see [Section 6.8](#68-library-catalog-describelibrary)). gRPC server reflection is enabled, so `grpcurl` and similar tools work without the `.proto` file.
+- **Protobuf definition:** The PRC API is defined in `prc.proto`, which contains every message, enum and rpc a client needs. The optional setup catalog (`DescribeLibrary`) is in a second file, `prc_library.proto`, which imports `prc.proto`: generate code from it only when you use the catalog. Code can be generated for any language using the standard `protoc` compiler.
+- **Discovery:** `DescribeLibrary` (optional, `prc_library.proto`) returns the setup catalog — every preset robot, every driver with its settings schema, every external-axis preset — so a client can offer a robot setup wizard without a copy of the library (see [Section 6.8](#68-library-catalog-describelibrary)). gRPC server reflection is enabled, so `grpcurl` and similar tools work without the `.proto` file.
 
 ---
 
@@ -268,14 +268,14 @@ response = stub.SendPing(prc_pb2.Ping(payload="", time_ms=10))
 # If no exception, the server is reachable
 ```
 
-The server also exposes **gRPC server reflection** (v1 and v1alpha, since 1.727), so generic tools can inspect the service without `prc.proto`:
+The server also exposes **gRPC server reflection** (v1 and v1alpha, since 1.727), so generic tools can inspect the services without the `.proto` files:
 
 ```bash
 grpcurl -cacert PRCServerCertificate.pem 127.0.0.1:5001 list
 grpcurl -cacert PRCServerCertificate.pem 127.0.0.1:5001 describe ParametricRobotControlService
 ```
 
-`PRCServerCertificate.pem` is the certificate shipped with the samples (`-insecure` also works). The service is registered under its bare name `ParametricRobotControlService` — the proto has no `package`. The endpoint is HTTP/2 + TLS only, so `-plaintext` cannot connect, and gRPC-Web clients cannot use reflection (it is a bidirectional stream).
+`PRCServerCertificate.pem` is the certificate shipped with the samples (`-insecure` also works). The services are registered under their bare names, `ParametricRobotControlService` and the optional `ParametricRobotControlLibraryService` — the protos have no `package`. The endpoint is HTTP/2 + TLS only, so `-plaintext` cannot connect, and gRPC-Web clients cannot use reflection (it is a bidirectional stream).
 
 ---
 
@@ -518,7 +518,7 @@ With `PRC.Library` referenced you can also enumerate the `PRC.Library.Robots`, `
 
 ## 5. GRPC Service Definition
 
-The PRC protobuf definition exposes **8 RPC methods** in the `ParametricRobotControlService`:
+The PRC protobuf definition exposes **7 RPC methods** in the `ParametricRobotControlService` (`prc.proto`):
 
 ```protobuf
 service ParametricRobotControlService {
@@ -547,8 +547,15 @@ service ParametricRobotControlService {
 
   // Optional: Ping the controller.
   rpc SendPing (Ping) returns (Ping);
+}
+```
 
-  // Optional: Describe what this PRC installation can set up — every preset robot,
+The setup catalog is a second, optional service in its own file, `prc_library.proto`, on the same server and channel. A client that does not use it needs neither the file nor the service:
+
+```protobuf
+// prc_library.proto — imports prc.proto
+service ParametricRobotControlLibraryService {
+  // Describe what this PRC installation can set up — every preset robot,
   // every driver with its settings schema, every preset external axis — so a
   // client can offer a robot setup wizard without a copy of the library.
   // Built once per server process; nothing is set up by this call.
@@ -565,7 +572,7 @@ service ParametricRobotControlService {
 | `UpdateVariable` | Unary | Set a variable on the robot. Returns all variables of all connected robots. The variable may be omitted to query without modifying anything. |
 | `GetRobotData` | Unary | Retrieve the resolved robot definition **and live state** (current settings, variables, axis position, tool/flange frames, visualization transformations) for any machine already set up via `SetupRobot` — any connected machine's ID may be queried, e.g. by a Supervisor client monitoring the other machines. Set `exclude_geometry` to skip all mesh data for high-frequency polling. Returns an error status before setup completes. |
 | `SendPing` | Unary | Connection health check: answers with the server's current time in `time_ms` (Unix milliseconds, UTC) and an empty `payload`, whatever the request carries. |
-| `DescribeLibrary` | Unary | The **setup catalog**: every preset robot (class, names, axis count, solver), every driver (class, display name, license requirement, online/offline, run-state variable, and the full **settings schema** the Settings page renders) and every preset external axis. Optionally filtered to one driver class. No license needed, nothing is set up. See [Section 6.8](#68-library-catalog-describelibrary). |
+| `DescribeLibrary` | Unary | Optional, on `ParametricRobotControlLibraryService` (`prc_library.proto`). The **setup catalog**: every preset robot (class, names, axis count, solver), every driver (class, display name, license requirement, online/offline, run-state variable, and the full **settings schema** the Settings page renders) and every preset external axis. Optionally filtered to one driver class. No license needed, nothing is set up. See [Section 6.8](#68-library-catalog-describelibrary). |
 
 ---
 
@@ -1589,6 +1596,16 @@ if reply.status == "OK":
 
 `DescribeLibrary` (since PRC 1.727) returns what a PRC installation can set up, so an external client can offer a robot setup wizard without a copy of `PRC.Library`: every preset robot, every driver with its **settings schema**, and every preset external axis. The catalog is built once per server process; later calls are cheap. Nothing is set up by the call and no license is needed for it.
 
+**Its use is optional.** `DescribeLibrary` is the one rpc of `ParametricRobotControlLibraryService`, defined with every message of this section in `prc_library.proto`, next to `prc.proto`. A client that does not offer a setup wizard needs neither the file nor the service: `SetupRobot` takes the same class strings whether or not a client read them here. To use it, generate code from both files in one folder (`prc_library.proto` imports `prc.proto`) and open the library service's client on the channel you already have. The .NET `Client.DescribeLibrary` does this for you.
+
+```python
+import prc_library_pb2, prc_library_pb2_grpc   # generated from prc.proto and prc_library.proto
+library = prc_library_pb2_grpc.ParametricRobotControlLibraryServiceStub(channel)
+catalog = library.DescribeLibrary(prc_library_pb2.DescribeLibraryRequest(driver_class=""))
+```
+
+PRC 1.727 to 1.746 served the rpc as `ParametricRobotControlService/DescribeLibrary`, in `prc.proto`. The messages are unchanged; only the service and the file moved. A client generated from an older `prc.proto` gets `UNIMPLEMENTED` from a newer server: regenerate from both files.
+
 #### `DescribeLibraryRequest`
 
 | Field | Type | Description |
@@ -1754,7 +1771,7 @@ Driver status flows back through the same channels: the live `RobotState.data` c
 
 ## 8. Settings Dictionary
 
-The `Settings` message is a `map<string, string>` dictionary returned from `SetupRobotReply`. Settings are **driver-specific** — different drivers return different keys. The schema behind the keys — label, tooltip, kind, default, options, unit, tab/group and visibility — is available from `DescribeLibrary` ([Section 6.8](#68-library-catalog-describelibrary)), so a client can render a settings form without hard-coding a single key. Since 1.727 the dictionary no longer contains an empty `""` key (it was an artefact of the layout items).
+The `Settings` message is a `map<string, string>` dictionary returned from `SetupRobotReply`. Settings are **driver-specific** — different drivers return different keys. The schema behind the keys — label, tooltip, kind, default, options, unit, tab/group and visibility — is available from the optional `DescribeLibrary` ([Section 6.8](#68-library-catalog-describelibrary)), so a client can render a settings form without hard-coding a single key. Since 1.727 the dictionary no longer contains an empty `""` key (it was an artefact of the layout items).
 
 ### Workflow
 

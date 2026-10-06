@@ -55,13 +55,6 @@ export class ParametricRobotControlServiceClient {
                response: prc_pb.Ping) => void
   ): grpcWeb.ClientReadableStream<prc_pb.Ping>;
 
-  describeLibrary(
-    request: prc_pb.DescribeLibraryRequest,
-    metadata: grpcWeb.Metadata | undefined,
-    callback: (err: grpcWeb.RpcError,
-               response: prc_pb.DescribeLibraryReply) => void
-  ): grpcWeb.ClientReadableStream<prc_pb.DescribeLibraryReply>;
-
 }
 
 export class ParametricRobotControlServicePromiseClient {
@@ -103,11 +96,6 @@ export class ParametricRobotControlServicePromiseClient {
     request: prc_pb.Ping,
     metadata?: grpcWeb.Metadata
   ): Promise<prc_pb.Ping>;
-
-  describeLibrary(
-    request: prc_pb.DescribeLibraryRequest,
-    metadata?: grpcWeb.Metadata
-  ): Promise<prc_pb.DescribeLibraryReply>;
 
 }
 

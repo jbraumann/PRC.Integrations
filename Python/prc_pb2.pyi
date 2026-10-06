@@ -32,16 +32,6 @@ class EulerFormat(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     AXISANGLE: _ClassVar[EulerFormat]
     RPY: _ClassVar[EulerFormat]
 
-class SettingKind(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = ()
-    SETTING_TEXT: _ClassVar[SettingKind]
-    SETTING_NUMBER: _ClassVar[SettingKind]
-    SETTING_OPTION: _ClassVar[SettingKind]
-    SETTING_TOGGLE: _ClassVar[SettingKind]
-    SETTING_FILE: _ClassVar[SettingKind]
-    SETTING_TEXT_AREA: _ClassVar[SettingKind]
-    SETTING_IMAGE: _ClassVar[SettingKind]
-
 class ExternalAxisType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     LINEAR_RAIL: _ClassVar[ExternalAxisType]
@@ -92,13 +82,6 @@ PARENT: CartesianReference
 ZYX: EulerFormat
 AXISANGLE: EulerFormat
 RPY: EulerFormat
-SETTING_TEXT: SettingKind
-SETTING_NUMBER: SettingKind
-SETTING_OPTION: SettingKind
-SETTING_TOGGLE: SettingKind
-SETTING_FILE: SettingKind
-SETTING_TEXT_AREA: SettingKind
-SETTING_IMAGE: SettingKind
 LINEAR_RAIL: ExternalAxisType
 LINEAR_DOUBLE: ExternalAxisType
 LINEAR_TRIPLE: ExternalAxisType
@@ -136,28 +119,6 @@ class AddRobotTaskRequest(_message.Message):
     robot_task: Task
     robot_settings: Settings
     def __init__(self, id: _Optional[str] = ..., robot_task: _Optional[_Union[Task, _Mapping]] = ..., robot_settings: _Optional[_Union[Settings, _Mapping]] = ...) -> None: ...
-
-class DescribeLibraryRequest(_message.Message):
-    __slots__ = ("driver_class",)
-    DRIVER_CLASS_FIELD_NUMBER: _ClassVar[int]
-    driver_class: str
-    def __init__(self, driver_class: _Optional[str] = ...) -> None: ...
-
-class DescribeLibraryReply(_message.Message):
-    __slots__ = ("status", "library_version", "license_state", "robots", "drivers", "external_axes")
-    STATUS_FIELD_NUMBER: _ClassVar[int]
-    LIBRARY_VERSION_FIELD_NUMBER: _ClassVar[int]
-    LICENSE_STATE_FIELD_NUMBER: _ClassVar[int]
-    ROBOTS_FIELD_NUMBER: _ClassVar[int]
-    DRIVERS_FIELD_NUMBER: _ClassVar[int]
-    EXTERNAL_AXES_FIELD_NUMBER: _ClassVar[int]
-    status: str
-    library_version: str
-    license_state: str
-    robots: _containers.RepeatedCompositeFieldContainer[RobotPreset]
-    drivers: _containers.RepeatedCompositeFieldContainer[DriverPreset]
-    external_axes: _containers.RepeatedCompositeFieldContainer[ExternalAxisPreset]
-    def __init__(self, status: _Optional[str] = ..., library_version: _Optional[str] = ..., license_state: _Optional[str] = ..., robots: _Optional[_Iterable[_Union[RobotPreset, _Mapping]]] = ..., drivers: _Optional[_Iterable[_Union[DriverPreset, _Mapping]]] = ..., external_axes: _Optional[_Iterable[_Union[ExternalAxisPreset, _Mapping]]] = ...) -> None: ...
 
 class GetRobotDataRequest(_message.Message):
     __slots__ = ("id", "exclude_geometry")
@@ -388,96 +349,6 @@ class Euler(_message.Message):
     c: float
     format: EulerFormat
     def __init__(self, x: _Optional[float] = ..., y: _Optional[float] = ..., z: _Optional[float] = ..., a: _Optional[float] = ..., b: _Optional[float] = ..., c: _Optional[float] = ..., format: _Optional[_Union[EulerFormat, str]] = ...) -> None: ...
-
-class DriverPreset(_message.Message):
-    __slots__ = ("robot_driver_class", "vendor", "name", "requires_license", "online", "run_state_variable", "busy_values", "settings")
-    ROBOT_DRIVER_CLASS_FIELD_NUMBER: _ClassVar[int]
-    VENDOR_FIELD_NUMBER: _ClassVar[int]
-    NAME_FIELD_NUMBER: _ClassVar[int]
-    REQUIRES_LICENSE_FIELD_NUMBER: _ClassVar[int]
-    ONLINE_FIELD_NUMBER: _ClassVar[int]
-    RUN_STATE_VARIABLE_FIELD_NUMBER: _ClassVar[int]
-    BUSY_VALUES_FIELD_NUMBER: _ClassVar[int]
-    SETTINGS_FIELD_NUMBER: _ClassVar[int]
-    robot_driver_class: str
-    vendor: str
-    name: str
-    requires_license: bool
-    online: bool
-    run_state_variable: str
-    busy_values: _containers.RepeatedScalarFieldContainer[str]
-    settings: _containers.RepeatedCompositeFieldContainer[SettingItem]
-    def __init__(self, robot_driver_class: _Optional[str] = ..., vendor: _Optional[str] = ..., name: _Optional[str] = ..., requires_license: bool = ..., online: bool = ..., run_state_variable: _Optional[str] = ..., busy_values: _Optional[_Iterable[str]] = ..., settings: _Optional[_Iterable[_Union[SettingItem, _Mapping]]] = ...) -> None: ...
-
-class SettingItem(_message.Message):
-    __slots__ = ("field", "label", "tooltip", "kind", "default_value", "options", "unit", "tab", "group", "visible_when_field", "visible_when_value", "select_folder", "dropdown", "group_requires_license")
-    FIELD_FIELD_NUMBER: _ClassVar[int]
-    LABEL_FIELD_NUMBER: _ClassVar[int]
-    TOOLTIP_FIELD_NUMBER: _ClassVar[int]
-    KIND_FIELD_NUMBER: _ClassVar[int]
-    DEFAULT_VALUE_FIELD_NUMBER: _ClassVar[int]
-    OPTIONS_FIELD_NUMBER: _ClassVar[int]
-    UNIT_FIELD_NUMBER: _ClassVar[int]
-    TAB_FIELD_NUMBER: _ClassVar[int]
-    GROUP_FIELD_NUMBER: _ClassVar[int]
-    VISIBLE_WHEN_FIELD_FIELD_NUMBER: _ClassVar[int]
-    VISIBLE_WHEN_VALUE_FIELD_NUMBER: _ClassVar[int]
-    SELECT_FOLDER_FIELD_NUMBER: _ClassVar[int]
-    DROPDOWN_FIELD_NUMBER: _ClassVar[int]
-    GROUP_REQUIRES_LICENSE_FIELD_NUMBER: _ClassVar[int]
-    field: str
-    label: str
-    tooltip: str
-    kind: SettingKind
-    default_value: str
-    options: _containers.RepeatedScalarFieldContainer[str]
-    unit: str
-    tab: str
-    group: str
-    visible_when_field: str
-    visible_when_value: str
-    select_folder: bool
-    dropdown: bool
-    group_requires_license: bool
-    def __init__(self, field: _Optional[str] = ..., label: _Optional[str] = ..., tooltip: _Optional[str] = ..., kind: _Optional[_Union[SettingKind, str]] = ..., default_value: _Optional[str] = ..., options: _Optional[_Iterable[str]] = ..., unit: _Optional[str] = ..., tab: _Optional[str] = ..., group: _Optional[str] = ..., visible_when_field: _Optional[str] = ..., visible_when_value: _Optional[str] = ..., select_folder: bool = ..., dropdown: bool = ..., group_requires_license: bool = ...) -> None: ...
-
-class RobotPreset(_message.Message):
-    __slots__ = ("preset_robot_class", "vendor", "name", "short_name", "axis_count", "solver")
-    PRESET_ROBOT_CLASS_FIELD_NUMBER: _ClassVar[int]
-    VENDOR_FIELD_NUMBER: _ClassVar[int]
-    NAME_FIELD_NUMBER: _ClassVar[int]
-    SHORT_NAME_FIELD_NUMBER: _ClassVar[int]
-    AXIS_COUNT_FIELD_NUMBER: _ClassVar[int]
-    SOLVER_FIELD_NUMBER: _ClassVar[int]
-    preset_robot_class: str
-    vendor: str
-    name: str
-    short_name: str
-    axis_count: int
-    solver: str
-    def __init__(self, preset_robot_class: _Optional[str] = ..., vendor: _Optional[str] = ..., name: _Optional[str] = ..., short_name: _Optional[str] = ..., axis_count: _Optional[int] = ..., solver: _Optional[str] = ...) -> None: ...
-
-class ExternalAxisPreset(_message.Message):
-    __slots__ = ("preset_external_axis_class", "vendor", "name", "short_name", "external_axis_type", "range_min", "range_max", "speed", "default_position")
-    PRESET_EXTERNAL_AXIS_CLASS_FIELD_NUMBER: _ClassVar[int]
-    VENDOR_FIELD_NUMBER: _ClassVar[int]
-    NAME_FIELD_NUMBER: _ClassVar[int]
-    SHORT_NAME_FIELD_NUMBER: _ClassVar[int]
-    EXTERNAL_AXIS_TYPE_FIELD_NUMBER: _ClassVar[int]
-    RANGE_MIN_FIELD_NUMBER: _ClassVar[int]
-    RANGE_MAX_FIELD_NUMBER: _ClassVar[int]
-    SPEED_FIELD_NUMBER: _ClassVar[int]
-    DEFAULT_POSITION_FIELD_NUMBER: _ClassVar[int]
-    preset_external_axis_class: str
-    vendor: str
-    name: str
-    short_name: str
-    external_axis_type: ExternalAxisType
-    range_min: _containers.RepeatedScalarFieldContainer[float]
-    range_max: _containers.RepeatedScalarFieldContainer[float]
-    speed: _containers.RepeatedScalarFieldContainer[float]
-    default_position: CartesianPosition
-    def __init__(self, preset_external_axis_class: _Optional[str] = ..., vendor: _Optional[str] = ..., name: _Optional[str] = ..., short_name: _Optional[str] = ..., external_axis_type: _Optional[_Union[ExternalAxisType, str]] = ..., range_min: _Optional[_Iterable[float]] = ..., range_max: _Optional[_Iterable[float]] = ..., speed: _Optional[_Iterable[float]] = ..., default_position: _Optional[_Union[CartesianPosition, _Mapping]] = ...) -> None: ...
 
 class ExternalAxis(_message.Message):
     __slots__ = ("external_axis_type", "name", "short_name", "range_min", "range_max", "speed", "orientation", "position", "geometry", "data", "preset_external_axis_class")
