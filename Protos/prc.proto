@@ -70,6 +70,28 @@ service ParametricRobotControlService {
 
     // Optional: Ping the controller for connection health checks.
     rpc SendPing (Ping) returns (Ping);
+
+    // Environments: several robots, each set up with SetupRobot and given its own tasks, on
+    // one shared timeline. The environment lines up their Sync actions, checks the robots
+    // against each other and against its own geometry, and gives the states of all of them
+    // at a time of that timeline. Its result is computed again whenever a member's task
+    // completes. A robot belongs to at most one environment.
+    rpc SetupEnvironment (SetupEnvironmentRequest) returns (SetupEnvironmentReply);
+    // The environment's shared timeline: validity, duration, Sync releases, contacts.
+    rpc GetEnvironmentResult (GetEnvironmentResultRequest) returns (EnvironmentResult);
+    // Every member's state at a time of the shared timeline, placed in the environment.
+    rpc GetEnvironmentState (GetEnvironmentStateRequest) returns (EnvironmentState);
+    // Removes an environment; its members stay set up. The server also removes an environment
+    // once none of its members is set up any more.
+    rpc RemoveEnvironment (RemoveEnvironmentRequest) returns (RemoveEnvironmentReply);
+    // Drives an environment's link to the robot it streams itself (the Unitree R1 environment's
+    // bridge): "status", "connect", "run" (plans from where the robot stands, simulating the
+    // members again from there through the Syncs and the cross check, refuses anything invalid
+    // unsent, then streams the shared timeline), "hold" (stops a run, or takes the robot where it
+    // stands), "stop" (stops a run, holding it, and takes nothing), "release" (hands the robot
+    // back to its own controller, which moves it to its own pose) or "disconnect". A stop always
+    // holds; only "release" lets go.
+    rpc ControlEnvironment (ControlEnvironmentRequest) returns (ControlEnvironmentReply);
 }
 
 
@@ -175,6 +197,78 @@ message RobotFeedback {
     }
 }
 
+// GetEnvironmentResultRequest asks for an environment's shared timeline.
+message GetEnvironmentResultRequest {
+    // The environment's id, from SetupEnvironmentReply.id.
+    string id = 1;
+}
+
+// GetEnvironmentStateRequest asks for every member's state at a time of the shared timeline.
+message GetEnvironmentStateRequest {
+    // The environment's id.
+    string id = 1;
+    // Seconds of the shared timeline; clamped to 0 and the duration.
+    float time = 2;
+}
+
+// RemoveEnvironmentRequest removes an environment.
+message RemoveEnvironmentRequest {
+    // The environment's id.
+    string id = 1;
+}
+
+// RemoveEnvironmentReply: "OK", or "Environment ID not found".
+message RemoveEnvironmentReply {
+    string status = 1;
+}
+
+// ControlEnvironmentRequest drives an environment's link to its robot.
+message ControlEnvironmentRequest {
+    // The environment's id.
+    string id = 1;
+    // "status", "connect", "run", "hold", "stop", "release" or "disconnect".
+    string command = 2;
+}
+
+// ControlEnvironmentReply: the command's outcome, and the link as it stands after it.
+message ControlEnvironmentReply {
+    // "OK", or why the command did nothing ("Environment ID not found", "Not sent: ...", a type
+    // without a link).
+    string status = 1;
+    EnvironmentLinkStatus link = 2;
+}
+
+// SetupEnvironmentReply confirms an environment, with what a client needs to draw it.
+message SetupEnvironmentReply {
+    // "OK", or why the environment was refused.
+    string status = 1;
+    // The environment's id. Use it in GetEnvironmentResult and GetEnvironmentState.
+    string id = 2;
+    // The environment's settings, as the request gave them, with the type's defaults.
+    Settings environment_settings = 3;
+    // The environment's geometry: the request's, then the type's own (the Unitree R1's
+    // body). Placed per state by EnvironmentState.geometry_transformations.
+    repeated PolyMesh geometry = 4;
+}
+
+// SetupEnvironmentRequest sets up an environment over robots already set up with SetupRobot.
+// Calling it again with the same id replaces the environment.
+message SetupEnvironmentRequest {
+    // Client-chosen id; empty lets the server name one.
+    string id = 1;
+    // The environment type: "Generic.Generic_Environment" (any robots: the shared timeline,
+    // the Syncs and the cross check) or "UNITREE.UNITREE_R1_Environment" (the two arms of a
+    // Unitree R1 with its body).
+    string environment_driver_class = 2;
+    repeated EnvironmentMember members = 3;
+    // Static geometry of the environment, placed by each mesh's transform; robots are
+    // checked against its collision hulls.
+    repeated PolyMesh geometry = 4;
+    // The environment's settings (the cross check, the type's own); omitted keys keep their
+    // defaults.
+    Settings environment_settings = 5;
+}
+
 // SetupRobotReply confirms that the robot environment has been initialised.
 message SetupRobotReply {
     // Setup feedback string.
@@ -243,6 +337,8 @@ message Action {
         // Inserts arbitrary code verbatim into the generated robot program.
         // Not parsed or simulated.
         InsertCode insert_code_action = 5;
+        // A meeting point with the other robots of an environment.
+        Sync sync_action = 6;
     }
 }
 
@@ -558,8 +654,20 @@ message JointTarget {
     repeated float external_axis_values = 4;
 }
 
+// [Motion] SPLMotion is a spline segment (KUKA's SPL): the path runs through its Cartesian
+// target on a smooth curve the controller plans. Use within SPLINE motion groups only. The
+// simulation approximates the controller's curve: a cubic through the block's points, the
+// tangent at each point taken from its neighbours, joined tangentially to the block's LIN and
+// circular segments.
+message SPLMotion {
+    // Optional additional data.
+    MetaData data = 1;
+    // The Cartesian target position.
+    CartesianTarget target = 2;
+}
+
 // [Motion] LINMotion moves the robot in a straight line to a Cartesian target.
-// Use within CP motion groups only.
+// Use within CP and SPLINE motion groups (in a SPLINE group it is an SLIN segment).
 message LINMotion {
     // Optional additional data.
     MetaData data = 1;
@@ -637,8 +745,10 @@ message MotionCommand {
         CircularMotion circular_motion = 2;
         // Point-to-point Cartesian motion (PTP groups).
         PTPMotion ptp_motion = 3;
-        // Linear Cartesian motion (CP groups).
+        // Linear Cartesian motion (CP and SPLINE groups).
         LINMotion lin_motion = 4;
+        // Spline segment (SPLINE groups only).
+        SPLMotion spl_motion = 5;
     }
 }
 
@@ -680,6 +790,10 @@ message MotionGroup {
     //                 before an output and before a tool change.
     // ABB, FANUC and UR report a value they do not know (a probable typo) and blend with
     // their default.
+    // In a SPLINE group (a spline block) the interpolation is the block's end only (KRL:
+    // ENDSPLINE C_SPL; use "C_SPL"): inside the block the robot passes every target without
+    // stopping, except where two LIN/circular segments meet at an angle and at repeated
+    // points. KRL never approximates a spline motion into a conventional LIN, CIRC or PTP.
     string interpolation = 3;
     // Tool ID — must match a key in Robot.tool_dictionary.
     string tool_id = 4;
@@ -697,7 +811,12 @@ enum MotionGroupType {
     // Point-to-point — fast joint-interpolated motion; Cartesian path is not
     // guaranteed. Use AxisMotion or PTPMotion.
     PTP = 1;
-    // Spline — smooth multi-point path with continuity at waypoints.
+    // Spline block (KUKA's SPLINE … ENDSPLINE): SPLMotion, LINMotion (SLIN) and
+    // CircularMotion (SCIRC) segments, in any order, planned as one motion through every
+    // target. Only KUKA controllers run it: KSS_KRL writes the block (KSS 8.3 or later),
+    // KSS_IOB replays the simulation, KUKA_SUNRISE writes each run of SPL segments as a
+    // Sunrise spline and the LIN and circular segments between them as LIN and CIRC motions.
+    // Every other driver simulates the task and writes or sends nothing ("Not written: …").
     SPLINE = 2;
 }
 
@@ -826,6 +945,94 @@ message Settings {
     map<string, string> settings_dictionary = 1;
 }
 
+// [Environments] EnvironmentContact is one contact between two robots of an environment, or
+// between a robot and the environment's geometry, over the times it lasts.
+message EnvironmentContact {
+    // Shared-timeline seconds of the first and the last check time in contact.
+    float start_time = 1;
+    float end_time = 2;
+    // The robot ids; member_b is empty for the environment's own geometry.
+    string member_a = 3;
+    string member_b = 4;
+    // The parts: "link 3", "tool", "E1" (an external unit's moving piece), or a piece of
+    // the environment's geometry by name.
+    string part_a = 5;
+    string part_b = 6;
+}
+
+// [Environments] EnvironmentLinkStatus is an environment's link to the robot it streams.
+message EnvironmentLinkStatus {
+    // "Disconnected", "Connecting", "No Answer", "Connected", "Planning", "Running", "Holding"
+    // or "Releasing".
+    string state = 1;
+    // The robot follows the link (held or streamed), not its own controller.
+    bool engaged = 2;
+    // A run streams the shared timeline.
+    bool moving = 3;
+    // Seconds of the shared timeline streamed, and the run's duration.
+    float time = 4;
+    float duration = 5;
+    // The bridge runs without a robot (its simulate mode).
+    bool simulated = 6;
+    // The bridge's "host:port"; empty without a link.
+    string endpoint = 7;
+    // The last command's outcome, or what the link reported (a hold by the bridge's watchdog).
+    string message = 8;
+}
+
+// [Environments] EnvironmentMember is a robot of an environment.
+message EnvironmentMember {
+    // The robot's id, from SetupRobotReply.id.
+    string robot_id = 1;
+    // Where the robot's world frame (its root; for a robot on a rail, the rail's frame)
+    // stands in the environment. Unset is the identity. An environment type that places
+    // its members itself (the Unitree R1) ignores it.
+    CartesianPosition placement = 2;
+    // Seconds on the shared timeline before the robot's task starts.
+    float time_offset = 3;
+}
+
+// [Environments] EnvironmentResult is an environment's shared timeline.
+message EnvironmentResult {
+    // "OK", or why there is no result (an unknown id).
+    string status = 1;
+    // False when a member's own simulation is invalid, a Sync cannot be resolved, or
+    // robots touch each other or the environment's geometry.
+    bool is_valid = 2;
+    // Seconds of the shared timeline.
+    float duration = 3;
+    repeated EnvironmentContact contacts = 4;
+    repeated SyncRelease syncs = 5;
+    // A deadlock, a missing partner, a Sync inside a WHILE, IF branches that reach other
+    // Syncs, a member without a simulation; empty when there is none.
+    string error = 6;
+    string warning = 7;
+    // The members' robot ids, in the order of the request, and their placements as the
+    // environment uses them (its type may set them).
+    repeated string member_ids = 8;
+    repeated Matrix4x4 placements = 9;
+    // The environment's settings now: the setup's, with what the Server's Settings page
+    // applied since. A client that keeps its settings reads edits made there from here.
+    Settings environment_settings = 10;
+}
+
+// [Environments] EnvironmentState is every member's state at a time of the shared timeline.
+message EnvironmentState {
+    // "OK", or why there is no state.
+    string status = 1;
+    // Seconds of the shared timeline.
+    float time = 2;
+    // One per member, in the order of the result's member_ids. The transformations, the tool
+    // frame and the flange frame are in the environment's frame; a member in contact at this
+    // time has the alarm of the part touching.
+    repeated RobotState states = 3;
+    // The environment's geometry pieces, placed at this time, in the order of
+    // SetupEnvironmentReply.geometry.
+    repeated Matrix4x4 geometry_transformations = 4;
+    // Per piece: whether it is in contact with a robot at this time.
+    repeated bool geometry_alarm = 5;
+}
+
 // [Actions] SetVariable sets a named robot variable to a new value.
 message SetVariable {
     // The new variable state.
@@ -892,6 +1099,34 @@ message SimulationResultUnit {
     // Type of the originating motion command, as the PRC.Core CommandType name
     // ("LIN", "PTP", "Circular", "Spline", "Axis"). Empty when unknown.
     string motion_type = 12;
+}
+
+// [Actions] Sync is a meeting point with the other robots of an environment. In a robot's own
+// simulation it stops the robot and takes no time; the environment holds each robot at its
+// Sync until every participant has arrived. The k-th Sync of a name meets the k-th Sync of
+// that name of the other robots. A robot's own program does not wait there: the generators
+// write a comment, and the simulation result carries a warning.
+message Sync {
+    // The meeting point's name.
+    string name = 1;
+    // The robots that meet here, by robot id; empty: every member whose task has it.
+    repeated string participants = 2;
+    // Optional additional data.
+    MetaData data = 3;
+    // One-sided: the robot signals its arrival and goes on without stopping.
+    bool no_wait = 4;
+}
+
+// [Environments] SyncRelease is one meeting point of an environment's Syncs.
+message SyncRelease {
+    string name = 1;
+    // 1 for the first Sync of the name, 2 for the second, ...
+    int32 occurrence = 2;
+    // Shared-timeline seconds when the last participant arrived.
+    float release_time = 3;
+    // The participants and how long each waited there, in seconds.
+    repeated string members = 4;
+    repeated float waits = 5;
 }
 
 // [Flow Control] Task is the top-level container for robot commands sent to the server.

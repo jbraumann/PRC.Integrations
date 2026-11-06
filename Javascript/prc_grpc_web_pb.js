@@ -495,5 +495,310 @@ proto.ParametricRobotControlServicePromiseClient.prototype.sendPing =
 };
 
 
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.SetupEnvironmentRequest,
+ *   !proto.SetupEnvironmentReply>}
+ */
+const methodDescriptor_ParametricRobotControlService_SetupEnvironment = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/SetupEnvironment',
+  grpc.web.MethodType.UNARY,
+  proto.SetupEnvironmentRequest,
+  proto.SetupEnvironmentReply,
+  /**
+   * @param {!proto.SetupEnvironmentRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.SetupEnvironmentReply.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.SetupEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.SetupEnvironmentReply)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.SetupEnvironmentReply>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.setupEnvironment =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/SetupEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_SetupEnvironment,
+      callback);
+};
+
+
+/**
+ * @param {!proto.SetupEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.SetupEnvironmentReply>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.setupEnvironment =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/SetupEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_SetupEnvironment);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.GetEnvironmentResultRequest,
+ *   !proto.EnvironmentResult>}
+ */
+const methodDescriptor_ParametricRobotControlService_GetEnvironmentResult = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/GetEnvironmentResult',
+  grpc.web.MethodType.UNARY,
+  proto.GetEnvironmentResultRequest,
+  proto.EnvironmentResult,
+  /**
+   * @param {!proto.GetEnvironmentResultRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.EnvironmentResult.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.GetEnvironmentResultRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.EnvironmentResult)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.EnvironmentResult>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.getEnvironmentResult =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/GetEnvironmentResult',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_GetEnvironmentResult,
+      callback);
+};
+
+
+/**
+ * @param {!proto.GetEnvironmentResultRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.EnvironmentResult>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.getEnvironmentResult =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/GetEnvironmentResult',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_GetEnvironmentResult);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.GetEnvironmentStateRequest,
+ *   !proto.EnvironmentState>}
+ */
+const methodDescriptor_ParametricRobotControlService_GetEnvironmentState = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/GetEnvironmentState',
+  grpc.web.MethodType.UNARY,
+  proto.GetEnvironmentStateRequest,
+  proto.EnvironmentState,
+  /**
+   * @param {!proto.GetEnvironmentStateRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.EnvironmentState.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.GetEnvironmentStateRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.EnvironmentState)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.EnvironmentState>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.getEnvironmentState =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/GetEnvironmentState',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_GetEnvironmentState,
+      callback);
+};
+
+
+/**
+ * @param {!proto.GetEnvironmentStateRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.EnvironmentState>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.getEnvironmentState =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/GetEnvironmentState',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_GetEnvironmentState);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.RemoveEnvironmentRequest,
+ *   !proto.RemoveEnvironmentReply>}
+ */
+const methodDescriptor_ParametricRobotControlService_RemoveEnvironment = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/RemoveEnvironment',
+  grpc.web.MethodType.UNARY,
+  proto.RemoveEnvironmentRequest,
+  proto.RemoveEnvironmentReply,
+  /**
+   * @param {!proto.RemoveEnvironmentRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.RemoveEnvironmentReply.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.RemoveEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.RemoveEnvironmentReply)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.RemoveEnvironmentReply>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.removeEnvironment =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/RemoveEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_RemoveEnvironment,
+      callback);
+};
+
+
+/**
+ * @param {!proto.RemoveEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.RemoveEnvironmentReply>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.removeEnvironment =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/RemoveEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_RemoveEnvironment);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.ControlEnvironmentRequest,
+ *   !proto.ControlEnvironmentReply>}
+ */
+const methodDescriptor_ParametricRobotControlService_ControlEnvironment = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/ControlEnvironment',
+  grpc.web.MethodType.UNARY,
+  proto.ControlEnvironmentRequest,
+  proto.ControlEnvironmentReply,
+  /**
+   * @param {!proto.ControlEnvironmentRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.ControlEnvironmentReply.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.ControlEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.ControlEnvironmentReply)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.ControlEnvironmentReply>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.controlEnvironment =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/ControlEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_ControlEnvironment,
+      callback);
+};
+
+
+/**
+ * @param {!proto.ControlEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.ControlEnvironmentReply>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.controlEnvironment =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/ControlEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_ControlEnvironment);
+};
+
+
 module.exports = proto;
 

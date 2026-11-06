@@ -174,6 +174,74 @@ class RobotFeedback(_message.Message):
     ping_data: Ping
     def __init__(self, status: _Optional[str] = ..., heartbeat_data: _Optional[_Union[Heartbeat, _Mapping]] = ..., robot_state_data: _Optional[_Union[RobotState, _Mapping]] = ..., settings_data: _Optional[_Union[Settings, _Mapping]] = ..., ping_data: _Optional[_Union[Ping, _Mapping]] = ...) -> None: ...
 
+class GetEnvironmentResultRequest(_message.Message):
+    __slots__ = ("id",)
+    ID_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    def __init__(self, id: _Optional[str] = ...) -> None: ...
+
+class GetEnvironmentStateRequest(_message.Message):
+    __slots__ = ("id", "time")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    TIME_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    time: float
+    def __init__(self, id: _Optional[str] = ..., time: _Optional[float] = ...) -> None: ...
+
+class RemoveEnvironmentRequest(_message.Message):
+    __slots__ = ("id",)
+    ID_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    def __init__(self, id: _Optional[str] = ...) -> None: ...
+
+class RemoveEnvironmentReply(_message.Message):
+    __slots__ = ("status",)
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    status: str
+    def __init__(self, status: _Optional[str] = ...) -> None: ...
+
+class ControlEnvironmentRequest(_message.Message):
+    __slots__ = ("id", "command")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    COMMAND_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    command: str
+    def __init__(self, id: _Optional[str] = ..., command: _Optional[str] = ...) -> None: ...
+
+class ControlEnvironmentReply(_message.Message):
+    __slots__ = ("status", "link")
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    LINK_FIELD_NUMBER: _ClassVar[int]
+    status: str
+    link: EnvironmentLinkStatus
+    def __init__(self, status: _Optional[str] = ..., link: _Optional[_Union[EnvironmentLinkStatus, _Mapping]] = ...) -> None: ...
+
+class SetupEnvironmentReply(_message.Message):
+    __slots__ = ("status", "id", "environment_settings", "geometry")
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    ID_FIELD_NUMBER: _ClassVar[int]
+    ENVIRONMENT_SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    GEOMETRY_FIELD_NUMBER: _ClassVar[int]
+    status: str
+    id: str
+    environment_settings: Settings
+    geometry: _containers.RepeatedCompositeFieldContainer[PolyMesh]
+    def __init__(self, status: _Optional[str] = ..., id: _Optional[str] = ..., environment_settings: _Optional[_Union[Settings, _Mapping]] = ..., geometry: _Optional[_Iterable[_Union[PolyMesh, _Mapping]]] = ...) -> None: ...
+
+class SetupEnvironmentRequest(_message.Message):
+    __slots__ = ("id", "environment_driver_class", "members", "geometry", "environment_settings")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    ENVIRONMENT_DRIVER_CLASS_FIELD_NUMBER: _ClassVar[int]
+    MEMBERS_FIELD_NUMBER: _ClassVar[int]
+    GEOMETRY_FIELD_NUMBER: _ClassVar[int]
+    ENVIRONMENT_SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    environment_driver_class: str
+    members: _containers.RepeatedCompositeFieldContainer[EnvironmentMember]
+    geometry: _containers.RepeatedCompositeFieldContainer[PolyMesh]
+    environment_settings: Settings
+    def __init__(self, id: _Optional[str] = ..., environment_driver_class: _Optional[str] = ..., members: _Optional[_Iterable[_Union[EnvironmentMember, _Mapping]]] = ..., geometry: _Optional[_Iterable[_Union[PolyMesh, _Mapping]]] = ..., environment_settings: _Optional[_Union[Settings, _Mapping]] = ...) -> None: ...
+
 class SetupRobotReply(_message.Message):
     __slots__ = ("status", "id", "license_state", "robot_settings")
     STATUS_FIELD_NUMBER: _ClassVar[int]
@@ -219,18 +287,20 @@ class UpdateVariableRequest(_message.Message):
     def __init__(self, id: _Optional[str] = ..., var: _Optional[_Union[Variable, _Mapping]] = ...) -> None: ...
 
 class Action(_message.Message):
-    __slots__ = ("set_variable_action", "wait_for_variable_action", "hold_action", "ping_action", "insert_code_action")
+    __slots__ = ("set_variable_action", "wait_for_variable_action", "hold_action", "ping_action", "insert_code_action", "sync_action")
     SET_VARIABLE_ACTION_FIELD_NUMBER: _ClassVar[int]
     WAIT_FOR_VARIABLE_ACTION_FIELD_NUMBER: _ClassVar[int]
     HOLD_ACTION_FIELD_NUMBER: _ClassVar[int]
     PING_ACTION_FIELD_NUMBER: _ClassVar[int]
     INSERT_CODE_ACTION_FIELD_NUMBER: _ClassVar[int]
+    SYNC_ACTION_FIELD_NUMBER: _ClassVar[int]
     set_variable_action: SetVariable
     wait_for_variable_action: WaitForVariable
     hold_action: Hold
     ping_action: Ping
     insert_code_action: InsertCode
-    def __init__(self, set_variable_action: _Optional[_Union[SetVariable, _Mapping]] = ..., wait_for_variable_action: _Optional[_Union[WaitForVariable, _Mapping]] = ..., hold_action: _Optional[_Union[Hold, _Mapping]] = ..., ping_action: _Optional[_Union[Ping, _Mapping]] = ..., insert_code_action: _Optional[_Union[InsertCode, _Mapping]] = ...) -> None: ...
+    sync_action: Sync
+    def __init__(self, set_variable_action: _Optional[_Union[SetVariable, _Mapping]] = ..., wait_for_variable_action: _Optional[_Union[WaitForVariable, _Mapping]] = ..., hold_action: _Optional[_Union[Hold, _Mapping]] = ..., ping_action: _Optional[_Union[Ping, _Mapping]] = ..., insert_code_action: _Optional[_Union[InsertCode, _Mapping]] = ..., sync_action: _Optional[_Union[Sync, _Mapping]] = ...) -> None: ...
 
 class AxisMotion(_message.Message):
     __slots__ = ("data", "target")
@@ -440,6 +510,14 @@ class JointTarget(_message.Message):
     external_axis_values: _containers.RepeatedScalarFieldContainer[float]
     def __init__(self, axis_values: _Optional[_Iterable[float]] = ..., speed: _Optional[_Iterable[float]] = ..., acceleration: _Optional[_Iterable[float]] = ..., external_axis_values: _Optional[_Iterable[float]] = ...) -> None: ...
 
+class SPLMotion(_message.Message):
+    __slots__ = ("data", "target")
+    DATA_FIELD_NUMBER: _ClassVar[int]
+    TARGET_FIELD_NUMBER: _ClassVar[int]
+    data: MetaData
+    target: CartesianTarget
+    def __init__(self, data: _Optional[_Union[MetaData, _Mapping]] = ..., target: _Optional[_Union[CartesianTarget, _Mapping]] = ...) -> None: ...
+
 class LINMotion(_message.Message):
     __slots__ = ("data", "target")
     DATA_FIELD_NUMBER: _ClassVar[int]
@@ -512,16 +590,18 @@ class MetaData(_message.Message):
     def __init__(self, id: _Optional[str] = ..., data: _Optional[_Mapping[str, str]] = ...) -> None: ...
 
 class MotionCommand(_message.Message):
-    __slots__ = ("axis_motion", "circular_motion", "ptp_motion", "lin_motion")
+    __slots__ = ("axis_motion", "circular_motion", "ptp_motion", "lin_motion", "spl_motion")
     AXIS_MOTION_FIELD_NUMBER: _ClassVar[int]
     CIRCULAR_MOTION_FIELD_NUMBER: _ClassVar[int]
     PTP_MOTION_FIELD_NUMBER: _ClassVar[int]
     LIN_MOTION_FIELD_NUMBER: _ClassVar[int]
+    SPL_MOTION_FIELD_NUMBER: _ClassVar[int]
     axis_motion: AxisMotion
     circular_motion: CircularMotion
     ptp_motion: PTPMotion
     lin_motion: LINMotion
-    def __init__(self, axis_motion: _Optional[_Union[AxisMotion, _Mapping]] = ..., circular_motion: _Optional[_Union[CircularMotion, _Mapping]] = ..., ptp_motion: _Optional[_Union[PTPMotion, _Mapping]] = ..., lin_motion: _Optional[_Union[LINMotion, _Mapping]] = ...) -> None: ...
+    spl_motion: SPLMotion
+    def __init__(self, axis_motion: _Optional[_Union[AxisMotion, _Mapping]] = ..., circular_motion: _Optional[_Union[CircularMotion, _Mapping]] = ..., ptp_motion: _Optional[_Union[PTPMotion, _Mapping]] = ..., lin_motion: _Optional[_Union[LINMotion, _Mapping]] = ..., spl_motion: _Optional[_Union[SPLMotion, _Mapping]] = ...) -> None: ...
 
 class MotionGroup(_message.Message):
     __slots__ = ("motion_group_type", "commands", "interpolation", "tool_id", "robot_base", "data")
@@ -661,6 +741,90 @@ class Settings(_message.Message):
     settings_dictionary: _containers.ScalarMap[str, str]
     def __init__(self, settings_dictionary: _Optional[_Mapping[str, str]] = ...) -> None: ...
 
+class EnvironmentContact(_message.Message):
+    __slots__ = ("start_time", "end_time", "member_a", "member_b", "part_a", "part_b")
+    START_TIME_FIELD_NUMBER: _ClassVar[int]
+    END_TIME_FIELD_NUMBER: _ClassVar[int]
+    MEMBER_A_FIELD_NUMBER: _ClassVar[int]
+    MEMBER_B_FIELD_NUMBER: _ClassVar[int]
+    PART_A_FIELD_NUMBER: _ClassVar[int]
+    PART_B_FIELD_NUMBER: _ClassVar[int]
+    start_time: float
+    end_time: float
+    member_a: str
+    member_b: str
+    part_a: str
+    part_b: str
+    def __init__(self, start_time: _Optional[float] = ..., end_time: _Optional[float] = ..., member_a: _Optional[str] = ..., member_b: _Optional[str] = ..., part_a: _Optional[str] = ..., part_b: _Optional[str] = ...) -> None: ...
+
+class EnvironmentLinkStatus(_message.Message):
+    __slots__ = ("state", "engaged", "moving", "time", "duration", "simulated", "endpoint", "message")
+    STATE_FIELD_NUMBER: _ClassVar[int]
+    ENGAGED_FIELD_NUMBER: _ClassVar[int]
+    MOVING_FIELD_NUMBER: _ClassVar[int]
+    TIME_FIELD_NUMBER: _ClassVar[int]
+    DURATION_FIELD_NUMBER: _ClassVar[int]
+    SIMULATED_FIELD_NUMBER: _ClassVar[int]
+    ENDPOINT_FIELD_NUMBER: _ClassVar[int]
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    state: str
+    engaged: bool
+    moving: bool
+    time: float
+    duration: float
+    simulated: bool
+    endpoint: str
+    message: str
+    def __init__(self, state: _Optional[str] = ..., engaged: bool = ..., moving: bool = ..., time: _Optional[float] = ..., duration: _Optional[float] = ..., simulated: bool = ..., endpoint: _Optional[str] = ..., message: _Optional[str] = ...) -> None: ...
+
+class EnvironmentMember(_message.Message):
+    __slots__ = ("robot_id", "placement", "time_offset")
+    ROBOT_ID_FIELD_NUMBER: _ClassVar[int]
+    PLACEMENT_FIELD_NUMBER: _ClassVar[int]
+    TIME_OFFSET_FIELD_NUMBER: _ClassVar[int]
+    robot_id: str
+    placement: CartesianPosition
+    time_offset: float
+    def __init__(self, robot_id: _Optional[str] = ..., placement: _Optional[_Union[CartesianPosition, _Mapping]] = ..., time_offset: _Optional[float] = ...) -> None: ...
+
+class EnvironmentResult(_message.Message):
+    __slots__ = ("status", "is_valid", "duration", "contacts", "syncs", "error", "warning", "member_ids", "placements", "environment_settings")
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    IS_VALID_FIELD_NUMBER: _ClassVar[int]
+    DURATION_FIELD_NUMBER: _ClassVar[int]
+    CONTACTS_FIELD_NUMBER: _ClassVar[int]
+    SYNCS_FIELD_NUMBER: _ClassVar[int]
+    ERROR_FIELD_NUMBER: _ClassVar[int]
+    WARNING_FIELD_NUMBER: _ClassVar[int]
+    MEMBER_IDS_FIELD_NUMBER: _ClassVar[int]
+    PLACEMENTS_FIELD_NUMBER: _ClassVar[int]
+    ENVIRONMENT_SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    status: str
+    is_valid: bool
+    duration: float
+    contacts: _containers.RepeatedCompositeFieldContainer[EnvironmentContact]
+    syncs: _containers.RepeatedCompositeFieldContainer[SyncRelease]
+    error: str
+    warning: str
+    member_ids: _containers.RepeatedScalarFieldContainer[str]
+    placements: _containers.RepeatedCompositeFieldContainer[Matrix4x4]
+    environment_settings: Settings
+    def __init__(self, status: _Optional[str] = ..., is_valid: bool = ..., duration: _Optional[float] = ..., contacts: _Optional[_Iterable[_Union[EnvironmentContact, _Mapping]]] = ..., syncs: _Optional[_Iterable[_Union[SyncRelease, _Mapping]]] = ..., error: _Optional[str] = ..., warning: _Optional[str] = ..., member_ids: _Optional[_Iterable[str]] = ..., placements: _Optional[_Iterable[_Union[Matrix4x4, _Mapping]]] = ..., environment_settings: _Optional[_Union[Settings, _Mapping]] = ...) -> None: ...
+
+class EnvironmentState(_message.Message):
+    __slots__ = ("status", "time", "states", "geometry_transformations", "geometry_alarm")
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    TIME_FIELD_NUMBER: _ClassVar[int]
+    STATES_FIELD_NUMBER: _ClassVar[int]
+    GEOMETRY_TRANSFORMATIONS_FIELD_NUMBER: _ClassVar[int]
+    GEOMETRY_ALARM_FIELD_NUMBER: _ClassVar[int]
+    status: str
+    time: float
+    states: _containers.RepeatedCompositeFieldContainer[RobotState]
+    geometry_transformations: _containers.RepeatedCompositeFieldContainer[Matrix4x4]
+    geometry_alarm: _containers.RepeatedScalarFieldContainer[bool]
+    def __init__(self, status: _Optional[str] = ..., time: _Optional[float] = ..., states: _Optional[_Iterable[_Union[RobotState, _Mapping]]] = ..., geometry_transformations: _Optional[_Iterable[_Union[Matrix4x4, _Mapping]]] = ..., geometry_alarm: _Optional[_Iterable[bool]] = ...) -> None: ...
+
 class SetVariable(_message.Message):
     __slots__ = ("new_state",)
     NEW_STATE_FIELD_NUMBER: _ClassVar[int]
@@ -718,6 +882,32 @@ class SimulationResultUnit(_message.Message):
     alarm: bool
     motion_type: str
     def __init__(self, axis_values: _Optional[_Iterable[float]] = ..., position: _Optional[_Union[Matrix4x4, _Mapping]] = ..., time: _Optional[float] = ..., collision: _Optional[_Iterable[bool]] = ..., singularity: _Optional[_Iterable[bool]] = ..., outofreach: _Optional[_Iterable[bool]] = ..., external_axis_values: _Optional[_Iterable[float]] = ..., external_axis_outofreach: _Optional[_Iterable[bool]] = ..., interpolation_factor: _Optional[float] = ..., id: _Optional[str] = ..., alarm: bool = ..., motion_type: _Optional[str] = ...) -> None: ...
+
+class Sync(_message.Message):
+    __slots__ = ("name", "participants", "data", "no_wait")
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    PARTICIPANTS_FIELD_NUMBER: _ClassVar[int]
+    DATA_FIELD_NUMBER: _ClassVar[int]
+    NO_WAIT_FIELD_NUMBER: _ClassVar[int]
+    name: str
+    participants: _containers.RepeatedScalarFieldContainer[str]
+    data: MetaData
+    no_wait: bool
+    def __init__(self, name: _Optional[str] = ..., participants: _Optional[_Iterable[str]] = ..., data: _Optional[_Union[MetaData, _Mapping]] = ..., no_wait: bool = ...) -> None: ...
+
+class SyncRelease(_message.Message):
+    __slots__ = ("name", "occurrence", "release_time", "members", "waits")
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    OCCURRENCE_FIELD_NUMBER: _ClassVar[int]
+    RELEASE_TIME_FIELD_NUMBER: _ClassVar[int]
+    MEMBERS_FIELD_NUMBER: _ClassVar[int]
+    WAITS_FIELD_NUMBER: _ClassVar[int]
+    name: str
+    occurrence: int
+    release_time: float
+    members: _containers.RepeatedScalarFieldContainer[str]
+    waits: _containers.RepeatedScalarFieldContainer[float]
+    def __init__(self, name: _Optional[str] = ..., occurrence: _Optional[int] = ..., release_time: _Optional[float] = ..., members: _Optional[_Iterable[str]] = ..., waits: _Optional[_Iterable[float]] = ...) -> None: ...
 
 class Task(_message.Message):
     __slots__ = ("payload", "type", "name", "data")

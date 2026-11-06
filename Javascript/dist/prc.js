@@ -886,6 +886,311 @@ proto.ParametricRobotControlServicePromiseClient.prototype.sendPing =
 };
 
 
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.SetupEnvironmentRequest,
+ *   !proto.SetupEnvironmentReply>}
+ */
+const methodDescriptor_ParametricRobotControlService_SetupEnvironment = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/SetupEnvironment',
+  grpc.web.MethodType.UNARY,
+  proto.SetupEnvironmentRequest,
+  proto.SetupEnvironmentReply,
+  /**
+   * @param {!proto.SetupEnvironmentRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.SetupEnvironmentReply.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.SetupEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.SetupEnvironmentReply)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.SetupEnvironmentReply>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.setupEnvironment =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/SetupEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_SetupEnvironment,
+      callback);
+};
+
+
+/**
+ * @param {!proto.SetupEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.SetupEnvironmentReply>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.setupEnvironment =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/SetupEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_SetupEnvironment);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.GetEnvironmentResultRequest,
+ *   !proto.EnvironmentResult>}
+ */
+const methodDescriptor_ParametricRobotControlService_GetEnvironmentResult = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/GetEnvironmentResult',
+  grpc.web.MethodType.UNARY,
+  proto.GetEnvironmentResultRequest,
+  proto.EnvironmentResult,
+  /**
+   * @param {!proto.GetEnvironmentResultRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.EnvironmentResult.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.GetEnvironmentResultRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.EnvironmentResult)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.EnvironmentResult>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.getEnvironmentResult =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/GetEnvironmentResult',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_GetEnvironmentResult,
+      callback);
+};
+
+
+/**
+ * @param {!proto.GetEnvironmentResultRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.EnvironmentResult>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.getEnvironmentResult =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/GetEnvironmentResult',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_GetEnvironmentResult);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.GetEnvironmentStateRequest,
+ *   !proto.EnvironmentState>}
+ */
+const methodDescriptor_ParametricRobotControlService_GetEnvironmentState = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/GetEnvironmentState',
+  grpc.web.MethodType.UNARY,
+  proto.GetEnvironmentStateRequest,
+  proto.EnvironmentState,
+  /**
+   * @param {!proto.GetEnvironmentStateRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.EnvironmentState.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.GetEnvironmentStateRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.EnvironmentState)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.EnvironmentState>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.getEnvironmentState =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/GetEnvironmentState',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_GetEnvironmentState,
+      callback);
+};
+
+
+/**
+ * @param {!proto.GetEnvironmentStateRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.EnvironmentState>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.getEnvironmentState =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/GetEnvironmentState',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_GetEnvironmentState);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.RemoveEnvironmentRequest,
+ *   !proto.RemoveEnvironmentReply>}
+ */
+const methodDescriptor_ParametricRobotControlService_RemoveEnvironment = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/RemoveEnvironment',
+  grpc.web.MethodType.UNARY,
+  proto.RemoveEnvironmentRequest,
+  proto.RemoveEnvironmentReply,
+  /**
+   * @param {!proto.RemoveEnvironmentRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.RemoveEnvironmentReply.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.RemoveEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.RemoveEnvironmentReply)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.RemoveEnvironmentReply>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.removeEnvironment =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/RemoveEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_RemoveEnvironment,
+      callback);
+};
+
+
+/**
+ * @param {!proto.RemoveEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.RemoveEnvironmentReply>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.removeEnvironment =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/RemoveEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_RemoveEnvironment);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.ControlEnvironmentRequest,
+ *   !proto.ControlEnvironmentReply>}
+ */
+const methodDescriptor_ParametricRobotControlService_ControlEnvironment = new grpc.web.MethodDescriptor(
+  '/ParametricRobotControlService/ControlEnvironment',
+  grpc.web.MethodType.UNARY,
+  proto.ControlEnvironmentRequest,
+  proto.ControlEnvironmentReply,
+  /**
+   * @param {!proto.ControlEnvironmentRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.ControlEnvironmentReply.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.ControlEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.ControlEnvironmentReply)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.ControlEnvironmentReply>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ParametricRobotControlServiceClient.prototype.controlEnvironment =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ParametricRobotControlService/ControlEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_ControlEnvironment,
+      callback);
+};
+
+
+/**
+ * @param {!proto.ControlEnvironmentRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.ControlEnvironmentReply>}
+ *     Promise that resolves to the response
+ */
+proto.ParametricRobotControlServicePromiseClient.prototype.controlEnvironment =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ParametricRobotControlService/ControlEnvironment',
+      request,
+      metadata || {},
+      methodDescriptor_ParametricRobotControlService_ControlEnvironment);
+};
+
+
 module.exports = proto;
 
 
@@ -924,9 +1229,16 @@ goog.exportSymbol('proto.CartesianPosition.FrameCase', null, global);
 goog.exportSymbol('proto.CartesianReference', null, global);
 goog.exportSymbol('proto.CartesianTarget', null, global);
 goog.exportSymbol('proto.CircularMotion', null, global);
+goog.exportSymbol('proto.ControlEnvironmentReply', null, global);
+goog.exportSymbol('proto.ControlEnvironmentRequest', null, global);
 goog.exportSymbol('proto.CoordinateSystem', null, global);
 goog.exportSymbol('proto.CustomRobot', null, global);
 goog.exportSymbol('proto.End', null, global);
+goog.exportSymbol('proto.EnvironmentContact', null, global);
+goog.exportSymbol('proto.EnvironmentLinkStatus', null, global);
+goog.exportSymbol('proto.EnvironmentMember', null, global);
+goog.exportSymbol('proto.EnvironmentResult', null, global);
+goog.exportSymbol('proto.EnvironmentState', null, global);
 goog.exportSymbol('proto.Euler', null, global);
 goog.exportSymbol('proto.EulerFormat', null, global);
 goog.exportSymbol('proto.ExternalAxis', null, global);
@@ -934,6 +1246,8 @@ goog.exportSymbol('proto.ExternalAxisType', null, global);
 goog.exportSymbol('proto.Flow', null, global);
 goog.exportSymbol('proto.Flow.FlowNodeCase', null, global);
 goog.exportSymbol('proto.FrameType', null, global);
+goog.exportSymbol('proto.GetEnvironmentResultRequest', null, global);
+goog.exportSymbol('proto.GetEnvironmentStateRequest', null, global);
 goog.exportSymbol('proto.GetRobotDataReply', null, global);
 goog.exportSymbol('proto.GetRobotDataRequest', null, global);
 goog.exportSymbol('proto.GetSimulatedRobotStateRequest', null, global);
@@ -955,19 +1269,26 @@ goog.exportSymbol('proto.PTPMotion', null, global);
 goog.exportSymbol('proto.Ping', null, global);
 goog.exportSymbol('proto.PolyMesh', null, global);
 goog.exportSymbol('proto.ProgramFile', null, global);
+goog.exportSymbol('proto.RemoveEnvironmentReply', null, global);
+goog.exportSymbol('proto.RemoveEnvironmentRequest', null, global);
 goog.exportSymbol('proto.Robot', null, global);
 goog.exportSymbol('proto.Robot.RobotDataCase', null, global);
 goog.exportSymbol('proto.RobotFeedback', null, global);
 goog.exportSymbol('proto.RobotFeedback.DataPackageCase', null, global);
 goog.exportSymbol('proto.RobotState', null, global);
 goog.exportSymbol('proto.RobotStatus', null, global);
+goog.exportSymbol('proto.SPLMotion', null, global);
 goog.exportSymbol('proto.SetVariable', null, global);
 goog.exportSymbol('proto.Settings', null, global);
+goog.exportSymbol('proto.SetupEnvironmentReply', null, global);
+goog.exportSymbol('proto.SetupEnvironmentRequest', null, global);
 goog.exportSymbol('proto.SetupRobotReply', null, global);
 goog.exportSymbol('proto.SetupRobotRequest', null, global);
 goog.exportSymbol('proto.SimulationResult', null, global);
 goog.exportSymbol('proto.SimulationResultUnit', null, global);
 goog.exportSymbol('proto.SubscribeRobotFeedbackRequest', null, global);
+goog.exportSymbol('proto.Sync', null, global);
+goog.exportSymbol('proto.SyncRelease', null, global);
 goog.exportSymbol('proto.Task', null, global);
 goog.exportSymbol('proto.TaskPayload', null, global);
 goog.exportSymbol('proto.TaskPayload.PayloadCase', null, global);
@@ -1107,6 +1428,174 @@ if (goog.DEBUG && !COMPILED) {
    * @override
    */
   proto.RobotFeedback.displayName = 'proto.RobotFeedback';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.GetEnvironmentResultRequest = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.GetEnvironmentResultRequest, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.GetEnvironmentResultRequest.displayName = 'proto.GetEnvironmentResultRequest';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.GetEnvironmentStateRequest = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.GetEnvironmentStateRequest, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.GetEnvironmentStateRequest.displayName = 'proto.GetEnvironmentStateRequest';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.RemoveEnvironmentRequest = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.RemoveEnvironmentRequest, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.RemoveEnvironmentRequest.displayName = 'proto.RemoveEnvironmentRequest';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.RemoveEnvironmentReply = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.RemoveEnvironmentReply, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.RemoveEnvironmentReply.displayName = 'proto.RemoveEnvironmentReply';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.ControlEnvironmentRequest = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.ControlEnvironmentRequest, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.ControlEnvironmentRequest.displayName = 'proto.ControlEnvironmentRequest';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.ControlEnvironmentReply = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.ControlEnvironmentReply, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.ControlEnvironmentReply.displayName = 'proto.ControlEnvironmentReply';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.SetupEnvironmentReply = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.SetupEnvironmentReply.repeatedFields_, null);
+};
+goog.inherits(proto.SetupEnvironmentReply, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.SetupEnvironmentReply.displayName = 'proto.SetupEnvironmentReply';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.SetupEnvironmentRequest = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.SetupEnvironmentRequest.repeatedFields_, null);
+};
+goog.inherits(proto.SetupEnvironmentRequest, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.SetupEnvironmentRequest.displayName = 'proto.SetupEnvironmentRequest';
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -1601,6 +2090,27 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
+proto.SPLMotion = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.SPLMotion, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.SPLMotion.displayName = 'proto.SPLMotion';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
 proto.LINMotion = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
@@ -1853,6 +2363,111 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
+proto.EnvironmentContact = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.EnvironmentContact, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.EnvironmentContact.displayName = 'proto.EnvironmentContact';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.EnvironmentLinkStatus = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.EnvironmentLinkStatus, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.EnvironmentLinkStatus.displayName = 'proto.EnvironmentLinkStatus';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.EnvironmentMember = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.EnvironmentMember, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.EnvironmentMember.displayName = 'proto.EnvironmentMember';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.EnvironmentResult = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.EnvironmentResult.repeatedFields_, null);
+};
+goog.inherits(proto.EnvironmentResult, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.EnvironmentResult.displayName = 'proto.EnvironmentResult';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.EnvironmentState = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.EnvironmentState.repeatedFields_, null);
+};
+goog.inherits(proto.EnvironmentState, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.EnvironmentState.displayName = 'proto.EnvironmentState';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
 proto.SetVariable = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
@@ -1926,6 +2541,48 @@ if (goog.DEBUG && !COMPILED) {
    * @override
    */
   proto.SimulationResultUnit.displayName = 'proto.SimulationResultUnit';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.Sync = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.Sync.repeatedFields_, null);
+};
+goog.inherits(proto.Sync, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.Sync.displayName = 'proto.Sync';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.SyncRelease = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.SyncRelease.repeatedFields_, null);
+};
+goog.inherits(proto.SyncRelease, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.SyncRelease.displayName = 'proto.SyncRelease';
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -3783,6 +4440,1492 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     http://goto/soy-param-migration
  * @return {!Object}
  */
+proto.GetEnvironmentResultRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.GetEnvironmentResultRequest.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.GetEnvironmentResultRequest} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.GetEnvironmentResultRequest.toObject = function(includeInstance, msg) {
+  var f, obj = {
+id: jspb.Message.getFieldWithDefault(msg, 1, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.GetEnvironmentResultRequest}
+ */
+proto.GetEnvironmentResultRequest.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.GetEnvironmentResultRequest;
+  return proto.GetEnvironmentResultRequest.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.GetEnvironmentResultRequest} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.GetEnvironmentResultRequest}
+ */
+proto.GetEnvironmentResultRequest.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setId(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.GetEnvironmentResultRequest.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.GetEnvironmentResultRequest.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.GetEnvironmentResultRequest} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.GetEnvironmentResultRequest.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getId();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string id = 1;
+ * @return {string}
+ */
+proto.GetEnvironmentResultRequest.prototype.getId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.GetEnvironmentResultRequest} returns this
+ */
+proto.GetEnvironmentResultRequest.prototype.setId = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.GetEnvironmentStateRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.GetEnvironmentStateRequest.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.GetEnvironmentStateRequest} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.GetEnvironmentStateRequest.toObject = function(includeInstance, msg) {
+  var f, obj = {
+id: jspb.Message.getFieldWithDefault(msg, 1, ""),
+time: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.GetEnvironmentStateRequest}
+ */
+proto.GetEnvironmentStateRequest.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.GetEnvironmentStateRequest;
+  return proto.GetEnvironmentStateRequest.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.GetEnvironmentStateRequest} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.GetEnvironmentStateRequest}
+ */
+proto.GetEnvironmentStateRequest.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setId(value);
+      break;
+    case 2:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setTime(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.GetEnvironmentStateRequest.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.GetEnvironmentStateRequest.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.GetEnvironmentStateRequest} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.GetEnvironmentStateRequest.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getId();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getTime();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      2,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string id = 1;
+ * @return {string}
+ */
+proto.GetEnvironmentStateRequest.prototype.getId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.GetEnvironmentStateRequest} returns this
+ */
+proto.GetEnvironmentStateRequest.prototype.setId = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional float time = 2;
+ * @return {number}
+ */
+proto.GetEnvironmentStateRequest.prototype.getTime = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 2, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.GetEnvironmentStateRequest} returns this
+ */
+proto.GetEnvironmentStateRequest.prototype.setTime = function(value) {
+  return jspb.Message.setProto3FloatField(this, 2, value);
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.RemoveEnvironmentRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.RemoveEnvironmentRequest.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.RemoveEnvironmentRequest} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.RemoveEnvironmentRequest.toObject = function(includeInstance, msg) {
+  var f, obj = {
+id: jspb.Message.getFieldWithDefault(msg, 1, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.RemoveEnvironmentRequest}
+ */
+proto.RemoveEnvironmentRequest.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.RemoveEnvironmentRequest;
+  return proto.RemoveEnvironmentRequest.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.RemoveEnvironmentRequest} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.RemoveEnvironmentRequest}
+ */
+proto.RemoveEnvironmentRequest.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setId(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.RemoveEnvironmentRequest.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.RemoveEnvironmentRequest.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.RemoveEnvironmentRequest} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.RemoveEnvironmentRequest.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getId();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string id = 1;
+ * @return {string}
+ */
+proto.RemoveEnvironmentRequest.prototype.getId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.RemoveEnvironmentRequest} returns this
+ */
+proto.RemoveEnvironmentRequest.prototype.setId = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.RemoveEnvironmentReply.prototype.toObject = function(opt_includeInstance) {
+  return proto.RemoveEnvironmentReply.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.RemoveEnvironmentReply} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.RemoveEnvironmentReply.toObject = function(includeInstance, msg) {
+  var f, obj = {
+status: jspb.Message.getFieldWithDefault(msg, 1, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.RemoveEnvironmentReply}
+ */
+proto.RemoveEnvironmentReply.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.RemoveEnvironmentReply;
+  return proto.RemoveEnvironmentReply.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.RemoveEnvironmentReply} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.RemoveEnvironmentReply}
+ */
+proto.RemoveEnvironmentReply.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setStatus(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.RemoveEnvironmentReply.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.RemoveEnvironmentReply.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.RemoveEnvironmentReply} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.RemoveEnvironmentReply.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getStatus();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string status = 1;
+ * @return {string}
+ */
+proto.RemoveEnvironmentReply.prototype.getStatus = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.RemoveEnvironmentReply} returns this
+ */
+proto.RemoveEnvironmentReply.prototype.setStatus = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.ControlEnvironmentRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.ControlEnvironmentRequest.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.ControlEnvironmentRequest} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.ControlEnvironmentRequest.toObject = function(includeInstance, msg) {
+  var f, obj = {
+id: jspb.Message.getFieldWithDefault(msg, 1, ""),
+command: jspb.Message.getFieldWithDefault(msg, 2, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.ControlEnvironmentRequest}
+ */
+proto.ControlEnvironmentRequest.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.ControlEnvironmentRequest;
+  return proto.ControlEnvironmentRequest.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.ControlEnvironmentRequest} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.ControlEnvironmentRequest}
+ */
+proto.ControlEnvironmentRequest.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setId(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setCommand(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.ControlEnvironmentRequest.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.ControlEnvironmentRequest.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.ControlEnvironmentRequest} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.ControlEnvironmentRequest.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getId();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getCommand();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string id = 1;
+ * @return {string}
+ */
+proto.ControlEnvironmentRequest.prototype.getId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.ControlEnvironmentRequest} returns this
+ */
+proto.ControlEnvironmentRequest.prototype.setId = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string command = 2;
+ * @return {string}
+ */
+proto.ControlEnvironmentRequest.prototype.getCommand = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.ControlEnvironmentRequest} returns this
+ */
+proto.ControlEnvironmentRequest.prototype.setCommand = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.ControlEnvironmentReply.prototype.toObject = function(opt_includeInstance) {
+  return proto.ControlEnvironmentReply.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.ControlEnvironmentReply} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.ControlEnvironmentReply.toObject = function(includeInstance, msg) {
+  var f, obj = {
+status: jspb.Message.getFieldWithDefault(msg, 1, ""),
+link: (f = msg.getLink()) && proto.EnvironmentLinkStatus.toObject(includeInstance, f)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.ControlEnvironmentReply}
+ */
+proto.ControlEnvironmentReply.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.ControlEnvironmentReply;
+  return proto.ControlEnvironmentReply.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.ControlEnvironmentReply} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.ControlEnvironmentReply}
+ */
+proto.ControlEnvironmentReply.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setStatus(value);
+      break;
+    case 2:
+      var value = new proto.EnvironmentLinkStatus;
+      reader.readMessage(value,proto.EnvironmentLinkStatus.deserializeBinaryFromReader);
+      msg.setLink(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.ControlEnvironmentReply.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.ControlEnvironmentReply.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.ControlEnvironmentReply} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.ControlEnvironmentReply.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getStatus();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getLink();
+  if (f != null) {
+    writer.writeMessage(
+      2,
+      f,
+      proto.EnvironmentLinkStatus.serializeBinaryToWriter
+    );
+  }
+};
+
+
+/**
+ * optional string status = 1;
+ * @return {string}
+ */
+proto.ControlEnvironmentReply.prototype.getStatus = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.ControlEnvironmentReply} returns this
+ */
+proto.ControlEnvironmentReply.prototype.setStatus = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional EnvironmentLinkStatus link = 2;
+ * @return {?proto.EnvironmentLinkStatus}
+ */
+proto.ControlEnvironmentReply.prototype.getLink = function() {
+  return /** @type{?proto.EnvironmentLinkStatus} */ (
+    jspb.Message.getWrapperField(this, proto.EnvironmentLinkStatus, 2));
+};
+
+
+/**
+ * @param {?proto.EnvironmentLinkStatus|undefined} value
+ * @return {!proto.ControlEnvironmentReply} returns this
+*/
+proto.ControlEnvironmentReply.prototype.setLink = function(value) {
+  return jspb.Message.setWrapperField(this, 2, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.ControlEnvironmentReply} returns this
+ */
+proto.ControlEnvironmentReply.prototype.clearLink = function() {
+  return this.setLink(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.ControlEnvironmentReply.prototype.hasLink = function() {
+  return jspb.Message.getField(this, 2) != null;
+};
+
+
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.SetupEnvironmentReply.repeatedFields_ = [4];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.SetupEnvironmentReply.prototype.toObject = function(opt_includeInstance) {
+  return proto.SetupEnvironmentReply.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.SetupEnvironmentReply} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.SetupEnvironmentReply.toObject = function(includeInstance, msg) {
+  var f, obj = {
+status: jspb.Message.getFieldWithDefault(msg, 1, ""),
+id: jspb.Message.getFieldWithDefault(msg, 2, ""),
+environmentSettings: (f = msg.getEnvironmentSettings()) && proto.Settings.toObject(includeInstance, f),
+geometryList: jspb.Message.toObjectList(msg.getGeometryList(),
+    proto.PolyMesh.toObject, includeInstance)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.SetupEnvironmentReply}
+ */
+proto.SetupEnvironmentReply.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.SetupEnvironmentReply;
+  return proto.SetupEnvironmentReply.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.SetupEnvironmentReply} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.SetupEnvironmentReply}
+ */
+proto.SetupEnvironmentReply.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setStatus(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setId(value);
+      break;
+    case 3:
+      var value = new proto.Settings;
+      reader.readMessage(value,proto.Settings.deserializeBinaryFromReader);
+      msg.setEnvironmentSettings(value);
+      break;
+    case 4:
+      var value = new proto.PolyMesh;
+      reader.readMessage(value,proto.PolyMesh.deserializeBinaryFromReader);
+      msg.addGeometry(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.SetupEnvironmentReply.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.SetupEnvironmentReply.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.SetupEnvironmentReply} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.SetupEnvironmentReply.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getStatus();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getId();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+  f = message.getEnvironmentSettings();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      proto.Settings.serializeBinaryToWriter
+    );
+  }
+  f = message.getGeometryList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      4,
+      f,
+      proto.PolyMesh.serializeBinaryToWriter
+    );
+  }
+};
+
+
+/**
+ * optional string status = 1;
+ * @return {string}
+ */
+proto.SetupEnvironmentReply.prototype.getStatus = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SetupEnvironmentReply} returns this
+ */
+proto.SetupEnvironmentReply.prototype.setStatus = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string id = 2;
+ * @return {string}
+ */
+proto.SetupEnvironmentReply.prototype.getId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SetupEnvironmentReply} returns this
+ */
+proto.SetupEnvironmentReply.prototype.setId = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional Settings environment_settings = 3;
+ * @return {?proto.Settings}
+ */
+proto.SetupEnvironmentReply.prototype.getEnvironmentSettings = function() {
+  return /** @type{?proto.Settings} */ (
+    jspb.Message.getWrapperField(this, proto.Settings, 3));
+};
+
+
+/**
+ * @param {?proto.Settings|undefined} value
+ * @return {!proto.SetupEnvironmentReply} returns this
+*/
+proto.SetupEnvironmentReply.prototype.setEnvironmentSettings = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.SetupEnvironmentReply} returns this
+ */
+proto.SetupEnvironmentReply.prototype.clearEnvironmentSettings = function() {
+  return this.setEnvironmentSettings(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.SetupEnvironmentReply.prototype.hasEnvironmentSettings = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
+/**
+ * repeated PolyMesh geometry = 4;
+ * @return {!Array<!proto.PolyMesh>}
+ */
+proto.SetupEnvironmentReply.prototype.getGeometryList = function() {
+  return /** @type{!Array<!proto.PolyMesh>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.PolyMesh, 4));
+};
+
+
+/**
+ * @param {!Array<!proto.PolyMesh>} value
+ * @return {!proto.SetupEnvironmentReply} returns this
+*/
+proto.SetupEnvironmentReply.prototype.setGeometryList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 4, value);
+};
+
+
+/**
+ * @param {!proto.PolyMesh=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.PolyMesh}
+ */
+proto.SetupEnvironmentReply.prototype.addGeometry = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.PolyMesh, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.SetupEnvironmentReply} returns this
+ */
+proto.SetupEnvironmentReply.prototype.clearGeometryList = function() {
+  return this.setGeometryList([]);
+};
+
+
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.SetupEnvironmentRequest.repeatedFields_ = [3,4];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.SetupEnvironmentRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.SetupEnvironmentRequest.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.SetupEnvironmentRequest} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.SetupEnvironmentRequest.toObject = function(includeInstance, msg) {
+  var f, obj = {
+id: jspb.Message.getFieldWithDefault(msg, 1, ""),
+environmentDriverClass: jspb.Message.getFieldWithDefault(msg, 2, ""),
+membersList: jspb.Message.toObjectList(msg.getMembersList(),
+    proto.EnvironmentMember.toObject, includeInstance),
+geometryList: jspb.Message.toObjectList(msg.getGeometryList(),
+    proto.PolyMesh.toObject, includeInstance),
+environmentSettings: (f = msg.getEnvironmentSettings()) && proto.Settings.toObject(includeInstance, f)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.SetupEnvironmentRequest}
+ */
+proto.SetupEnvironmentRequest.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.SetupEnvironmentRequest;
+  return proto.SetupEnvironmentRequest.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.SetupEnvironmentRequest} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.SetupEnvironmentRequest}
+ */
+proto.SetupEnvironmentRequest.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setId(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setEnvironmentDriverClass(value);
+      break;
+    case 3:
+      var value = new proto.EnvironmentMember;
+      reader.readMessage(value,proto.EnvironmentMember.deserializeBinaryFromReader);
+      msg.addMembers(value);
+      break;
+    case 4:
+      var value = new proto.PolyMesh;
+      reader.readMessage(value,proto.PolyMesh.deserializeBinaryFromReader);
+      msg.addGeometry(value);
+      break;
+    case 5:
+      var value = new proto.Settings;
+      reader.readMessage(value,proto.Settings.deserializeBinaryFromReader);
+      msg.setEnvironmentSettings(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.SetupEnvironmentRequest.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.SetupEnvironmentRequest.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.SetupEnvironmentRequest} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.SetupEnvironmentRequest.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getId();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getEnvironmentDriverClass();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+  f = message.getMembersList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      3,
+      f,
+      proto.EnvironmentMember.serializeBinaryToWriter
+    );
+  }
+  f = message.getGeometryList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      4,
+      f,
+      proto.PolyMesh.serializeBinaryToWriter
+    );
+  }
+  f = message.getEnvironmentSettings();
+  if (f != null) {
+    writer.writeMessage(
+      5,
+      f,
+      proto.Settings.serializeBinaryToWriter
+    );
+  }
+};
+
+
+/**
+ * optional string id = 1;
+ * @return {string}
+ */
+proto.SetupEnvironmentRequest.prototype.getId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SetupEnvironmentRequest} returns this
+ */
+proto.SetupEnvironmentRequest.prototype.setId = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string environment_driver_class = 2;
+ * @return {string}
+ */
+proto.SetupEnvironmentRequest.prototype.getEnvironmentDriverClass = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SetupEnvironmentRequest} returns this
+ */
+proto.SetupEnvironmentRequest.prototype.setEnvironmentDriverClass = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * repeated EnvironmentMember members = 3;
+ * @return {!Array<!proto.EnvironmentMember>}
+ */
+proto.SetupEnvironmentRequest.prototype.getMembersList = function() {
+  return /** @type{!Array<!proto.EnvironmentMember>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.EnvironmentMember, 3));
+};
+
+
+/**
+ * @param {!Array<!proto.EnvironmentMember>} value
+ * @return {!proto.SetupEnvironmentRequest} returns this
+*/
+proto.SetupEnvironmentRequest.prototype.setMembersList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 3, value);
+};
+
+
+/**
+ * @param {!proto.EnvironmentMember=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.EnvironmentMember}
+ */
+proto.SetupEnvironmentRequest.prototype.addMembers = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 3, opt_value, proto.EnvironmentMember, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.SetupEnvironmentRequest} returns this
+ */
+proto.SetupEnvironmentRequest.prototype.clearMembersList = function() {
+  return this.setMembersList([]);
+};
+
+
+/**
+ * repeated PolyMesh geometry = 4;
+ * @return {!Array<!proto.PolyMesh>}
+ */
+proto.SetupEnvironmentRequest.prototype.getGeometryList = function() {
+  return /** @type{!Array<!proto.PolyMesh>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.PolyMesh, 4));
+};
+
+
+/**
+ * @param {!Array<!proto.PolyMesh>} value
+ * @return {!proto.SetupEnvironmentRequest} returns this
+*/
+proto.SetupEnvironmentRequest.prototype.setGeometryList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 4, value);
+};
+
+
+/**
+ * @param {!proto.PolyMesh=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.PolyMesh}
+ */
+proto.SetupEnvironmentRequest.prototype.addGeometry = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.PolyMesh, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.SetupEnvironmentRequest} returns this
+ */
+proto.SetupEnvironmentRequest.prototype.clearGeometryList = function() {
+  return this.setGeometryList([]);
+};
+
+
+/**
+ * optional Settings environment_settings = 5;
+ * @return {?proto.Settings}
+ */
+proto.SetupEnvironmentRequest.prototype.getEnvironmentSettings = function() {
+  return /** @type{?proto.Settings} */ (
+    jspb.Message.getWrapperField(this, proto.Settings, 5));
+};
+
+
+/**
+ * @param {?proto.Settings|undefined} value
+ * @return {!proto.SetupEnvironmentRequest} returns this
+*/
+proto.SetupEnvironmentRequest.prototype.setEnvironmentSettings = function(value) {
+  return jspb.Message.setWrapperField(this, 5, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.SetupEnvironmentRequest} returns this
+ */
+proto.SetupEnvironmentRequest.prototype.clearEnvironmentSettings = function() {
+  return this.setEnvironmentSettings(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.SetupEnvironmentRequest.prototype.hasEnvironmentSettings = function() {
+  return jspb.Message.getField(this, 5) != null;
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
 proto.SetupRobotReply.prototype.toObject = function(opt_includeInstance) {
   return proto.SetupRobotReply.toObject(opt_includeInstance, this);
 };
@@ -4748,7 +6891,7 @@ proto.UpdateVariableRequest.prototype.hasVar = function() {
  * @private {!Array<!Array<number>>}
  * @const
  */
-proto.Action.oneofGroups_ = [[1,2,3,4,5]];
+proto.Action.oneofGroups_ = [[1,2,3,4,5,6]];
 
 /**
  * @enum {number}
@@ -4759,7 +6902,8 @@ proto.Action.ActionNodeCase = {
   WAIT_FOR_VARIABLE_ACTION: 2,
   HOLD_ACTION: 3,
   PING_ACTION: 4,
-  INSERT_CODE_ACTION: 5
+  INSERT_CODE_ACTION: 5,
+  SYNC_ACTION: 6
 };
 
 /**
@@ -4804,7 +6948,8 @@ setVariableAction: (f = msg.getSetVariableAction()) && proto.SetVariable.toObjec
 waitForVariableAction: (f = msg.getWaitForVariableAction()) && proto.WaitForVariable.toObject(includeInstance, f),
 holdAction: (f = msg.getHoldAction()) && proto.Hold.toObject(includeInstance, f),
 pingAction: (f = msg.getPingAction()) && proto.Ping.toObject(includeInstance, f),
-insertCodeAction: (f = msg.getInsertCodeAction()) && proto.InsertCode.toObject(includeInstance, f)
+insertCodeAction: (f = msg.getInsertCodeAction()) && proto.InsertCode.toObject(includeInstance, f),
+syncAction: (f = msg.getSyncAction()) && proto.Sync.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4865,6 +7010,11 @@ proto.Action.deserializeBinaryFromReader = function(msg, reader) {
       var value = new proto.InsertCode;
       reader.readMessage(value,proto.InsertCode.deserializeBinaryFromReader);
       msg.setInsertCodeAction(value);
+      break;
+    case 6:
+      var value = new proto.Sync;
+      reader.readMessage(value,proto.Sync.deserializeBinaryFromReader);
+      msg.setSyncAction(value);
       break;
     default:
       reader.skipField();
@@ -4933,6 +7083,14 @@ proto.Action.serializeBinaryToWriter = function(message, writer) {
       5,
       f,
       proto.InsertCode.serializeBinaryToWriter
+    );
+  }
+  f = message.getSyncAction();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      proto.Sync.serializeBinaryToWriter
     );
   }
 };
@@ -5120,6 +7278,43 @@ proto.Action.prototype.clearInsertCodeAction = function() {
  */
 proto.Action.prototype.hasInsertCodeAction = function() {
   return jspb.Message.getField(this, 5) != null;
+};
+
+
+/**
+ * optional Sync sync_action = 6;
+ * @return {?proto.Sync}
+ */
+proto.Action.prototype.getSyncAction = function() {
+  return /** @type{?proto.Sync} */ (
+    jspb.Message.getWrapperField(this, proto.Sync, 6));
+};
+
+
+/**
+ * @param {?proto.Sync|undefined} value
+ * @return {!proto.Action} returns this
+*/
+proto.Action.prototype.setSyncAction = function(value) {
+  return jspb.Message.setOneofWrapperField(this, 6, proto.Action.oneofGroups_[0], value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.Action} returns this
+ */
+proto.Action.prototype.clearSyncAction = function() {
+  return this.setSyncAction(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.Action.prototype.hasSyncAction = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -9979,6 +12174,208 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     http://goto/soy-param-migration
  * @return {!Object}
  */
+proto.SPLMotion.prototype.toObject = function(opt_includeInstance) {
+  return proto.SPLMotion.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.SPLMotion} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.SPLMotion.toObject = function(includeInstance, msg) {
+  var f, obj = {
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
+target: (f = msg.getTarget()) && proto.CartesianTarget.toObject(includeInstance, f)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.SPLMotion}
+ */
+proto.SPLMotion.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.SPLMotion;
+  return proto.SPLMotion.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.SPLMotion} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.SPLMotion}
+ */
+proto.SPLMotion.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = new proto.MetaData;
+      reader.readMessage(value,proto.MetaData.deserializeBinaryFromReader);
+      msg.setData(value);
+      break;
+    case 2:
+      var value = new proto.CartesianTarget;
+      reader.readMessage(value,proto.CartesianTarget.deserializeBinaryFromReader);
+      msg.setTarget(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.SPLMotion.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.SPLMotion.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.SPLMotion} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.SPLMotion.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getData();
+  if (f != null) {
+    writer.writeMessage(
+      1,
+      f,
+      proto.MetaData.serializeBinaryToWriter
+    );
+  }
+  f = message.getTarget();
+  if (f != null) {
+    writer.writeMessage(
+      2,
+      f,
+      proto.CartesianTarget.serializeBinaryToWriter
+    );
+  }
+};
+
+
+/**
+ * optional MetaData data = 1;
+ * @return {?proto.MetaData}
+ */
+proto.SPLMotion.prototype.getData = function() {
+  return /** @type{?proto.MetaData} */ (
+    jspb.Message.getWrapperField(this, proto.MetaData, 1));
+};
+
+
+/**
+ * @param {?proto.MetaData|undefined} value
+ * @return {!proto.SPLMotion} returns this
+*/
+proto.SPLMotion.prototype.setData = function(value) {
+  return jspb.Message.setWrapperField(this, 1, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.SPLMotion} returns this
+ */
+proto.SPLMotion.prototype.clearData = function() {
+  return this.setData(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.SPLMotion.prototype.hasData = function() {
+  return jspb.Message.getField(this, 1) != null;
+};
+
+
+/**
+ * optional CartesianTarget target = 2;
+ * @return {?proto.CartesianTarget}
+ */
+proto.SPLMotion.prototype.getTarget = function() {
+  return /** @type{?proto.CartesianTarget} */ (
+    jspb.Message.getWrapperField(this, proto.CartesianTarget, 2));
+};
+
+
+/**
+ * @param {?proto.CartesianTarget|undefined} value
+ * @return {!proto.SPLMotion} returns this
+*/
+proto.SPLMotion.prototype.setTarget = function(value) {
+  return jspb.Message.setWrapperField(this, 2, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.SPLMotion} returns this
+ */
+proto.SPLMotion.prototype.clearTarget = function() {
+  return this.setTarget(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.SPLMotion.prototype.hasTarget = function() {
+  return jspb.Message.getField(this, 2) != null;
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
 proto.LINMotion.prototype.toObject = function(opt_includeInstance) {
   return proto.LINMotion.toObject(opt_includeInstance, this);
 };
@@ -11240,7 +13637,7 @@ proto.MetaData.prototype.clearDataMap = function() {
  * @private {!Array<!Array<number>>}
  * @const
  */
-proto.MotionCommand.oneofGroups_ = [[1,2,3,4]];
+proto.MotionCommand.oneofGroups_ = [[1,2,3,4,5]];
 
 /**
  * @enum {number}
@@ -11250,7 +13647,8 @@ proto.MotionCommand.CommandCase = {
   AXIS_MOTION: 1,
   CIRCULAR_MOTION: 2,
   PTP_MOTION: 3,
-  LIN_MOTION: 4
+  LIN_MOTION: 4,
+  SPL_MOTION: 5
 };
 
 /**
@@ -11294,7 +13692,8 @@ proto.MotionCommand.toObject = function(includeInstance, msg) {
 axisMotion: (f = msg.getAxisMotion()) && proto.AxisMotion.toObject(includeInstance, f),
 circularMotion: (f = msg.getCircularMotion()) && proto.CircularMotion.toObject(includeInstance, f),
 ptpMotion: (f = msg.getPtpMotion()) && proto.PTPMotion.toObject(includeInstance, f),
-linMotion: (f = msg.getLinMotion()) && proto.LINMotion.toObject(includeInstance, f)
+linMotion: (f = msg.getLinMotion()) && proto.LINMotion.toObject(includeInstance, f),
+splMotion: (f = msg.getSplMotion()) && proto.SPLMotion.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -11350,6 +13749,11 @@ proto.MotionCommand.deserializeBinaryFromReader = function(msg, reader) {
       var value = new proto.LINMotion;
       reader.readMessage(value,proto.LINMotion.deserializeBinaryFromReader);
       msg.setLinMotion(value);
+      break;
+    case 5:
+      var value = new proto.SPLMotion;
+      reader.readMessage(value,proto.SPLMotion.deserializeBinaryFromReader);
+      msg.setSplMotion(value);
       break;
     default:
       reader.skipField();
@@ -11410,6 +13814,14 @@ proto.MotionCommand.serializeBinaryToWriter = function(message, writer) {
       4,
       f,
       proto.LINMotion.serializeBinaryToWriter
+    );
+  }
+  f = message.getSplMotion();
+  if (f != null) {
+    writer.writeMessage(
+      5,
+      f,
+      proto.SPLMotion.serializeBinaryToWriter
     );
   }
 };
@@ -11560,6 +13972,43 @@ proto.MotionCommand.prototype.clearLinMotion = function() {
  */
 proto.MotionCommand.prototype.hasLinMotion = function() {
   return jspb.Message.getField(this, 4) != null;
+};
+
+
+/**
+ * optional SPLMotion spl_motion = 5;
+ * @return {?proto.SPLMotion}
+ */
+proto.MotionCommand.prototype.getSplMotion = function() {
+  return /** @type{?proto.SPLMotion} */ (
+    jspb.Message.getWrapperField(this, proto.SPLMotion, 5));
+};
+
+
+/**
+ * @param {?proto.SPLMotion|undefined} value
+ * @return {!proto.MotionCommand} returns this
+*/
+proto.MotionCommand.prototype.setSplMotion = function(value) {
+  return jspb.Message.setOneofWrapperField(this, 5, proto.MotionCommand.oneofGroups_[0], value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.MotionCommand} returns this
+ */
+proto.MotionCommand.prototype.clearSplMotion = function() {
+  return this.setSplMotion(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.MotionCommand.prototype.hasSplMotion = function() {
+  return jspb.Message.getField(this, 5) != null;
 };
 
 
@@ -14066,6 +16515,1674 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     http://goto/soy-param-migration
  * @return {!Object}
  */
+proto.EnvironmentContact.prototype.toObject = function(opt_includeInstance) {
+  return proto.EnvironmentContact.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.EnvironmentContact} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.EnvironmentContact.toObject = function(includeInstance, msg) {
+  var f, obj = {
+startTime: jspb.Message.getFloatingPointFieldWithDefault(msg, 1, 0.0),
+endTime: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
+memberA: jspb.Message.getFieldWithDefault(msg, 3, ""),
+memberB: jspb.Message.getFieldWithDefault(msg, 4, ""),
+partA: jspb.Message.getFieldWithDefault(msg, 5, ""),
+partB: jspb.Message.getFieldWithDefault(msg, 6, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.EnvironmentContact}
+ */
+proto.EnvironmentContact.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.EnvironmentContact;
+  return proto.EnvironmentContact.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.EnvironmentContact} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.EnvironmentContact}
+ */
+proto.EnvironmentContact.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setStartTime(value);
+      break;
+    case 2:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setEndTime(value);
+      break;
+    case 3:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setMemberA(value);
+      break;
+    case 4:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setMemberB(value);
+      break;
+    case 5:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setPartA(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setPartB(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.EnvironmentContact.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.EnvironmentContact.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.EnvironmentContact} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.EnvironmentContact.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getStartTime();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      1,
+      f
+    );
+  }
+  f = message.getEndTime();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      2,
+      f
+    );
+  }
+  f = message.getMemberA();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
+  f = message.getMemberB();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
+      f
+    );
+  }
+  f = message.getPartA();
+  if (f.length > 0) {
+    writer.writeString(
+      5,
+      f
+    );
+  }
+  f = message.getPartB();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional float start_time = 1;
+ * @return {number}
+ */
+proto.EnvironmentContact.prototype.getStartTime = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 1, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.EnvironmentContact} returns this
+ */
+proto.EnvironmentContact.prototype.setStartTime = function(value) {
+  return jspb.Message.setProto3FloatField(this, 1, value);
+};
+
+
+/**
+ * optional float end_time = 2;
+ * @return {number}
+ */
+proto.EnvironmentContact.prototype.getEndTime = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 2, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.EnvironmentContact} returns this
+ */
+proto.EnvironmentContact.prototype.setEndTime = function(value) {
+  return jspb.Message.setProto3FloatField(this, 2, value);
+};
+
+
+/**
+ * optional string member_a = 3;
+ * @return {string}
+ */
+proto.EnvironmentContact.prototype.getMemberA = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentContact} returns this
+ */
+proto.EnvironmentContact.prototype.setMemberA = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * optional string member_b = 4;
+ * @return {string}
+ */
+proto.EnvironmentContact.prototype.getMemberB = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentContact} returns this
+ */
+proto.EnvironmentContact.prototype.setMemberB = function(value) {
+  return jspb.Message.setProto3StringField(this, 4, value);
+};
+
+
+/**
+ * optional string part_a = 5;
+ * @return {string}
+ */
+proto.EnvironmentContact.prototype.getPartA = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentContact} returns this
+ */
+proto.EnvironmentContact.prototype.setPartA = function(value) {
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional string part_b = 6;
+ * @return {string}
+ */
+proto.EnvironmentContact.prototype.getPartB = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentContact} returns this
+ */
+proto.EnvironmentContact.prototype.setPartB = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.EnvironmentLinkStatus.prototype.toObject = function(opt_includeInstance) {
+  return proto.EnvironmentLinkStatus.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.EnvironmentLinkStatus} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.EnvironmentLinkStatus.toObject = function(includeInstance, msg) {
+  var f, obj = {
+state: jspb.Message.getFieldWithDefault(msg, 1, ""),
+engaged: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
+moving: jspb.Message.getBooleanFieldWithDefault(msg, 3, false),
+time: jspb.Message.getFloatingPointFieldWithDefault(msg, 4, 0.0),
+duration: jspb.Message.getFloatingPointFieldWithDefault(msg, 5, 0.0),
+simulated: jspb.Message.getBooleanFieldWithDefault(msg, 6, false),
+endpoint: jspb.Message.getFieldWithDefault(msg, 7, ""),
+message: jspb.Message.getFieldWithDefault(msg, 8, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.EnvironmentLinkStatus}
+ */
+proto.EnvironmentLinkStatus.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.EnvironmentLinkStatus;
+  return proto.EnvironmentLinkStatus.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.EnvironmentLinkStatus} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.EnvironmentLinkStatus}
+ */
+proto.EnvironmentLinkStatus.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setState(value);
+      break;
+    case 2:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setEngaged(value);
+      break;
+    case 3:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setMoving(value);
+      break;
+    case 4:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setTime(value);
+      break;
+    case 5:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setDuration(value);
+      break;
+    case 6:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setSimulated(value);
+      break;
+    case 7:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setEndpoint(value);
+      break;
+    case 8:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setMessage(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.EnvironmentLinkStatus.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.EnvironmentLinkStatus.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.EnvironmentLinkStatus} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.EnvironmentLinkStatus.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getState();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getEngaged();
+  if (f) {
+    writer.writeBool(
+      2,
+      f
+    );
+  }
+  f = message.getMoving();
+  if (f) {
+    writer.writeBool(
+      3,
+      f
+    );
+  }
+  f = message.getTime();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      4,
+      f
+    );
+  }
+  f = message.getDuration();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      5,
+      f
+    );
+  }
+  f = message.getSimulated();
+  if (f) {
+    writer.writeBool(
+      6,
+      f
+    );
+  }
+  f = message.getEndpoint();
+  if (f.length > 0) {
+    writer.writeString(
+      7,
+      f
+    );
+  }
+  f = message.getMessage();
+  if (f.length > 0) {
+    writer.writeString(
+      8,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string state = 1;
+ * @return {string}
+ */
+proto.EnvironmentLinkStatus.prototype.getState = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentLinkStatus} returns this
+ */
+proto.EnvironmentLinkStatus.prototype.setState = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional bool engaged = 2;
+ * @return {boolean}
+ */
+proto.EnvironmentLinkStatus.prototype.getEngaged = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 2, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.EnvironmentLinkStatus} returns this
+ */
+proto.EnvironmentLinkStatus.prototype.setEngaged = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 2, value);
+};
+
+
+/**
+ * optional bool moving = 3;
+ * @return {boolean}
+ */
+proto.EnvironmentLinkStatus.prototype.getMoving = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 3, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.EnvironmentLinkStatus} returns this
+ */
+proto.EnvironmentLinkStatus.prototype.setMoving = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 3, value);
+};
+
+
+/**
+ * optional float time = 4;
+ * @return {number}
+ */
+proto.EnvironmentLinkStatus.prototype.getTime = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 4, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.EnvironmentLinkStatus} returns this
+ */
+proto.EnvironmentLinkStatus.prototype.setTime = function(value) {
+  return jspb.Message.setProto3FloatField(this, 4, value);
+};
+
+
+/**
+ * optional float duration = 5;
+ * @return {number}
+ */
+proto.EnvironmentLinkStatus.prototype.getDuration = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 5, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.EnvironmentLinkStatus} returns this
+ */
+proto.EnvironmentLinkStatus.prototype.setDuration = function(value) {
+  return jspb.Message.setProto3FloatField(this, 5, value);
+};
+
+
+/**
+ * optional bool simulated = 6;
+ * @return {boolean}
+ */
+proto.EnvironmentLinkStatus.prototype.getSimulated = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 6, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.EnvironmentLinkStatus} returns this
+ */
+proto.EnvironmentLinkStatus.prototype.setSimulated = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 6, value);
+};
+
+
+/**
+ * optional string endpoint = 7;
+ * @return {string}
+ */
+proto.EnvironmentLinkStatus.prototype.getEndpoint = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentLinkStatus} returns this
+ */
+proto.EnvironmentLinkStatus.prototype.setEndpoint = function(value) {
+  return jspb.Message.setProto3StringField(this, 7, value);
+};
+
+
+/**
+ * optional string message = 8;
+ * @return {string}
+ */
+proto.EnvironmentLinkStatus.prototype.getMessage = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentLinkStatus} returns this
+ */
+proto.EnvironmentLinkStatus.prototype.setMessage = function(value) {
+  return jspb.Message.setProto3StringField(this, 8, value);
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.EnvironmentMember.prototype.toObject = function(opt_includeInstance) {
+  return proto.EnvironmentMember.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.EnvironmentMember} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.EnvironmentMember.toObject = function(includeInstance, msg) {
+  var f, obj = {
+robotId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+placement: (f = msg.getPlacement()) && proto.CartesianPosition.toObject(includeInstance, f),
+timeOffset: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.EnvironmentMember}
+ */
+proto.EnvironmentMember.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.EnvironmentMember;
+  return proto.EnvironmentMember.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.EnvironmentMember} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.EnvironmentMember}
+ */
+proto.EnvironmentMember.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setRobotId(value);
+      break;
+    case 2:
+      var value = new proto.CartesianPosition;
+      reader.readMessage(value,proto.CartesianPosition.deserializeBinaryFromReader);
+      msg.setPlacement(value);
+      break;
+    case 3:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setTimeOffset(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.EnvironmentMember.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.EnvironmentMember.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.EnvironmentMember} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.EnvironmentMember.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getRobotId();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getPlacement();
+  if (f != null) {
+    writer.writeMessage(
+      2,
+      f,
+      proto.CartesianPosition.serializeBinaryToWriter
+    );
+  }
+  f = message.getTimeOffset();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      3,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string robot_id = 1;
+ * @return {string}
+ */
+proto.EnvironmentMember.prototype.getRobotId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentMember} returns this
+ */
+proto.EnvironmentMember.prototype.setRobotId = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional CartesianPosition placement = 2;
+ * @return {?proto.CartesianPosition}
+ */
+proto.EnvironmentMember.prototype.getPlacement = function() {
+  return /** @type{?proto.CartesianPosition} */ (
+    jspb.Message.getWrapperField(this, proto.CartesianPosition, 2));
+};
+
+
+/**
+ * @param {?proto.CartesianPosition|undefined} value
+ * @return {!proto.EnvironmentMember} returns this
+*/
+proto.EnvironmentMember.prototype.setPlacement = function(value) {
+  return jspb.Message.setWrapperField(this, 2, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.EnvironmentMember} returns this
+ */
+proto.EnvironmentMember.prototype.clearPlacement = function() {
+  return this.setPlacement(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.EnvironmentMember.prototype.hasPlacement = function() {
+  return jspb.Message.getField(this, 2) != null;
+};
+
+
+/**
+ * optional float time_offset = 3;
+ * @return {number}
+ */
+proto.EnvironmentMember.prototype.getTimeOffset = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 3, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.EnvironmentMember} returns this
+ */
+proto.EnvironmentMember.prototype.setTimeOffset = function(value) {
+  return jspb.Message.setProto3FloatField(this, 3, value);
+};
+
+
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.EnvironmentResult.repeatedFields_ = [4,5,8,9];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.EnvironmentResult.prototype.toObject = function(opt_includeInstance) {
+  return proto.EnvironmentResult.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.EnvironmentResult} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.EnvironmentResult.toObject = function(includeInstance, msg) {
+  var f, obj = {
+status: jspb.Message.getFieldWithDefault(msg, 1, ""),
+isValid: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
+duration: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
+contactsList: jspb.Message.toObjectList(msg.getContactsList(),
+    proto.EnvironmentContact.toObject, includeInstance),
+syncsList: jspb.Message.toObjectList(msg.getSyncsList(),
+    proto.SyncRelease.toObject, includeInstance),
+error: jspb.Message.getFieldWithDefault(msg, 6, ""),
+warning: jspb.Message.getFieldWithDefault(msg, 7, ""),
+memberIdsList: (f = jspb.Message.getRepeatedField(msg, 8)) == null ? undefined : f,
+placementsList: jspb.Message.toObjectList(msg.getPlacementsList(),
+    proto.Matrix4x4.toObject, includeInstance),
+environmentSettings: (f = msg.getEnvironmentSettings()) && proto.Settings.toObject(includeInstance, f)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.EnvironmentResult}
+ */
+proto.EnvironmentResult.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.EnvironmentResult;
+  return proto.EnvironmentResult.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.EnvironmentResult} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.EnvironmentResult}
+ */
+proto.EnvironmentResult.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setStatus(value);
+      break;
+    case 2:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setIsValid(value);
+      break;
+    case 3:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setDuration(value);
+      break;
+    case 4:
+      var value = new proto.EnvironmentContact;
+      reader.readMessage(value,proto.EnvironmentContact.deserializeBinaryFromReader);
+      msg.addContacts(value);
+      break;
+    case 5:
+      var value = new proto.SyncRelease;
+      reader.readMessage(value,proto.SyncRelease.deserializeBinaryFromReader);
+      msg.addSyncs(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setError(value);
+      break;
+    case 7:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setWarning(value);
+      break;
+    case 8:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.addMemberIds(value);
+      break;
+    case 9:
+      var value = new proto.Matrix4x4;
+      reader.readMessage(value,proto.Matrix4x4.deserializeBinaryFromReader);
+      msg.addPlacements(value);
+      break;
+    case 10:
+      var value = new proto.Settings;
+      reader.readMessage(value,proto.Settings.deserializeBinaryFromReader);
+      msg.setEnvironmentSettings(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.EnvironmentResult.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.EnvironmentResult.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.EnvironmentResult} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.EnvironmentResult.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getStatus();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getIsValid();
+  if (f) {
+    writer.writeBool(
+      2,
+      f
+    );
+  }
+  f = message.getDuration();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      3,
+      f
+    );
+  }
+  f = message.getContactsList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      4,
+      f,
+      proto.EnvironmentContact.serializeBinaryToWriter
+    );
+  }
+  f = message.getSyncsList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      5,
+      f,
+      proto.SyncRelease.serializeBinaryToWriter
+    );
+  }
+  f = message.getError();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
+  f = message.getWarning();
+  if (f.length > 0) {
+    writer.writeString(
+      7,
+      f
+    );
+  }
+  f = message.getMemberIdsList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
+      8,
+      f
+    );
+  }
+  f = message.getPlacementsList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      9,
+      f,
+      proto.Matrix4x4.serializeBinaryToWriter
+    );
+  }
+  f = message.getEnvironmentSettings();
+  if (f != null) {
+    writer.writeMessage(
+      10,
+      f,
+      proto.Settings.serializeBinaryToWriter
+    );
+  }
+};
+
+
+/**
+ * optional string status = 1;
+ * @return {string}
+ */
+proto.EnvironmentResult.prototype.getStatus = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.setStatus = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional bool is_valid = 2;
+ * @return {boolean}
+ */
+proto.EnvironmentResult.prototype.getIsValid = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 2, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.setIsValid = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 2, value);
+};
+
+
+/**
+ * optional float duration = 3;
+ * @return {number}
+ */
+proto.EnvironmentResult.prototype.getDuration = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 3, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.setDuration = function(value) {
+  return jspb.Message.setProto3FloatField(this, 3, value);
+};
+
+
+/**
+ * repeated EnvironmentContact contacts = 4;
+ * @return {!Array<!proto.EnvironmentContact>}
+ */
+proto.EnvironmentResult.prototype.getContactsList = function() {
+  return /** @type{!Array<!proto.EnvironmentContact>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.EnvironmentContact, 4));
+};
+
+
+/**
+ * @param {!Array<!proto.EnvironmentContact>} value
+ * @return {!proto.EnvironmentResult} returns this
+*/
+proto.EnvironmentResult.prototype.setContactsList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 4, value);
+};
+
+
+/**
+ * @param {!proto.EnvironmentContact=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.EnvironmentContact}
+ */
+proto.EnvironmentResult.prototype.addContacts = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.EnvironmentContact, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.clearContactsList = function() {
+  return this.setContactsList([]);
+};
+
+
+/**
+ * repeated SyncRelease syncs = 5;
+ * @return {!Array<!proto.SyncRelease>}
+ */
+proto.EnvironmentResult.prototype.getSyncsList = function() {
+  return /** @type{!Array<!proto.SyncRelease>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.SyncRelease, 5));
+};
+
+
+/**
+ * @param {!Array<!proto.SyncRelease>} value
+ * @return {!proto.EnvironmentResult} returns this
+*/
+proto.EnvironmentResult.prototype.setSyncsList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 5, value);
+};
+
+
+/**
+ * @param {!proto.SyncRelease=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.SyncRelease}
+ */
+proto.EnvironmentResult.prototype.addSyncs = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 5, opt_value, proto.SyncRelease, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.clearSyncsList = function() {
+  return this.setSyncsList([]);
+};
+
+
+/**
+ * optional string error = 6;
+ * @return {string}
+ */
+proto.EnvironmentResult.prototype.getError = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.setError = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * optional string warning = 7;
+ * @return {string}
+ */
+proto.EnvironmentResult.prototype.getWarning = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.setWarning = function(value) {
+  return jspb.Message.setProto3StringField(this, 7, value);
+};
+
+
+/**
+ * repeated string member_ids = 8;
+ * @return {!Array<string>}
+ */
+proto.EnvironmentResult.prototype.getMemberIdsList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 8));
+};
+
+
+/**
+ * @param {!Array<string>} value
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.setMemberIdsList = function(value) {
+  return jspb.Message.setField(this, 8, value || []);
+};
+
+
+/**
+ * @param {string} value
+ * @param {number=} opt_index
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.addMemberIds = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 8, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.clearMemberIdsList = function() {
+  return this.setMemberIdsList([]);
+};
+
+
+/**
+ * repeated Matrix4x4 placements = 9;
+ * @return {!Array<!proto.Matrix4x4>}
+ */
+proto.EnvironmentResult.prototype.getPlacementsList = function() {
+  return /** @type{!Array<!proto.Matrix4x4>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.Matrix4x4, 9));
+};
+
+
+/**
+ * @param {!Array<!proto.Matrix4x4>} value
+ * @return {!proto.EnvironmentResult} returns this
+*/
+proto.EnvironmentResult.prototype.setPlacementsList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 9, value);
+};
+
+
+/**
+ * @param {!proto.Matrix4x4=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.Matrix4x4}
+ */
+proto.EnvironmentResult.prototype.addPlacements = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 9, opt_value, proto.Matrix4x4, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.clearPlacementsList = function() {
+  return this.setPlacementsList([]);
+};
+
+
+/**
+ * optional Settings environment_settings = 10;
+ * @return {?proto.Settings}
+ */
+proto.EnvironmentResult.prototype.getEnvironmentSettings = function() {
+  return /** @type{?proto.Settings} */ (
+    jspb.Message.getWrapperField(this, proto.Settings, 10));
+};
+
+
+/**
+ * @param {?proto.Settings|undefined} value
+ * @return {!proto.EnvironmentResult} returns this
+*/
+proto.EnvironmentResult.prototype.setEnvironmentSettings = function(value) {
+  return jspb.Message.setWrapperField(this, 10, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.EnvironmentResult} returns this
+ */
+proto.EnvironmentResult.prototype.clearEnvironmentSettings = function() {
+  return this.setEnvironmentSettings(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.EnvironmentResult.prototype.hasEnvironmentSettings = function() {
+  return jspb.Message.getField(this, 10) != null;
+};
+
+
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.EnvironmentState.repeatedFields_ = [3,4,5];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.EnvironmentState.prototype.toObject = function(opt_includeInstance) {
+  return proto.EnvironmentState.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.EnvironmentState} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.EnvironmentState.toObject = function(includeInstance, msg) {
+  var f, obj = {
+status: jspb.Message.getFieldWithDefault(msg, 1, ""),
+time: jspb.Message.getFloatingPointFieldWithDefault(msg, 2, 0.0),
+statesList: jspb.Message.toObjectList(msg.getStatesList(),
+    proto.RobotState.toObject, includeInstance),
+geometryTransformationsList: jspb.Message.toObjectList(msg.getGeometryTransformationsList(),
+    proto.Matrix4x4.toObject, includeInstance),
+geometryAlarmList: (f = jspb.Message.getRepeatedBooleanField(msg, 5)) == null ? undefined : f
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.EnvironmentState}
+ */
+proto.EnvironmentState.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.EnvironmentState;
+  return proto.EnvironmentState.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.EnvironmentState} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.EnvironmentState}
+ */
+proto.EnvironmentState.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setStatus(value);
+      break;
+    case 2:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setTime(value);
+      break;
+    case 3:
+      var value = new proto.RobotState;
+      reader.readMessage(value,proto.RobotState.deserializeBinaryFromReader);
+      msg.addStates(value);
+      break;
+    case 4:
+      var value = new proto.Matrix4x4;
+      reader.readMessage(value,proto.Matrix4x4.deserializeBinaryFromReader);
+      msg.addGeometryTransformations(value);
+      break;
+    case 5:
+      reader.readPackableBoolInto(msg.getGeometryAlarmList());
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.EnvironmentState.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.EnvironmentState.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.EnvironmentState} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.EnvironmentState.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getStatus();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getTime();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      2,
+      f
+    );
+  }
+  f = message.getStatesList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      3,
+      f,
+      proto.RobotState.serializeBinaryToWriter
+    );
+  }
+  f = message.getGeometryTransformationsList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      4,
+      f,
+      proto.Matrix4x4.serializeBinaryToWriter
+    );
+  }
+  f = message.getGeometryAlarmList();
+  if (f.length > 0) {
+    writer.writePackedBool(
+      5,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string status = 1;
+ * @return {string}
+ */
+proto.EnvironmentState.prototype.getStatus = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.EnvironmentState} returns this
+ */
+proto.EnvironmentState.prototype.setStatus = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional float time = 2;
+ * @return {number}
+ */
+proto.EnvironmentState.prototype.getTime = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 2, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.EnvironmentState} returns this
+ */
+proto.EnvironmentState.prototype.setTime = function(value) {
+  return jspb.Message.setProto3FloatField(this, 2, value);
+};
+
+
+/**
+ * repeated RobotState states = 3;
+ * @return {!Array<!proto.RobotState>}
+ */
+proto.EnvironmentState.prototype.getStatesList = function() {
+  return /** @type{!Array<!proto.RobotState>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.RobotState, 3));
+};
+
+
+/**
+ * @param {!Array<!proto.RobotState>} value
+ * @return {!proto.EnvironmentState} returns this
+*/
+proto.EnvironmentState.prototype.setStatesList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 3, value);
+};
+
+
+/**
+ * @param {!proto.RobotState=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.RobotState}
+ */
+proto.EnvironmentState.prototype.addStates = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 3, opt_value, proto.RobotState, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.EnvironmentState} returns this
+ */
+proto.EnvironmentState.prototype.clearStatesList = function() {
+  return this.setStatesList([]);
+};
+
+
+/**
+ * repeated Matrix4x4 geometry_transformations = 4;
+ * @return {!Array<!proto.Matrix4x4>}
+ */
+proto.EnvironmentState.prototype.getGeometryTransformationsList = function() {
+  return /** @type{!Array<!proto.Matrix4x4>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.Matrix4x4, 4));
+};
+
+
+/**
+ * @param {!Array<!proto.Matrix4x4>} value
+ * @return {!proto.EnvironmentState} returns this
+*/
+proto.EnvironmentState.prototype.setGeometryTransformationsList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 4, value);
+};
+
+
+/**
+ * @param {!proto.Matrix4x4=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.Matrix4x4}
+ */
+proto.EnvironmentState.prototype.addGeometryTransformations = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.Matrix4x4, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.EnvironmentState} returns this
+ */
+proto.EnvironmentState.prototype.clearGeometryTransformationsList = function() {
+  return this.setGeometryTransformationsList([]);
+};
+
+
+/**
+ * repeated bool geometry_alarm = 5;
+ * @return {!Array<boolean>}
+ */
+proto.EnvironmentState.prototype.getGeometryAlarmList = function() {
+  return /** @type {!Array<boolean>} */ (jspb.Message.getRepeatedBooleanField(this, 5));
+};
+
+
+/**
+ * @param {!Array<boolean>} value
+ * @return {!proto.EnvironmentState} returns this
+ */
+proto.EnvironmentState.prototype.setGeometryAlarmList = function(value) {
+  return jspb.Message.setField(this, 5, value || []);
+};
+
+
+/**
+ * @param {boolean} value
+ * @param {number=} opt_index
+ * @return {!proto.EnvironmentState} returns this
+ */
+proto.EnvironmentState.prototype.addGeometryAlarm = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 5, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.EnvironmentState} returns this
+ */
+proto.EnvironmentState.prototype.clearGeometryAlarmList = function() {
+  return this.setGeometryAlarmList([]);
+};
+
+
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
 proto.SetVariable.prototype.toObject = function(opt_includeInstance) {
   return proto.SetVariable.toObject(opt_includeInstance, this);
 };
@@ -15308,6 +19425,567 @@ proto.SimulationResultUnit.prototype.getMotionType = function() {
  */
 proto.SimulationResultUnit.prototype.setMotionType = function(value) {
   return jspb.Message.setProto3StringField(this, 12, value);
+};
+
+
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.Sync.repeatedFields_ = [2];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.Sync.prototype.toObject = function(opt_includeInstance) {
+  return proto.Sync.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.Sync} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.Sync.toObject = function(includeInstance, msg) {
+  var f, obj = {
+name: jspb.Message.getFieldWithDefault(msg, 1, ""),
+participantsList: (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f,
+data: (f = msg.getData()) && proto.MetaData.toObject(includeInstance, f),
+noWait: jspb.Message.getBooleanFieldWithDefault(msg, 4, false)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.Sync}
+ */
+proto.Sync.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.Sync;
+  return proto.Sync.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.Sync} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.Sync}
+ */
+proto.Sync.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setName(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.addParticipants(value);
+      break;
+    case 3:
+      var value = new proto.MetaData;
+      reader.readMessage(value,proto.MetaData.deserializeBinaryFromReader);
+      msg.setData(value);
+      break;
+    case 4:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setNoWait(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.Sync.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.Sync.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.Sync} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.Sync.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getName();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getParticipantsList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
+      2,
+      f
+    );
+  }
+  f = message.getData();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      proto.MetaData.serializeBinaryToWriter
+    );
+  }
+  f = message.getNoWait();
+  if (f) {
+    writer.writeBool(
+      4,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string name = 1;
+ * @return {string}
+ */
+proto.Sync.prototype.getName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.Sync} returns this
+ */
+proto.Sync.prototype.setName = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * repeated string participants = 2;
+ * @return {!Array<string>}
+ */
+proto.Sync.prototype.getParticipantsList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 2));
+};
+
+
+/**
+ * @param {!Array<string>} value
+ * @return {!proto.Sync} returns this
+ */
+proto.Sync.prototype.setParticipantsList = function(value) {
+  return jspb.Message.setField(this, 2, value || []);
+};
+
+
+/**
+ * @param {string} value
+ * @param {number=} opt_index
+ * @return {!proto.Sync} returns this
+ */
+proto.Sync.prototype.addParticipants = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 2, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.Sync} returns this
+ */
+proto.Sync.prototype.clearParticipantsList = function() {
+  return this.setParticipantsList([]);
+};
+
+
+/**
+ * optional MetaData data = 3;
+ * @return {?proto.MetaData}
+ */
+proto.Sync.prototype.getData = function() {
+  return /** @type{?proto.MetaData} */ (
+    jspb.Message.getWrapperField(this, proto.MetaData, 3));
+};
+
+
+/**
+ * @param {?proto.MetaData|undefined} value
+ * @return {!proto.Sync} returns this
+*/
+proto.Sync.prototype.setData = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.Sync} returns this
+ */
+proto.Sync.prototype.clearData = function() {
+  return this.setData(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.Sync.prototype.hasData = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
+/**
+ * optional bool no_wait = 4;
+ * @return {boolean}
+ */
+proto.Sync.prototype.getNoWait = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 4, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.Sync} returns this
+ */
+proto.Sync.prototype.setNoWait = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 4, value);
+};
+
+
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.SyncRelease.repeatedFields_ = [4,5];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.SyncRelease.prototype.toObject = function(opt_includeInstance) {
+  return proto.SyncRelease.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.SyncRelease} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.SyncRelease.toObject = function(includeInstance, msg) {
+  var f, obj = {
+name: jspb.Message.getFieldWithDefault(msg, 1, ""),
+occurrence: jspb.Message.getFieldWithDefault(msg, 2, 0),
+releaseTime: jspb.Message.getFloatingPointFieldWithDefault(msg, 3, 0.0),
+membersList: (f = jspb.Message.getRepeatedField(msg, 4)) == null ? undefined : f,
+waitsList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 5)) == null ? undefined : f
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.binary.bytesource.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.SyncRelease}
+ */
+proto.SyncRelease.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.SyncRelease;
+  return proto.SyncRelease.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.SyncRelease} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.SyncRelease}
+ */
+proto.SyncRelease.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.setName(value);
+      break;
+    case 2:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setOccurrence(value);
+      break;
+    case 3:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setReleaseTime(value);
+      break;
+    case 4:
+      var value = /** @type {string} */ (reader.readStringRequireUtf8());
+      msg.addMembers(value);
+      break;
+    case 5:
+      reader.readPackableFloatInto(msg.getWaitsList());
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.SyncRelease.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.SyncRelease.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.SyncRelease} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.SyncRelease.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getName();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getOccurrence();
+  if (f !== 0) {
+    writer.writeInt32(
+      2,
+      f
+    );
+  }
+  f = message.getReleaseTime();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      3,
+      f
+    );
+  }
+  f = message.getMembersList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
+      4,
+      f
+    );
+  }
+  f = message.getWaitsList();
+  if (f.length > 0) {
+    writer.writePackedFloat(
+      5,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string name = 1;
+ * @return {string}
+ */
+proto.SyncRelease.prototype.getName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SyncRelease} returns this
+ */
+proto.SyncRelease.prototype.setName = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional int32 occurrence = 2;
+ * @return {number}
+ */
+proto.SyncRelease.prototype.getOccurrence = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.SyncRelease} returns this
+ */
+proto.SyncRelease.prototype.setOccurrence = function(value) {
+  return jspb.Message.setProto3IntField(this, 2, value);
+};
+
+
+/**
+ * optional float release_time = 3;
+ * @return {number}
+ */
+proto.SyncRelease.prototype.getReleaseTime = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 3, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.SyncRelease} returns this
+ */
+proto.SyncRelease.prototype.setReleaseTime = function(value) {
+  return jspb.Message.setProto3FloatField(this, 3, value);
+};
+
+
+/**
+ * repeated string members = 4;
+ * @return {!Array<string>}
+ */
+proto.SyncRelease.prototype.getMembersList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 4));
+};
+
+
+/**
+ * @param {!Array<string>} value
+ * @return {!proto.SyncRelease} returns this
+ */
+proto.SyncRelease.prototype.setMembersList = function(value) {
+  return jspb.Message.setField(this, 4, value || []);
+};
+
+
+/**
+ * @param {string} value
+ * @param {number=} opt_index
+ * @return {!proto.SyncRelease} returns this
+ */
+proto.SyncRelease.prototype.addMembers = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 4, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.SyncRelease} returns this
+ */
+proto.SyncRelease.prototype.clearMembersList = function() {
+  return this.setMembersList([]);
+};
+
+
+/**
+ * repeated float waits = 5;
+ * @return {!Array<number>}
+ */
+proto.SyncRelease.prototype.getWaitsList = function() {
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 5));
+};
+
+
+/**
+ * @param {!Array<number>} value
+ * @return {!proto.SyncRelease} returns this
+ */
+proto.SyncRelease.prototype.setWaitsList = function(value) {
+  return jspb.Message.setField(this, 5, value || []);
+};
+
+
+/**
+ * @param {number} value
+ * @param {number=} opt_index
+ * @return {!proto.SyncRelease} returns this
+ */
+proto.SyncRelease.prototype.addWaits = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 5, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.SyncRelease} returns this
+ */
+proto.SyncRelease.prototype.clearWaitsList = function() {
+  return this.setWaitsList([]);
 };
 
 

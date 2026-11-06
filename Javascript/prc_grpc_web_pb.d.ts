@@ -55,6 +55,41 @@ export class ParametricRobotControlServiceClient {
                response: prc_pb.Ping) => void
   ): grpcWeb.ClientReadableStream<prc_pb.Ping>;
 
+  setupEnvironment(
+    request: prc_pb.SetupEnvironmentRequest,
+    metadata: grpcWeb.Metadata | undefined,
+    callback: (err: grpcWeb.RpcError,
+               response: prc_pb.SetupEnvironmentReply) => void
+  ): grpcWeb.ClientReadableStream<prc_pb.SetupEnvironmentReply>;
+
+  getEnvironmentResult(
+    request: prc_pb.GetEnvironmentResultRequest,
+    metadata: grpcWeb.Metadata | undefined,
+    callback: (err: grpcWeb.RpcError,
+               response: prc_pb.EnvironmentResult) => void
+  ): grpcWeb.ClientReadableStream<prc_pb.EnvironmentResult>;
+
+  getEnvironmentState(
+    request: prc_pb.GetEnvironmentStateRequest,
+    metadata: grpcWeb.Metadata | undefined,
+    callback: (err: grpcWeb.RpcError,
+               response: prc_pb.EnvironmentState) => void
+  ): grpcWeb.ClientReadableStream<prc_pb.EnvironmentState>;
+
+  removeEnvironment(
+    request: prc_pb.RemoveEnvironmentRequest,
+    metadata: grpcWeb.Metadata | undefined,
+    callback: (err: grpcWeb.RpcError,
+               response: prc_pb.RemoveEnvironmentReply) => void
+  ): grpcWeb.ClientReadableStream<prc_pb.RemoveEnvironmentReply>;
+
+  controlEnvironment(
+    request: prc_pb.ControlEnvironmentRequest,
+    metadata: grpcWeb.Metadata | undefined,
+    callback: (err: grpcWeb.RpcError,
+               response: prc_pb.ControlEnvironmentReply) => void
+  ): grpcWeb.ClientReadableStream<prc_pb.ControlEnvironmentReply>;
+
 }
 
 export class ParametricRobotControlServicePromiseClient {
@@ -96,6 +131,31 @@ export class ParametricRobotControlServicePromiseClient {
     request: prc_pb.Ping,
     metadata?: grpcWeb.Metadata
   ): Promise<prc_pb.Ping>;
+
+  setupEnvironment(
+    request: prc_pb.SetupEnvironmentRequest,
+    metadata?: grpcWeb.Metadata
+  ): Promise<prc_pb.SetupEnvironmentReply>;
+
+  getEnvironmentResult(
+    request: prc_pb.GetEnvironmentResultRequest,
+    metadata?: grpcWeb.Metadata
+  ): Promise<prc_pb.EnvironmentResult>;
+
+  getEnvironmentState(
+    request: prc_pb.GetEnvironmentStateRequest,
+    metadata?: grpcWeb.Metadata
+  ): Promise<prc_pb.EnvironmentState>;
+
+  removeEnvironment(
+    request: prc_pb.RemoveEnvironmentRequest,
+    metadata?: grpcWeb.Metadata
+  ): Promise<prc_pb.RemoveEnvironmentReply>;
+
+  controlEnvironment(
+    request: prc_pb.ControlEnvironmentRequest,
+    metadata?: grpcWeb.Metadata
+  ): Promise<prc_pb.ControlEnvironmentReply>;
 
 }
 

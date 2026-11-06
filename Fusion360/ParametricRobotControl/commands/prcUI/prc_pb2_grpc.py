@@ -81,6 +81,31 @@ class ParametricRobotControlServiceStub(object):
                 request_serializer=prc__pb2.Ping.SerializeToString,
                 response_deserializer=prc__pb2.Ping.FromString,
                 _registered_method=True)
+        self.SetupEnvironment = channel.unary_unary(
+                '/ParametricRobotControlService/SetupEnvironment',
+                request_serializer=prc__pb2.SetupEnvironmentRequest.SerializeToString,
+                response_deserializer=prc__pb2.SetupEnvironmentReply.FromString,
+                _registered_method=True)
+        self.GetEnvironmentResult = channel.unary_unary(
+                '/ParametricRobotControlService/GetEnvironmentResult',
+                request_serializer=prc__pb2.GetEnvironmentResultRequest.SerializeToString,
+                response_deserializer=prc__pb2.EnvironmentResult.FromString,
+                _registered_method=True)
+        self.GetEnvironmentState = channel.unary_unary(
+                '/ParametricRobotControlService/GetEnvironmentState',
+                request_serializer=prc__pb2.GetEnvironmentStateRequest.SerializeToString,
+                response_deserializer=prc__pb2.EnvironmentState.FromString,
+                _registered_method=True)
+        self.RemoveEnvironment = channel.unary_unary(
+                '/ParametricRobotControlService/RemoveEnvironment',
+                request_serializer=prc__pb2.RemoveEnvironmentRequest.SerializeToString,
+                response_deserializer=prc__pb2.RemoveEnvironmentReply.FromString,
+                _registered_method=True)
+        self.ControlEnvironment = channel.unary_unary(
+                '/ParametricRobotControlService/ControlEnvironment',
+                request_serializer=prc__pb2.ControlEnvironmentRequest.SerializeToString,
+                response_deserializer=prc__pb2.ControlEnvironmentReply.FromString,
+                _registered_method=True)
 
 
 class ParametricRobotControlServiceServicer(object):
@@ -170,6 +195,52 @@ class ParametricRobotControlServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SetupEnvironment(self, request, context):
+        """Environments: several robots, each set up with SetupRobot and given its own tasks, on
+        one shared timeline. The environment lines up their Sync actions, checks the robots
+        against each other and against its own geometry, and gives the states of all of them
+        at a time of that timeline. Its result is computed again whenever a member's task
+        completes. A robot belongs to at most one environment.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetEnvironmentResult(self, request, context):
+        """The environment's shared timeline: validity, duration, Sync releases, contacts.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetEnvironmentState(self, request, context):
+        """Every member's state at a time of the shared timeline, placed in the environment.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RemoveEnvironment(self, request, context):
+        """Removes an environment; its members stay set up. The server also removes an environment
+        once none of its members is set up any more.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ControlEnvironment(self, request, context):
+        """Drives an environment's link to the robot it streams itself (the Unitree R1 environment's
+        bridge): "status", "connect", "run" (plans from where the robot stands, simulating the
+        members again from there through the Syncs and the cross check, refuses anything invalid
+        unsent, then streams the shared timeline), "hold" (stops a run, or takes the robot where it
+        stands), "stop" (stops a run, holding it, and takes nothing), "release" (hands the robot
+        back to its own controller, which moves it to its own pose) or "disconnect". A stop always
+        holds; only "release" lets go.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ParametricRobotControlServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -207,6 +278,31 @@ def add_ParametricRobotControlServiceServicer_to_server(servicer, server):
                     servicer.SendPing,
                     request_deserializer=prc__pb2.Ping.FromString,
                     response_serializer=prc__pb2.Ping.SerializeToString,
+            ),
+            'SetupEnvironment': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetupEnvironment,
+                    request_deserializer=prc__pb2.SetupEnvironmentRequest.FromString,
+                    response_serializer=prc__pb2.SetupEnvironmentReply.SerializeToString,
+            ),
+            'GetEnvironmentResult': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetEnvironmentResult,
+                    request_deserializer=prc__pb2.GetEnvironmentResultRequest.FromString,
+                    response_serializer=prc__pb2.EnvironmentResult.SerializeToString,
+            ),
+            'GetEnvironmentState': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetEnvironmentState,
+                    request_deserializer=prc__pb2.GetEnvironmentStateRequest.FromString,
+                    response_serializer=prc__pb2.EnvironmentState.SerializeToString,
+            ),
+            'RemoveEnvironment': grpc.unary_unary_rpc_method_handler(
+                    servicer.RemoveEnvironment,
+                    request_deserializer=prc__pb2.RemoveEnvironmentRequest.FromString,
+                    response_serializer=prc__pb2.RemoveEnvironmentReply.SerializeToString,
+            ),
+            'ControlEnvironment': grpc.unary_unary_rpc_method_handler(
+                    servicer.ControlEnvironment,
+                    request_deserializer=prc__pb2.ControlEnvironmentRequest.FromString,
+                    response_serializer=prc__pb2.ControlEnvironmentReply.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -410,6 +506,141 @@ class ParametricRobotControlService(object):
             '/ParametricRobotControlService/SendPing',
             prc__pb2.Ping.SerializeToString,
             prc__pb2.Ping.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetupEnvironment(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ParametricRobotControlService/SetupEnvironment',
+            prc__pb2.SetupEnvironmentRequest.SerializeToString,
+            prc__pb2.SetupEnvironmentReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetEnvironmentResult(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ParametricRobotControlService/GetEnvironmentResult',
+            prc__pb2.GetEnvironmentResultRequest.SerializeToString,
+            prc__pb2.EnvironmentResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetEnvironmentState(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ParametricRobotControlService/GetEnvironmentState',
+            prc__pb2.GetEnvironmentStateRequest.SerializeToString,
+            prc__pb2.EnvironmentState.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RemoveEnvironment(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ParametricRobotControlService/RemoveEnvironment',
+            prc__pb2.RemoveEnvironmentRequest.SerializeToString,
+            prc__pb2.RemoveEnvironmentReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ControlEnvironment(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ParametricRobotControlService/ControlEnvironment',
+            prc__pb2.ControlEnvironmentRequest.SerializeToString,
+            prc__pb2.ControlEnvironmentReply.FromString,
             options,
             channel_credentials,
             insecure,

@@ -120,8 +120,10 @@ _ROBOTS = [
     ("KUKA.KUKA_KR90KR270R2500",  "KUKA KR 90/270 R2500",        "KUKA"),
     ("KUKA.KUKA_KR90KR270R2700",  "KUKA KR 90/270 R2700",        "KUKA"),
     ("KUKA.KUKA_KR90KR270R3100",  "KUKA KR 90/270 R3100",        "KUKA"),
-    ("KUKA.KUKA_LBR12R1260",      "KUKA LBR iiwa 12 R1260",      "KUKA"),
-    ("KUKA.KUKA_LBR3R760",        "KUKA LBR iiwa 3 R760",        "KUKA"),
+    ("KUKA.KUKA_LBR12R1260",      "KUKA LBR iico 12 R1260",      "KUKA"),
+    ("KUKA.KUKA_LBR3R760",        "KUKA LBR iisy 3 R760",        "KUKA"),
+    ("KUKA.KUKA_LBR611R1300",     "KUKA LBR iisy 6-11 R1300",    "KUKA"),
+    ("KUKA.KUKA_LBR815R930",      "KUKA LBR iisy 8-15 R930",     "KUKA"),
     ("KUKA.KUKA_OALego",          "KUKA OALego",                 "KUKA"),
 
     # NEURA

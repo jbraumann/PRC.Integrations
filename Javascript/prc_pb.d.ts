@@ -220,6 +220,202 @@ export namespace RobotFeedback {
   }
 }
 
+export class GetEnvironmentResultRequest extends jspb.Message {
+  getId(): string;
+  setId(value: string): GetEnvironmentResultRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetEnvironmentResultRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetEnvironmentResultRequest): GetEnvironmentResultRequest.AsObject;
+  static serializeBinaryToWriter(message: GetEnvironmentResultRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetEnvironmentResultRequest;
+  static deserializeBinaryFromReader(message: GetEnvironmentResultRequest, reader: jspb.BinaryReader): GetEnvironmentResultRequest;
+}
+
+export namespace GetEnvironmentResultRequest {
+  export type AsObject = {
+    id: string,
+  }
+}
+
+export class GetEnvironmentStateRequest extends jspb.Message {
+  getId(): string;
+  setId(value: string): GetEnvironmentStateRequest;
+
+  getTime(): number;
+  setTime(value: number): GetEnvironmentStateRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetEnvironmentStateRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetEnvironmentStateRequest): GetEnvironmentStateRequest.AsObject;
+  static serializeBinaryToWriter(message: GetEnvironmentStateRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetEnvironmentStateRequest;
+  static deserializeBinaryFromReader(message: GetEnvironmentStateRequest, reader: jspb.BinaryReader): GetEnvironmentStateRequest;
+}
+
+export namespace GetEnvironmentStateRequest {
+  export type AsObject = {
+    id: string,
+    time: number,
+  }
+}
+
+export class RemoveEnvironmentRequest extends jspb.Message {
+  getId(): string;
+  setId(value: string): RemoveEnvironmentRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): RemoveEnvironmentRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: RemoveEnvironmentRequest): RemoveEnvironmentRequest.AsObject;
+  static serializeBinaryToWriter(message: RemoveEnvironmentRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): RemoveEnvironmentRequest;
+  static deserializeBinaryFromReader(message: RemoveEnvironmentRequest, reader: jspb.BinaryReader): RemoveEnvironmentRequest;
+}
+
+export namespace RemoveEnvironmentRequest {
+  export type AsObject = {
+    id: string,
+  }
+}
+
+export class RemoveEnvironmentReply extends jspb.Message {
+  getStatus(): string;
+  setStatus(value: string): RemoveEnvironmentReply;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): RemoveEnvironmentReply.AsObject;
+  static toObject(includeInstance: boolean, msg: RemoveEnvironmentReply): RemoveEnvironmentReply.AsObject;
+  static serializeBinaryToWriter(message: RemoveEnvironmentReply, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): RemoveEnvironmentReply;
+  static deserializeBinaryFromReader(message: RemoveEnvironmentReply, reader: jspb.BinaryReader): RemoveEnvironmentReply;
+}
+
+export namespace RemoveEnvironmentReply {
+  export type AsObject = {
+    status: string,
+  }
+}
+
+export class ControlEnvironmentRequest extends jspb.Message {
+  getId(): string;
+  setId(value: string): ControlEnvironmentRequest;
+
+  getCommand(): string;
+  setCommand(value: string): ControlEnvironmentRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ControlEnvironmentRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ControlEnvironmentRequest): ControlEnvironmentRequest.AsObject;
+  static serializeBinaryToWriter(message: ControlEnvironmentRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ControlEnvironmentRequest;
+  static deserializeBinaryFromReader(message: ControlEnvironmentRequest, reader: jspb.BinaryReader): ControlEnvironmentRequest;
+}
+
+export namespace ControlEnvironmentRequest {
+  export type AsObject = {
+    id: string,
+    command: string,
+  }
+}
+
+export class ControlEnvironmentReply extends jspb.Message {
+  getStatus(): string;
+  setStatus(value: string): ControlEnvironmentReply;
+
+  getLink(): EnvironmentLinkStatus | undefined;
+  setLink(value?: EnvironmentLinkStatus): ControlEnvironmentReply;
+  hasLink(): boolean;
+  clearLink(): ControlEnvironmentReply;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ControlEnvironmentReply.AsObject;
+  static toObject(includeInstance: boolean, msg: ControlEnvironmentReply): ControlEnvironmentReply.AsObject;
+  static serializeBinaryToWriter(message: ControlEnvironmentReply, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ControlEnvironmentReply;
+  static deserializeBinaryFromReader(message: ControlEnvironmentReply, reader: jspb.BinaryReader): ControlEnvironmentReply;
+}
+
+export namespace ControlEnvironmentReply {
+  export type AsObject = {
+    status: string,
+    link?: EnvironmentLinkStatus.AsObject,
+  }
+}
+
+export class SetupEnvironmentReply extends jspb.Message {
+  getStatus(): string;
+  setStatus(value: string): SetupEnvironmentReply;
+
+  getId(): string;
+  setId(value: string): SetupEnvironmentReply;
+
+  getEnvironmentSettings(): Settings | undefined;
+  setEnvironmentSettings(value?: Settings): SetupEnvironmentReply;
+  hasEnvironmentSettings(): boolean;
+  clearEnvironmentSettings(): SetupEnvironmentReply;
+
+  getGeometryList(): Array<PolyMesh>;
+  setGeometryList(value: Array<PolyMesh>): SetupEnvironmentReply;
+  clearGeometryList(): SetupEnvironmentReply;
+  addGeometry(value?: PolyMesh, index?: number): PolyMesh;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SetupEnvironmentReply.AsObject;
+  static toObject(includeInstance: boolean, msg: SetupEnvironmentReply): SetupEnvironmentReply.AsObject;
+  static serializeBinaryToWriter(message: SetupEnvironmentReply, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SetupEnvironmentReply;
+  static deserializeBinaryFromReader(message: SetupEnvironmentReply, reader: jspb.BinaryReader): SetupEnvironmentReply;
+}
+
+export namespace SetupEnvironmentReply {
+  export type AsObject = {
+    status: string,
+    id: string,
+    environmentSettings?: Settings.AsObject,
+    geometryList: Array<PolyMesh.AsObject>,
+  }
+}
+
+export class SetupEnvironmentRequest extends jspb.Message {
+  getId(): string;
+  setId(value: string): SetupEnvironmentRequest;
+
+  getEnvironmentDriverClass(): string;
+  setEnvironmentDriverClass(value: string): SetupEnvironmentRequest;
+
+  getMembersList(): Array<EnvironmentMember>;
+  setMembersList(value: Array<EnvironmentMember>): SetupEnvironmentRequest;
+  clearMembersList(): SetupEnvironmentRequest;
+  addMembers(value?: EnvironmentMember, index?: number): EnvironmentMember;
+
+  getGeometryList(): Array<PolyMesh>;
+  setGeometryList(value: Array<PolyMesh>): SetupEnvironmentRequest;
+  clearGeometryList(): SetupEnvironmentRequest;
+  addGeometry(value?: PolyMesh, index?: number): PolyMesh;
+
+  getEnvironmentSettings(): Settings | undefined;
+  setEnvironmentSettings(value?: Settings): SetupEnvironmentRequest;
+  hasEnvironmentSettings(): boolean;
+  clearEnvironmentSettings(): SetupEnvironmentRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SetupEnvironmentRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: SetupEnvironmentRequest): SetupEnvironmentRequest.AsObject;
+  static serializeBinaryToWriter(message: SetupEnvironmentRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SetupEnvironmentRequest;
+  static deserializeBinaryFromReader(message: SetupEnvironmentRequest, reader: jspb.BinaryReader): SetupEnvironmentRequest;
+}
+
+export namespace SetupEnvironmentRequest {
+  export type AsObject = {
+    id: string,
+    environmentDriverClass: string,
+    membersList: Array<EnvironmentMember.AsObject>,
+    geometryList: Array<PolyMesh.AsObject>,
+    environmentSettings?: Settings.AsObject,
+  }
+}
+
 export class SetupRobotReply extends jspb.Message {
   getStatus(): string;
   setStatus(value: string): SetupRobotReply;
@@ -374,6 +570,11 @@ export class Action extends jspb.Message {
   hasInsertCodeAction(): boolean;
   clearInsertCodeAction(): Action;
 
+  getSyncAction(): Sync | undefined;
+  setSyncAction(value?: Sync): Action;
+  hasSyncAction(): boolean;
+  clearSyncAction(): Action;
+
   getActionNodeCase(): Action.ActionNodeCase;
 
   serializeBinary(): Uint8Array;
@@ -391,6 +592,7 @@ export namespace Action {
     holdAction?: Hold.AsObject,
     pingAction?: Ping.AsObject,
     insertCodeAction?: InsertCode.AsObject,
+    syncAction?: Sync.AsObject,
   }
 
   export enum ActionNodeCase { 
@@ -400,6 +602,7 @@ export namespace Action {
     HOLD_ACTION = 3,
     PING_ACTION = 4,
     INSERT_CODE_ACTION = 5,
+    SYNC_ACTION = 6,
   }
 }
 
@@ -1068,6 +1271,32 @@ export namespace JointTarget {
   }
 }
 
+export class SPLMotion extends jspb.Message {
+  getData(): MetaData | undefined;
+  setData(value?: MetaData): SPLMotion;
+  hasData(): boolean;
+  clearData(): SPLMotion;
+
+  getTarget(): CartesianTarget | undefined;
+  setTarget(value?: CartesianTarget): SPLMotion;
+  hasTarget(): boolean;
+  clearTarget(): SPLMotion;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SPLMotion.AsObject;
+  static toObject(includeInstance: boolean, msg: SPLMotion): SPLMotion.AsObject;
+  static serializeBinaryToWriter(message: SPLMotion, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SPLMotion;
+  static deserializeBinaryFromReader(message: SPLMotion, reader: jspb.BinaryReader): SPLMotion;
+}
+
+export namespace SPLMotion {
+  export type AsObject = {
+    data?: MetaData.AsObject,
+    target?: CartesianTarget.AsObject,
+  }
+}
+
 export class LINMotion extends jspb.Message {
   getData(): MetaData | undefined;
   setData(value?: MetaData): LINMotion;
@@ -1253,6 +1482,11 @@ export class MotionCommand extends jspb.Message {
   hasLinMotion(): boolean;
   clearLinMotion(): MotionCommand;
 
+  getSplMotion(): SPLMotion | undefined;
+  setSplMotion(value?: SPLMotion): MotionCommand;
+  hasSplMotion(): boolean;
+  clearSplMotion(): MotionCommand;
+
   getCommandCase(): MotionCommand.CommandCase;
 
   serializeBinary(): Uint8Array;
@@ -1269,6 +1503,7 @@ export namespace MotionCommand {
     circularMotion?: CircularMotion.AsObject,
     ptpMotion?: PTPMotion.AsObject,
     linMotion?: LINMotion.AsObject,
+    splMotion?: SPLMotion.AsObject,
   }
 
   export enum CommandCase { 
@@ -1277,6 +1512,7 @@ export namespace MotionCommand {
     CIRCULAR_MOTION = 2,
     PTP_MOTION = 3,
     LIN_MOTION = 4,
+    SPL_MOTION = 5,
   }
 }
 
@@ -1592,6 +1828,222 @@ export namespace Settings {
   }
 }
 
+export class EnvironmentContact extends jspb.Message {
+  getStartTime(): number;
+  setStartTime(value: number): EnvironmentContact;
+
+  getEndTime(): number;
+  setEndTime(value: number): EnvironmentContact;
+
+  getMemberA(): string;
+  setMemberA(value: string): EnvironmentContact;
+
+  getMemberB(): string;
+  setMemberB(value: string): EnvironmentContact;
+
+  getPartA(): string;
+  setPartA(value: string): EnvironmentContact;
+
+  getPartB(): string;
+  setPartB(value: string): EnvironmentContact;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): EnvironmentContact.AsObject;
+  static toObject(includeInstance: boolean, msg: EnvironmentContact): EnvironmentContact.AsObject;
+  static serializeBinaryToWriter(message: EnvironmentContact, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): EnvironmentContact;
+  static deserializeBinaryFromReader(message: EnvironmentContact, reader: jspb.BinaryReader): EnvironmentContact;
+}
+
+export namespace EnvironmentContact {
+  export type AsObject = {
+    startTime: number,
+    endTime: number,
+    memberA: string,
+    memberB: string,
+    partA: string,
+    partB: string,
+  }
+}
+
+export class EnvironmentLinkStatus extends jspb.Message {
+  getState(): string;
+  setState(value: string): EnvironmentLinkStatus;
+
+  getEngaged(): boolean;
+  setEngaged(value: boolean): EnvironmentLinkStatus;
+
+  getMoving(): boolean;
+  setMoving(value: boolean): EnvironmentLinkStatus;
+
+  getTime(): number;
+  setTime(value: number): EnvironmentLinkStatus;
+
+  getDuration(): number;
+  setDuration(value: number): EnvironmentLinkStatus;
+
+  getSimulated(): boolean;
+  setSimulated(value: boolean): EnvironmentLinkStatus;
+
+  getEndpoint(): string;
+  setEndpoint(value: string): EnvironmentLinkStatus;
+
+  getMessage(): string;
+  setMessage(value: string): EnvironmentLinkStatus;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): EnvironmentLinkStatus.AsObject;
+  static toObject(includeInstance: boolean, msg: EnvironmentLinkStatus): EnvironmentLinkStatus.AsObject;
+  static serializeBinaryToWriter(message: EnvironmentLinkStatus, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): EnvironmentLinkStatus;
+  static deserializeBinaryFromReader(message: EnvironmentLinkStatus, reader: jspb.BinaryReader): EnvironmentLinkStatus;
+}
+
+export namespace EnvironmentLinkStatus {
+  export type AsObject = {
+    state: string,
+    engaged: boolean,
+    moving: boolean,
+    time: number,
+    duration: number,
+    simulated: boolean,
+    endpoint: string,
+    message: string,
+  }
+}
+
+export class EnvironmentMember extends jspb.Message {
+  getRobotId(): string;
+  setRobotId(value: string): EnvironmentMember;
+
+  getPlacement(): CartesianPosition | undefined;
+  setPlacement(value?: CartesianPosition): EnvironmentMember;
+  hasPlacement(): boolean;
+  clearPlacement(): EnvironmentMember;
+
+  getTimeOffset(): number;
+  setTimeOffset(value: number): EnvironmentMember;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): EnvironmentMember.AsObject;
+  static toObject(includeInstance: boolean, msg: EnvironmentMember): EnvironmentMember.AsObject;
+  static serializeBinaryToWriter(message: EnvironmentMember, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): EnvironmentMember;
+  static deserializeBinaryFromReader(message: EnvironmentMember, reader: jspb.BinaryReader): EnvironmentMember;
+}
+
+export namespace EnvironmentMember {
+  export type AsObject = {
+    robotId: string,
+    placement?: CartesianPosition.AsObject,
+    timeOffset: number,
+  }
+}
+
+export class EnvironmentResult extends jspb.Message {
+  getStatus(): string;
+  setStatus(value: string): EnvironmentResult;
+
+  getIsValid(): boolean;
+  setIsValid(value: boolean): EnvironmentResult;
+
+  getDuration(): number;
+  setDuration(value: number): EnvironmentResult;
+
+  getContactsList(): Array<EnvironmentContact>;
+  setContactsList(value: Array<EnvironmentContact>): EnvironmentResult;
+  clearContactsList(): EnvironmentResult;
+  addContacts(value?: EnvironmentContact, index?: number): EnvironmentContact;
+
+  getSyncsList(): Array<SyncRelease>;
+  setSyncsList(value: Array<SyncRelease>): EnvironmentResult;
+  clearSyncsList(): EnvironmentResult;
+  addSyncs(value?: SyncRelease, index?: number): SyncRelease;
+
+  getError(): string;
+  setError(value: string): EnvironmentResult;
+
+  getWarning(): string;
+  setWarning(value: string): EnvironmentResult;
+
+  getMemberIdsList(): Array<string>;
+  setMemberIdsList(value: Array<string>): EnvironmentResult;
+  clearMemberIdsList(): EnvironmentResult;
+  addMemberIds(value: string, index?: number): EnvironmentResult;
+
+  getPlacementsList(): Array<Matrix4x4>;
+  setPlacementsList(value: Array<Matrix4x4>): EnvironmentResult;
+  clearPlacementsList(): EnvironmentResult;
+  addPlacements(value?: Matrix4x4, index?: number): Matrix4x4;
+
+  getEnvironmentSettings(): Settings | undefined;
+  setEnvironmentSettings(value?: Settings): EnvironmentResult;
+  hasEnvironmentSettings(): boolean;
+  clearEnvironmentSettings(): EnvironmentResult;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): EnvironmentResult.AsObject;
+  static toObject(includeInstance: boolean, msg: EnvironmentResult): EnvironmentResult.AsObject;
+  static serializeBinaryToWriter(message: EnvironmentResult, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): EnvironmentResult;
+  static deserializeBinaryFromReader(message: EnvironmentResult, reader: jspb.BinaryReader): EnvironmentResult;
+}
+
+export namespace EnvironmentResult {
+  export type AsObject = {
+    status: string,
+    isValid: boolean,
+    duration: number,
+    contactsList: Array<EnvironmentContact.AsObject>,
+    syncsList: Array<SyncRelease.AsObject>,
+    error: string,
+    warning: string,
+    memberIdsList: Array<string>,
+    placementsList: Array<Matrix4x4.AsObject>,
+    environmentSettings?: Settings.AsObject,
+  }
+}
+
+export class EnvironmentState extends jspb.Message {
+  getStatus(): string;
+  setStatus(value: string): EnvironmentState;
+
+  getTime(): number;
+  setTime(value: number): EnvironmentState;
+
+  getStatesList(): Array<RobotState>;
+  setStatesList(value: Array<RobotState>): EnvironmentState;
+  clearStatesList(): EnvironmentState;
+  addStates(value?: RobotState, index?: number): RobotState;
+
+  getGeometryTransformationsList(): Array<Matrix4x4>;
+  setGeometryTransformationsList(value: Array<Matrix4x4>): EnvironmentState;
+  clearGeometryTransformationsList(): EnvironmentState;
+  addGeometryTransformations(value?: Matrix4x4, index?: number): Matrix4x4;
+
+  getGeometryAlarmList(): Array<boolean>;
+  setGeometryAlarmList(value: Array<boolean>): EnvironmentState;
+  clearGeometryAlarmList(): EnvironmentState;
+  addGeometryAlarm(value: boolean, index?: number): EnvironmentState;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): EnvironmentState.AsObject;
+  static toObject(includeInstance: boolean, msg: EnvironmentState): EnvironmentState.AsObject;
+  static serializeBinaryToWriter(message: EnvironmentState, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): EnvironmentState;
+  static deserializeBinaryFromReader(message: EnvironmentState, reader: jspb.BinaryReader): EnvironmentState;
+}
+
+export namespace EnvironmentState {
+  export type AsObject = {
+    status: string,
+    time: number,
+    statesList: Array<RobotState.AsObject>,
+    geometryTransformationsList: Array<Matrix4x4.AsObject>,
+    geometryAlarmList: Array<boolean>,
+  }
+}
+
 export class SetVariable extends jspb.Message {
   getNewState(): Variable | undefined;
   setNewState(value?: Variable): SetVariable;
@@ -1751,6 +2203,78 @@ export namespace SimulationResultUnit {
     id: string,
     alarm: boolean,
     motionType: string,
+  }
+}
+
+export class Sync extends jspb.Message {
+  getName(): string;
+  setName(value: string): Sync;
+
+  getParticipantsList(): Array<string>;
+  setParticipantsList(value: Array<string>): Sync;
+  clearParticipantsList(): Sync;
+  addParticipants(value: string, index?: number): Sync;
+
+  getData(): MetaData | undefined;
+  setData(value?: MetaData): Sync;
+  hasData(): boolean;
+  clearData(): Sync;
+
+  getNoWait(): boolean;
+  setNoWait(value: boolean): Sync;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Sync.AsObject;
+  static toObject(includeInstance: boolean, msg: Sync): Sync.AsObject;
+  static serializeBinaryToWriter(message: Sync, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Sync;
+  static deserializeBinaryFromReader(message: Sync, reader: jspb.BinaryReader): Sync;
+}
+
+export namespace Sync {
+  export type AsObject = {
+    name: string,
+    participantsList: Array<string>,
+    data?: MetaData.AsObject,
+    noWait: boolean,
+  }
+}
+
+export class SyncRelease extends jspb.Message {
+  getName(): string;
+  setName(value: string): SyncRelease;
+
+  getOccurrence(): number;
+  setOccurrence(value: number): SyncRelease;
+
+  getReleaseTime(): number;
+  setReleaseTime(value: number): SyncRelease;
+
+  getMembersList(): Array<string>;
+  setMembersList(value: Array<string>): SyncRelease;
+  clearMembersList(): SyncRelease;
+  addMembers(value: string, index?: number): SyncRelease;
+
+  getWaitsList(): Array<number>;
+  setWaitsList(value: Array<number>): SyncRelease;
+  clearWaitsList(): SyncRelease;
+  addWaits(value: number, index?: number): SyncRelease;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SyncRelease.AsObject;
+  static toObject(includeInstance: boolean, msg: SyncRelease): SyncRelease.AsObject;
+  static serializeBinaryToWriter(message: SyncRelease, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SyncRelease;
+  static deserializeBinaryFromReader(message: SyncRelease, reader: jspb.BinaryReader): SyncRelease;
+}
+
+export namespace SyncRelease {
+  export type AsObject = {
+    name: string,
+    occurrence: number,
+    releaseTime: number,
+    membersList: Array<string>,
+    waitsList: Array<number>,
   }
 }
 
